@@ -1,0 +1,78 @@
+name: tripbank
+description: "A new Flutter project."
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  google_fonts: ^6.3.3
+  get: ^4.7.3
+  http: ^1.2.0
+  intl: ^0.19.0
+  get_storage: ^2.1.1
+  cached_network_image: ^3.3.0
+  flutter_secure_storage: ^9.0.0
+  flutter_screenutil: ^5.9.3
+  google_sign_in: ^6.2.1
+  sign_in_with_apple: ^7.0.1
+  material_design_icons_flutter: ^7.0.7296
+  speech_to_text: ^7.0.0
+  permission_handler: ^11.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+flutter:
+  assets:
+    - assets/images/tripbank.png
+    - assets/images/onboarding1.png
+    - assets/images/onboarding2.png
+    - assets/images/onboarding3.png
+    - assets/images/google.png
+    - assets/images/apple.png
+    - assets/images/chatbot.png
+    - assets/images/premium quality.png
+    - assets/images/notifications.png
+    - assets/images/airplane.png
+    - assets/images/hotel.png
+    - assets/images/car.png
+    - assets/images/location.png
+    - assets/images/triangle_flag.png
+    - assets/images/user.png
+    - assets/images/chat_bot.png
+    - assets/images/edit.png
+    - assets/images/favorite.png
+    - assets/images/history.png
+    - assets/images/info.png
+    - assets/images/search.png
+    - assets/images/location_p.png
+    - assets/images/gold.png
+    - assets/images/diamond.png
+    - assets/images/platinum.png
+    - assets/images/chat_icon.png
+    - assets/images/menu.png
+    - assets/images/chat_1.png
+    - assets/images/send.png
+    - assets/images/swap.png
+    - assets/images/bxs_contact.png
+    - assets/images/Passenger.png
+    - assets/images/
+    - assets/images/
+    - assets/images/
+    - assets/images/
+    - assets/images/
+
+
+  uses-material-design: true
+
