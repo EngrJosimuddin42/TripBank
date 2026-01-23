@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../widgets/custom_date_picker.dart';
 import '../controllers/flight_booking_controller.dart';
+import '../controllers/flight_search_controller.dart';
 
 class FlightBookingView extends GetView<FlightBookingController> {
   const FlightBookingView({super.key});
@@ -11,22 +12,38 @@ class FlightBookingView extends GetView<FlightBookingController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFDFDFD),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFFECD08),
-        elevation: 0,
-        leading: IconButton(
-          onPressed: () => Get.back(),
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
-        ),
-        title: Text(
-          'Book Flight Tickets',
-          style: GoogleFonts.roboto(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(103),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFFFEDE5A),
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(24),
+              bottomRight: Radius.circular(24),
+            ),
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () => Get.back(),
+                    icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                  ),
+                  Text(
+                    'Book Flight Tickets',
+                    style: GoogleFonts.roboto(
+                      color: Colors.black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
-        centerTitle: false,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -38,153 +55,246 @@ class FlightBookingView extends GetView<FlightBookingController> {
               _buildTripTypeSection(),
 
               const SizedBox(height: 20),
-              _buildLocationSection(isDeparture: true),
 
-              const SizedBox(height: 20),
-              _buildTimeOfJourney(isDeparture: true),
+              // One Way & Round Way
+              Obx(() {
+                if (controller.selectedTripType.value != 'Multi Way') {
+                  return Column(
+                    children: [
+                      _buildLocationSection(isDeparture: true),
+                      const SizedBox(height: 20),
+                      _buildTimeOfJourney(isDeparture: true),
+                      const SizedBox(height: 20),
+                      _buildSetTimeButton(isDeparture: true),
+                      const SizedBox(height: 20),
+                      _buildDateSection(),
+                    ],
+                  );
+                }
+                return const SizedBox.shrink();
+              }),
 
-              const SizedBox(height: 20),
-              _buildSetTimeButton(isDeparture: true),
-
-              const SizedBox(height: 20),
-              _buildDateSection(),
-
-              // ====== ADD MULTI-WAY SECTION HERE ======
+              // MULTI-WAY SECTION
               Obx(() {
                 if (controller.selectedTripType.value == 'Multi Way') {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 20),
-                      // List of multi-way flights
+                      const SizedBox(height: 16),
+
                       ...controller.multiWayFlights.asMap().entries.map((entry) {
                         final index = entry.key;
                         final flight = entry.value;
 
+                        final bool fromEmpty = flight.fromLocation.isEmpty;
+                        final bool toEmpty = flight.toLocation.isEmpty;
+
                         return Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFFFAE6),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0xFFFECD08), width: 1.5),
-                            ),
-                            child: Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          // TODO: Open location picker for from
-                                        },
-                                        child: _buildLocationCard(
-                                          city: flight.fromLocation,
-                                          airport: '${flight.fromLocation} Airport',
-                                          country: 'Nigeria', // বা ডায়নামিক করতে পারো পরে
-                                          code: flight.fromCode,
-                                          onTap: () {}, // ইতিমধ্যে GestureDetector আছে, তাই এটা empty রাখলেও চলবে
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    GestureDetector(
-                                      onTap: () => controller.swapMultiWayLocations(index),
-                                      child: Container(
-                                        padding: const EdgeInsets.all(8),
-                                        decoration: const BoxDecoration(
-                                          color: Color(0xFFFECD08),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Image.asset(
-                                          'assets/images/swap.png',
-                                          height: 44,
-                                          width: 44,
-                                          fit: BoxFit.contain,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          // TODO: Open location picker for to
-                                        },
-                                        child: _buildLocationCard(
-                                          city: flight.toLocation,
-                                          airport: '${flight.toLocation} Airport',
-                                          country: 'United Kingdom',
-                                          code: flight.toCode,
-                                          onTap: () {},
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                          padding: const EdgeInsets.only(bottom: 28),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Flight number header
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: Text(
+                                  'Flight ${index + 1}',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFFD4A017),
+                                  ),
                                 ),
-                                const SizedBox(height: 16),
-                                GestureDetector(
-                                  onTap: () async {
-                                    final DateTime? picked = await showDialog<DateTime>(
-                                      context: Get.context!,
-                                      builder: (context) => CustomDatePicker(
-                                        initialDate: flight.date,
-                                        firstDate: DateTime.now(),
-                                        lastDate: DateTime.now().add(const Duration(days: 365)),
-                                        onDateSelected: (_) {}, // not used here
+                              ),
+
+                              // FROM/TO Cards
+                              Row(
+                                children: [
+                                  // FROM Card
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () => controller.selectLocation(
+                                        isFrom: true,
+                                        isMultiWay: true,
+                                        flightIndex: index,
                                       ),
-                                    );
-                                    if (picked != null) {
-                                      controller.updateMultiWayFlight(index, date: picked);
-                                    }
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(color: const Color(0xFFFECD08)),
+                                      child: Container(
+                                        height: 110,
+                                        width: 160,
+                                        padding: const EdgeInsets.all(16),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFFFFAE6),
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(color: const Color(0xFFFECD08), width: 1.5),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              'FROM',
+                                              style: GoogleFonts.inter(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                                color: Colors.black87,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              fromEmpty ? 'SELECT ORIGIN' : flight.fromLocation,
+                                              style: GoogleFonts.inter(
+                                                fontSize: fromEmpty ? 14 : 18,
+                                                fontWeight: fromEmpty ? FontWeight.w500 : FontWeight.w700,
+                                                color: fromEmpty ? Colors.black54 : Colors.black,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  ),
+
+                                  // Swap Icon
+                                  GestureDetector(
+                                    onTap: () => controller.swapMultiWayLocations(index),
+                                    child: Container(
+                                      height: 44,
+                                      width: 44,
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFFFECD08),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Image.asset('assets/images/swap.png', height: 44, width: 44, fit: BoxFit.contain),
+                                    ),
+                                  ),
+
+                                  // TO Card
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () => controller.selectLocation(
+                                        isFrom: false,
+                                        isMultiWay: true,
+                                        flightIndex: index,
+                                      ),
+                                      child: Container(
+                                        height: 110,
+                                        width: 160,
+                                        padding: const EdgeInsets.all(16),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFFFFAE6),
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(color: const Color(0xFFFECD08), width: 1.5),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              'TO',
+                                              style: GoogleFonts.inter(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                                color: Colors.black87,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              toEmpty ? 'SELECT DESTINATION' : flight.toLocation,
+                                              textAlign: TextAlign.center,
+                                              style: GoogleFonts.inter(
+                                                fontSize: toEmpty ? 14 : 18,
+                                                fontWeight: toEmpty ? FontWeight.w500 : FontWeight.w700,
+                                                color: toEmpty ? Colors.black54 : Colors.black,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 20),
+
+                              // Multi Way Time of Journey
+                              _buildMultiWayTimeOfJourney(index),
+                              const SizedBox(height: 20),
+
+                              // Multi Way Set Time Button
+                              _buildMultiWaySetTimeButton(index),
+                              const SizedBox(height: 20),
+
+                              // Departure Date Card
+                              GestureDetector(
+                                onTap: () async {
+                                  final DateTime? picked = await showDialog<DateTime>(
+                                    context: Get.context!,
+                                    builder: (context) => CustomDatePicker(
+                                      initialDate: flight.date,
+                                      firstDate: DateTime.now(),
+                                      lastDate: DateTime.now().add(const Duration(days: 365)),
+                                      onDateSelected: (_) {},
+                                    ),
+                                  );
+                                  if (picked != null) {
+                                    controller.updateMultiWayFlight(index, date: picked);
+                                  }
+                                },
+                                child: Center(
+                                  child: Container(
+                                    height: 76,
+                                    width: 375,
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFFFFAE6),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: const Color(0xFFFECD08), width: 1.5),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         Text(
-                                          'Date',
-                                          style: GoogleFonts.inter(
-                                            fontSize: 14,
-                                            color: Colors.grey[700],
+                                          'Departure',
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 12,
+                                            color: const Color(0xFFD4A017),
+                                            fontWeight: FontWeight.w400,
                                           ),
                                         ),
+                                        const SizedBox(height: 8),
                                         Text(
-                                          controller.formatDate(flight.date),
-                                          style: GoogleFonts.inter(
-                                            fontSize: 15,
+                                          _formatDateShort(flight.date),
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 16,
                                             fontWeight: FontWeight.w600,
                                             color: Colors.black,
                                           ),
                                         ),
-                                        const Icon(Icons.calendar_today, color: Color(0xFFD4A017), size: 20),
                                       ],
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 12),
-                                if (controller.multiWayFlights.length > 1)
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child: TextButton.icon(
-                                      onPressed: () => controller.removeMultiWayFlight(index),
-                                      icon: const Icon(Icons.delete_outline, color: Colors.red, size: 18),
-                                      label: const Text('Remove', style: TextStyle(color: Colors.red)),
-                                    ),
+                              ),
+
+                              // Remove button
+                              if (controller.multiWayFlights.length > 1)
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: TextButton.icon(
+                                    onPressed: () => controller.removeMultiWayFlight(index),
+                                    icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                                    label: const Text('Remove', style: TextStyle(color: Colors.red)),
                                   ),
-                              ],
-                            ),
+                                ),
+                            ],
                           ),
                         );
                       }).toList(),
 
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
+
+                      // Add Another Flight
                       if (controller.multiWayFlights.length < 5)
                         Center(
                           child: OutlinedButton.icon(
@@ -192,19 +302,16 @@ class FlightBookingView extends GetView<FlightBookingController> {
                             icon: const Icon(Icons.add, color: Color(0xFFD4A017)),
                             label: Text(
                               'Add Another Flight',
-                              style: GoogleFonts.inter(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFFD4A017),
-                              ),
+                              style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: const Color(0xFFD4A017)),
                             ),
                             style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: Color(0xFFFECD08), width: 1.5),
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                              side: const BorderSide(color: Color(0xFFFECD08), width: 2),
+                              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             ),
                           ),
                         ),
+
                       const SizedBox(height: 20),
                     ],
                   );
@@ -212,7 +319,7 @@ class FlightBookingView extends GetView<FlightBookingController> {
                 return const SizedBox.shrink();
               }),
 
-              // Return Flight Section
+              // Return Flight Section (Round Way only)
               Obx(() {
                 if (controller.selectedTripType.value == 'Round Way') {
                   if (controller.returnDate.value == null) {
@@ -238,7 +345,7 @@ class FlightBookingView extends GetView<FlightBookingController> {
               const SizedBox(height: 20),
               _buildTravellerClassSection(),
 
-              const SizedBox(height: 80),
+              const SizedBox(height: 40),
               _buildSearchButton(),
 
               const SizedBox(height: 20),
@@ -301,12 +408,13 @@ class FlightBookingView extends GetView<FlightBookingController> {
     );
   }
 
+  // ONE WAY & ROUND WAY Location Section
   Widget _buildLocationSection({required bool isDeparture}) {
     return Row(
       children: [
-        // From Location
         Expanded(
           child: Obx(() => _buildLocationCard(
+            isFrom: true,
             city: isDeparture
                 ? controller.departureFromLocation.value
                 : controller.returnFromLocation.value,
@@ -315,13 +423,13 @@ class FlightBookingView extends GetView<FlightBookingController> {
             code: isDeparture
                 ? controller.departureFromCode.value
                 : controller.returnFromCode.value,
-            onTap: () {
-              // TODO: Open location picker
-            },
+            onTap: () => controller.selectLocation(
+              isFrom: true,
+              isMultiWay: false,
+              isDeparture: isDeparture,
+            ),
           )),
         ),
-
-        // Swap Button
         GestureDetector(
           onTap: isDeparture
               ? controller.swapDepartureLocations
@@ -336,10 +444,9 @@ class FlightBookingView extends GetView<FlightBookingController> {
             child: Image.asset('assets/images/swap.png', height: 44, width: 44, fit: BoxFit.contain),
           ),
         ),
-
-        // To Location
         Expanded(
           child: Obx(() => _buildLocationCard(
+            isFrom: false,
             city: isDeparture
                 ? controller.departureToLocation.value
                 : controller.returnToLocation.value,
@@ -348,9 +455,11 @@ class FlightBookingView extends GetView<FlightBookingController> {
             code: isDeparture
                 ? controller.departureToCode.value
                 : controller.returnToCode.value,
-            onTap: () {
-              // TODO: Open location picker
-            },
+            onTap: () => controller.selectLocation(
+              isFrom: false,
+              isMultiWay: false,
+              isDeparture: isDeparture,
+            ),
           )),
         ),
       ],
@@ -358,18 +467,20 @@ class FlightBookingView extends GetView<FlightBookingController> {
   }
 
   Widget _buildLocationCard({
+    required bool isFrom,
     required String city,
     required String airport,
     required String country,
     required String code,
     required VoidCallback onTap,
   }) {
+    final bool isEmpty = city.isEmpty;
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 110,
+        height: 120,
         width: 160,
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: const Color(0xFFFFFAE6),
           borderRadius: BorderRadius.circular(12),
@@ -377,76 +488,493 @@ class FlightBookingView extends GetView<FlightBookingController> {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              city,
-              style: GoogleFonts.inter(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: Colors.black,
-              ),
+              isFrom ? 'FROM' : 'TO',
+              style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.black87),
             ),
             const SizedBox(height: 4),
             Text(
-              airport,
+              isEmpty ? (isFrom ? 'SELECT ORIGIN' : 'SELECT DESTINATION') : city,
+              textAlign: TextAlign.center,
               style: GoogleFonts.inter(
-                fontSize: 11,
-                color: Colors.grey[600],
+                fontSize: isEmpty ? 14 : 18,
+                fontWeight: isEmpty ? FontWeight.w500 : FontWeight.w700,
+                color: isEmpty ? Colors.black54 : Colors.black,
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              country,
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                color: const Color(0xFFD4A017),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            if (!isEmpty) ...[
+              const SizedBox(height: 4),
+              Text(airport, style: GoogleFonts.inter(fontSize: 11, color: Colors.grey[600])),
+              const SizedBox(height: 4),
+              Text(country, style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFFD4A017), fontWeight: FontWeight.w500)),
+            ],
           ],
         ),
       ),
     );
   }
-  Widget _buildMultiWayLocationCard({
-    required String label,
-    required String city,
-    required String code,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFFECD08)),
-      ),
-      child: Column(
+
+  // ONE WAY & ROUND WAY Time of Journey
+  Widget _buildTimeOfJourney({required bool isDeparture}) {
+    return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            label,
-            style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[600]),
+            'Time of Journey',
+            style: GoogleFonts.inter(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            city,
-            style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700),
-          ),
-          Text(
-            '$code • Airport',
-            style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[600]),
+          const SizedBox(height: 12),
+          GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 12,
+            childAspectRatio: 3.4,
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            children: controller.timeOptions.map((time) {
+              return _buildTimeOption(time, isDeparture);
+            }).toList(),
           ),
         ],
+      );
+  }
+
+  Widget _buildTimeOption(String time, bool isDeparture) {
+    final searchController = Get.find<FlightSearchController>();
+    return Obx(() {
+      final isSelected = isDeparture
+          ? searchController.departurePreferredTimes.contains(time)
+          : searchController.returnPreferredTimes.contains(time);
+      return GestureDetector(
+        onTap: () {
+          if (isDeparture) {
+            searchController.departurePreferredTimes.clear();
+            searchController.departurePreferredTimes.add(time);
+          } else {
+            searchController.returnPreferredTimes.clear();
+            searchController.returnPreferredTimes.add(time);
+          }
+        },
+        child: Row(
+          children: [
+            Container(
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected ? const Color(0xFFFECD08) : Colors.grey,
+                  width: 2,
+                ),
+              ),
+              child: isSelected
+                  ? Center(
+                child: Container(
+                  width: 10,
+                  height: 10,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFECD08),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              )
+                  : null,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              time,
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: Colors.black87,
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  // ONE WAY & ROUND WAY Set Time Button
+  Widget _buildSetTimeButton({required bool isDeparture}) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton(
+        onPressed: () => _showTimeSelectionSheet(isDeparture: isDeparture),
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          side: const BorderSide(color: Color(0xFFFECD08), width: 1.5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          backgroundColor: const Color(0xFFFFFAE6),
+        ),
+        child: Text(
+          'Set Time',
+          style: GoogleFonts.inter(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: Colors.black,
+          ),
+        ),
       ),
+    );
+  }
+
+  void _showTimeSelectionSheet({required bool isDeparture}) {
+    final List<String> timeSlots = _generateTimeSlots();
+    final searchController = Get.find<FlightSearchController>();
+    Get.bottomSheet(
+      Container(
+        height: Get.height * 0.7,
+        padding: const EdgeInsets.all(24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              isDeparture ? 'Select Departure Time' : 'Select Return Time',
+              style: GoogleFonts.inter(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 2.2,
+                ),
+                itemCount: timeSlots.length,
+                itemBuilder: (context, index) {
+                  final time = timeSlots[index];
+
+                  return Obx(() {
+                    final isSelected = isDeparture
+                        ? searchController.departureSelectedTimeSlots.contains(time)
+                        : searchController.returnSelectedTimeSlots.contains(time);
+
+                    return GestureDetector(
+                      onTap: () {
+                        if (isDeparture) {
+                          searchController.toggleDepartureTimeSlot(time);
+                        } else {
+                          searchController.toggleReturnTimeSlot(time);
+                        }
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isSelected ? const Color(0xFFFECD08) : Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: isSelected ? const Color(0xFFFECD08) : Colors.grey[300]!,
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            time,
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  });
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  final selectedSlots = isDeparture
+                      ? searchController.departureSelectedTimeSlots
+                      : searchController.returnSelectedTimeSlots;
+
+                  if (selectedSlots.isEmpty) {
+                    Get.snackbar(
+                      'Select Time',
+                      'Please select at least one time slot',
+                      backgroundColor: Colors.orange[100],
+                      colorText: Colors.orange[800],
+                      duration: const Duration(seconds: 2),
+                    );
+                  } else {
+                    Get.back();
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFECD08),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  'OK',
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
+    );
+  }
+
+  // MULTI WAY Time of Journey
+  Widget _buildMultiWayTimeOfJourney(int flightIndex) {
+    return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Time of Journey',
+            style: GoogleFonts.inter(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 12),
+          GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 12,
+            childAspectRatio: 3.4,
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            children: controller.timeOptions.map((time) {
+              return _buildMultiWayTimeOption(time, flightIndex);
+            }).toList(),
+          ),
+        ],
+      );
+  }
+
+  Widget _buildMultiWayTimeOption(String time, int flightIndex) {
+    return Obx(() {
+      final flight = controller.multiWayFlights[flightIndex];
+      final bool isSelected = flight.preferredTime == time;
+
+      return GestureDetector(
+        onTap: () {
+          controller.updateMultiWayFlightTime(flightIndex, time);
+        },
+        child: Row(
+          children: [
+            Container(
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected ? const Color(0xFFFECD08) : Colors.grey,
+                  width: 2,
+                ),
+              ),
+              child: isSelected
+                  ? Center(
+                child: Container(
+                  width: 10,
+                  height: 10,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFECD08),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              )
+                  : null,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              time,
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: Colors.black87,
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  // MULTI WAY Set Time Button
+  Widget _buildMultiWaySetTimeButton(int index) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton(
+        onPressed: () => _showMultiWayTimeSelectionSheet(index),
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          side: const BorderSide(color: Color(0xFFFECD08), width: 1.5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          backgroundColor: const Color(0xFFFFFAE6),
+        ),
+        child: Text(
+          'Set Flight ${index + 1} Time',
+          style: GoogleFonts.inter(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: Colors.black,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showMultiWayTimeSelectionSheet(int flightIndex) {
+    final List<String> timeSlots = _generateTimeSlots();
+    final RxList<String> tempSelectedSlots = <String>[].obs;
+    final searchController = Get.find<FlightSearchController>();
+    final currentFlight = controller.multiWayFlights[flightIndex];
+
+    // Current selection load
+    tempSelectedSlots.value = List<String>.from(currentFlight.selectedTimeSlots);
+
+    Get.bottomSheet(
+      Container(
+        height: Get.height * 0.7,
+        padding: const EdgeInsets.all(24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              'Select Departure Time (Flight ${flightIndex + 1})',
+              style: GoogleFonts.inter(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 2.2,
+                ),
+                itemCount: timeSlots.length,
+                itemBuilder: (context, index) {
+                  final time = timeSlots[index];
+
+                  return Obx(() {
+                    final isSelected = tempSelectedSlots.contains(time);
+                    return GestureDetector(
+                      onTap: () {
+                        tempSelectedSlots.clear();
+                        tempSelectedSlots.add(time);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isSelected ? const Color(0xFFFECD08) : Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: isSelected ? const Color(0xFFFECD08) : Colors.grey[300]!,
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            time,
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  });
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  if (tempSelectedSlots.isEmpty) {
+                    Get.snackbar(
+                      'Select Time',
+                      'Please select at least one time slot',
+                      backgroundColor: Colors.orange[100],
+                      colorText: Colors.orange[800],
+                      duration: const Duration(seconds: 2),
+                    );
+                  } else {
+                    final selectedTime = tempSelectedSlots.first;
+                    final category = searchController.getTimeCategory(selectedTime);
+                    controller.updateMultiWayFlight(
+                      flightIndex,
+                      selectedTimeSlots: tempSelectedSlots.toList(),
+                      preferredTime: category,
+                    );
+                    Get.back();
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFECD08),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  'OK',
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
     );
   }
 
   Widget _buildDateSection() {
     return Obx(() {
-      final isOneWayOrMulti = controller.selectedTripType.value == 'One Way' ||
-          controller.selectedTripType.value == 'Multi Way';
+      final isOneWay = controller.selectedTripType.value == 'One Way';
 
-      if (isOneWayOrMulti) {
+      if (isOneWay) {
         return GestureDetector(
           onTap: () => _selectDate(true),
           child: Center(
@@ -487,6 +1015,7 @@ class FlightBookingView extends GetView<FlightBookingController> {
         );
       }
 
+      // Round Way
       return Center(
         child: Container(
           height: 90,
@@ -588,8 +1117,6 @@ class FlightBookingView extends GetView<FlightBookingController> {
     );
   }
 
-
-
   Widget _buildTravellerClassSection() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -664,250 +1191,15 @@ class FlightBookingView extends GetView<FlightBookingController> {
     );
   }
 
-  Widget _buildTimeOfJourney({required bool isDeparture}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Time of Journey',
-          style: GoogleFonts.inter(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-            color: Colors.black,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Column(
-          children: [
-            Row(
-              children: [
-                Expanded(child: _buildTimeOption('Early morning', isDeparture)),
-                const SizedBox(width: 12),
-                Expanded(child: _buildTimeOption('Morning', isDeparture)),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(child: _buildTimeOption('Afternoon', isDeparture)),
-                const SizedBox(width: 12),
-                Expanded(child: _buildTimeOption('Evening', isDeparture)),
-              ],
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTimeOption(String time, bool isDeparture) {
-    return Obx(() {
-      final isSelected = isDeparture
-          ? controller.departurePreferredTimes.contains(time)
-          : controller.returnPreferredTimes.contains(time);
-
-      return GestureDetector(
-        onTap: () {},
-        child: Row(
-          children: [
-            Container(
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected ? const Color(0xFFFECD08) : Colors.grey,
-                  width: 2,
-                ),
-              ),
-              child: isSelected
-                  ? Center(
-                child: Container(
-                  width: 10,
-                  height: 10,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFFECD08),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              )
-                  : null,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              time,
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                color: Colors.black87,
-              ),
-            ),
-          ],
-        ),
-      );
-    });
-  }
-
-  Widget _buildSetTimeButton({required bool isDeparture}) {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton(
-        onPressed: () => _showTimeSelectionSheet(isDeparture: isDeparture),
-        style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          side: const BorderSide(color: Color(0xFFFECD08), width: 1.5),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          backgroundColor: const Color(0xFFFFFAE6),
-        ),
-        child: Text(
-          'Set Time',
-          style: GoogleFonts.inter(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-            color: Colors.black,
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showTimeSelectionSheet({required bool isDeparture}) {
-    final List<String> timeSlots = _generateTimeSlots();
-
-    Get.bottomSheet(
-      Container(
-        height: Get.height * 0.7,
-        padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              isDeparture ? 'Select Departure Time' : 'Select Return Time',
-              style: GoogleFonts.inter(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 2.2,
-                ),
-                itemCount: timeSlots.length,
-                itemBuilder: (context, index) {
-                  final time = timeSlots[index];
-
-                  return Obx(() {
-                    final isSelected = isDeparture
-                        ? controller.departureSelectedTimeSlots.contains(time)
-                        : controller.returnSelectedTimeSlots.contains(time);
-
-                    return GestureDetector(
-                      onTap: () {
-                        if (isDeparture) {
-                          controller.toggleDepartureTimeSlot(time);
-                        } else {
-                          controller.toggleReturnTimeSlot(time);
-                        }
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xFFFECD08) : Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: isSelected ? const Color(0xFFFECD08) : Colors.grey[300]!,
-                            width: 1.5,
-                          ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            time,
-                            style: GoogleFonts.inter(
-                              fontSize: 13,
-                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  });
-                },
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  final selectedSlots = isDeparture
-                      ? controller.departureSelectedTimeSlots
-                      : controller.returnSelectedTimeSlots;
-
-                  if (selectedSlots.isEmpty) {
-                    Get.snackbar(
-                      'Select Time',
-                      'Please select at least one time slot',
-                      backgroundColor: Colors.orange[100],
-                      colorText: Colors.orange[800],
-                      duration: const Duration(seconds: 2),
-                    );
-                  } else {
-                    Get.back();
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFECD08),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 0,
-                ),
-                child: Text(
-                  'OK',
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      isScrollControlled: true,
-    );
-  }
-
-  List<String> _generateTimeSlots() {
-    List<String> slots = [];
-    for (int hour = 0; hour < 24; hour++) {
-      for (int minute = 0; minute < 60; minute += 30) {
-        final period = hour < 12 ? 'am' : 'pm';
-        final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
-        final displayMinute = minute.toString().padLeft(2, '0');
-        slots.add('${displayHour.toString().padLeft(2, '0')}:$displayMinute $period');
-      }
-    }
-    return slots;
-  }
-
   Widget _buildSearchButton() {
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
-        onPressed: controller.searchFlights,
+        child: Obx(() => ElevatedButton(
+          onPressed: controller.isLoading.value
+              ? null
+              : () {
+            Get.find<FlightSearchController>().searchFlights();
+          },
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFFFECD08),
           padding: const EdgeInsets.symmetric(vertical: 16),
@@ -932,8 +1224,9 @@ class FlightBookingView extends GetView<FlightBookingController> {
           ],
         ),
       ),
+        ),
     );
-  }
+    }
 
   Future<void> _selectDate(bool isDeparture) async {
     final DateTime initialDate = isDeparture
@@ -981,6 +1274,19 @@ class FlightBookingView extends GetView<FlightBookingController> {
       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
     ];
     return '${date.day.toString().padLeft(2, '0')} ${months[date.month - 1]}, ${date.year}';
+  }
+
+  List<String> _generateTimeSlots() {
+    List<String> slots = [];
+    for (int hour = 0; hour < 24; hour++) {
+      for (int minute = 0; minute < 60; minute += 30) {
+        final period = hour < 12 ? 'am' : 'pm';
+        final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+        final displayMinute = minute.toString().padLeft(2, '0');
+        slots.add('${displayHour.toString().padLeft(2, '0')}:$displayMinute $period');
+      }
+    }
+    return slots;
   }
 
   void _showTravellerClassPicker() {

@@ -7,7 +7,7 @@ class AuthRepository {
 
   AuthRepository(this._apiService);
 
-  // ============ REGISTER ============
+  // REGISTER
   Future<Map<String, dynamic>> register({
     required String name,
     required String email,
@@ -38,7 +38,7 @@ class AuthRepository {
     }
   }
 
-  // ============ LOGIN ============
+  //  LOGIN
   Future<Map<String, dynamic>> login({
     required String email,
     required String password,
@@ -65,9 +65,9 @@ class AuthRepository {
     }
   }
 
-  // ============ SOCIAL LOGIN ============
+  //  SOCIAL LOGIN
   Future<Map<String, dynamic>> socialLogin({
-    required String provider, // 'google' or 'facebook'
+    required String provider,
     required String token,
   }) async {
     try {
@@ -92,7 +92,7 @@ class AuthRepository {
     }
   }
 
-  // ============ LOGOUT ============
+  //  LOGOUT
   Future<void> logout() async {
     try {
       final response = await _apiService.post(ApiConstants.logout, {});
@@ -105,7 +105,7 @@ class AuthRepository {
     }
   }
 
-  // ============ FORGOT PASSWORD - SEND OTP ============
+  // FORGOT PASSWORD - SEND OTP
   Future<void> sendOtp({required String email}) async {
     try {
       final response = await _apiService.post(
@@ -121,7 +121,7 @@ class AuthRepository {
     }
   }
 
-  // ============ FORGOT PASSWORD - VERIFY OTP ============
+  //  FORGOT PASSWORD - VERIFY OTP
   Future<void> verifyOtp({
     required String email,
     required String otp,
@@ -143,7 +143,7 @@ class AuthRepository {
     }
   }
 
-  // ============ FORGOT PASSWORD - RESET PASSWORD ============
+  //  FORGOT PASSWORD - RESET PASSWORD
   Future<void> resetPassword({
     required String email,
     required String otp,

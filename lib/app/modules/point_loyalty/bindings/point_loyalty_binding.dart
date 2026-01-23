@@ -1,12 +1,12 @@
 import 'package:get/get.dart';
 
-import '../controllers/point_loyalty_controller.dart';
+import '../controllers/loyalty_program_controller.dart';
 
 class PointLoyaltyBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<PointLoyaltyController>(
-      () => PointLoyaltyController(),
+    Get.lazyPut<LoyaltyProgramController>(
+      () => LoyaltyProgramController(),
     );
   }
 }

@@ -109,14 +109,11 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
     final lastDay = DateTime(_currentMonth.year, _currentMonth.month + 1, 0);
 
     final days = <DateTime>[];
-
-    // Add empty days for alignment
     final startWeekday = firstDay.weekday % 7;
     for (int i = 0; i < startWeekday; i++) {
       days.add(DateTime(0));
     }
 
-    // Add actual days
     for (int day = 1; day <= lastDay.day; day++) {
       days.add(DateTime(_currentMonth.year, _currentMonth.month, day));
     }
@@ -142,7 +139,6 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Month/Year Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -176,6 +172,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
             const SizedBox(height: 16),
 
             // Weekday Labels
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -197,6 +194,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
             const SizedBox(height: 8),
 
             // Calendar Grid
+
             SizedBox(
               height: 240,
               child: GridView.builder(
@@ -259,6 +257,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
             const SizedBox(height: 16),
 
             // Action Buttons
+
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -277,7 +276,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
                   onPressed: _selectedDate != null
                       ? () {
                     widget.onDateSelected(_selectedDate!);
-                    Navigator.of(context).pop();
+                    Navigator.of(context).pop(_selectedDate);
                   }
                       : null,
                   style: ElevatedButton.styleFrom(

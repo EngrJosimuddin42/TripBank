@@ -229,7 +229,6 @@ class LoginView extends GetView<LoginController> {
                           onPressed: controller.isLoading.value
                               ? null
                               : () {
-                            // ✅ Testing Purpose - Direct Home Navigation
                             Get.offAllNamed('/home');
 
                             //if (!controller.validateEmail()) {

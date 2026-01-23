@@ -8,6 +8,13 @@ class PassengerDetailsView extends GetView<FlightBookingController> {
   PassengerDetailsView({super.key});
 
   final TextEditingController _dobController = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _mobileController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _ninController = TextEditingController();
+  final TextEditingController _passportController = TextEditingController();
+  final List<String> titles = ['MR.', 'MS.', 'MRS.'];
 
   @override
   Widget build(BuildContext context) {
@@ -129,13 +136,13 @@ class PassengerDetailsView extends GetView<FlightBookingController> {
           ),
           const SizedBox(height: 24),
 
-          _buildRequiredTextField(label: 'Mobile No.', hint: '+88   01799999999'),
+          _buildRequiredTextField(label: 'Mobile No.', hint: 'Enter your Mobile Number',  controller: _mobileController,),
           const SizedBox(height: 16),
-          _buildRequiredTextField(label: 'Email', hint: 'josimcse@gmail.com'),
+          _buildRequiredTextField(label: 'Email', hint: 'Enter your email', controller: _emailController),
           const SizedBox(height: 16),
-          _buildRequiredTextField(label: 'NIN Number', hint: '654854685548165851'),
+          _buildRequiredTextField(label: 'NIN Number', hint: 'Enter your Nin Number', controller: _ninController),
           const SizedBox(height: 16),
-          _buildRequiredTextField(label: 'Passport Number', hint: '564854165465465'),
+          _buildRequiredTextField(label: 'Passport Number', hint: 'Enter your Passport Number',controller: _passportController),
         ],
       ),
     );
@@ -212,22 +219,28 @@ class PassengerDetailsView extends GetView<FlightBookingController> {
               ),
               const SizedBox(height: 8),
               Row(
-                children: [
-                  _buildTitleButton('MR.', true),
-                  const SizedBox(width: 12),
-                  _buildTitleButton('MS.', false),
-                  const SizedBox(width: 12),
-                  _buildTitleButton('MRS.', false),
-                ],
+                children: titles.map((title) => Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: _buildTitleButton(title),
+                )).toList(),
               ),
               const SizedBox(height: 20),
 
               // First Name
-              _buildRequiredTextField(label: 'First Name (Given Name)', hint: 'Josim'),
+              _buildRequiredTextField(
+                label: 'First Name (Given Name)',
+                hint: 'Enter your first name',
+                controller: _firstNameController,
+              ),
+
               const SizedBox(height: 16),
 
               // Last Name
-              _buildRequiredTextField(label: 'Last Name (Surname)', hint: 'Uddin'),
+              _buildRequiredTextField(
+                label: 'Last Name (Surname)',
+                hint: 'Enter your last name',
+                controller: _lastNameController,
+              ),
               const SizedBox(height: 16),
 
               // Date of Birth
@@ -304,18 +317,26 @@ class PassengerDetailsView extends GetView<FlightBookingController> {
       ],
     );
   }
+
   // Title Buttons (MR. / MS. / MRS.)
-  Widget _buildTitleButton(String title, bool isSelected) {
-    return GestureDetector(
-      onTap: () {},
+  Widget _buildTitleButton(String title) {
+    return Obx(() => GestureDetector(
+      onTap: () {
+        controller.selectedTitle.value = title;
+      },
       child: Container(
         height: 40,
         width: 50,
         padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFE7BB07) : const Color(0xFFFFFAE6),
+          color: controller.selectedTitle.value == title
+              ? const Color(0xFFE7BB07)
+              : const Color(0xFFFFFAE6),
           borderRadius: BorderRadius.circular(4),
-          border: Border.all(color: const Color(0xFF8F949A), width: 1.5),
+          border: Border.all(
+            color: const Color(0xFF8F949A),
+            width: 1.5,
+          ),
         ),
         child: Center(
           child: Text(
@@ -328,13 +349,14 @@ class PassengerDetailsView extends GetView<FlightBookingController> {
           ),
         ),
       ),
-    );
+    ));
   }
 
   // Required Text Field with Red *
   Widget _buildRequiredTextField({
     required String label,
     required String hint,
+    TextEditingController? controller,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -353,6 +375,7 @@ class PassengerDetailsView extends GetView<FlightBookingController> {
         ),
         const SizedBox(height: 8),
         TextField(
+          controller: controller,
           style: GoogleFonts.poppins(
             fontSize: 14,
             fontWeight: FontWeight.w400,
@@ -390,7 +413,7 @@ class PassengerDetailsView extends GetView<FlightBookingController> {
     );
   }
 
-  // CustomDatePicker ব্যবহার করে DOB সিলেক্ট
+  // CustomDatePicker
   void _selectDOB() async {
     final DateTime? picked = await showDialog<DateTime>(
       context: Get.context!,
@@ -408,23 +431,51 @@ class PassengerDetailsView extends GetView<FlightBookingController> {
     );
   }
 
-  // Next Button (Fixed at bottom)
+  // Next Button
   Widget _buildScrollableNextButton() {
     return Center(
       child: SizedBox(
         width: 343,
         height: 52,
         child: ElevatedButton(
-          onPressed: controller.continueToPayment,
+          onPressed: () {
+            final title = controller.selectedTitle.value;
+            final firstName = _firstNameController.text.trim();
+            final lastName = _lastNameController.text.trim();
+            final dob = _dobController.text.trim();
+            final mobile = _mobileController.text.trim();
+            final email = _emailController.text.trim();
+            final nin = _ninController.text.trim();
+            final passport = _passportController.text.trim();
+
+            //  Validation
+             if (firstName.isEmpty || lastName.isEmpty || dob.isEmpty ||
+                mobile.isEmpty || email.isEmpty || passport.isEmpty) {
+              Get.snackbar('Error', 'Please fill all required fields');
+              return;
+            }
+
+            //  Date format convert (MM-DD-YYYY → YYYY-MM-DD)
+            final dateParts = dob.split('-');
+            final formattedDob = '${dateParts[2]}-${dateParts[0]}-${dateParts[1]}';
+
+            //  Save passenger data
+            controller.savePassengerData(
+              title: title,
+              firstName: firstName,
+              lastName: lastName,
+              dateOfBirth: formattedDob,
+              mobile: mobile,
+              email: email,
+              nin: nin,
+              passport: passport,
+            );
+            controller.continueToPayment();
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFFFECD08),
-            padding: const EdgeInsets.symmetric(
-              vertical: 8,
-              horizontal: 16,
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             elevation: 0,
           ),
           child: Text(

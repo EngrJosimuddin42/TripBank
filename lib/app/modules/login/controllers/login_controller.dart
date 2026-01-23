@@ -51,14 +51,13 @@ class LoginController extends GetxController {
     return true;
   }
 
-  // ✅ CORRECT LOGIN - Uses Repository
+  //  CORRECT LOGIN
   Future<void> login() async {
     if (!validateEmail() || !validatePassword()) return;
 
     try {
       isLoading.value = true;
 
-      // Use AuthRepository instead of direct HTTP
       final result = await _authRepository.login(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
@@ -77,7 +76,7 @@ class LoginController extends GetxController {
     }
   }
 
-  // ✅ CORRECT GOOGLE LOGIN
+  // CORRECT GOOGLE LOGIN
   Future<void> loginWithGoogle() async {
     try {
       isLoading.value = true;
@@ -93,7 +92,7 @@ class LoginController extends GetxController {
       final auth.GoogleSignInAuthentication googleAuth =
       await googleUser.authentication;
 
-      // Use AuthRepository's socialLogin method
+      //  socialLogin method
       final result = await _authRepository.socialLogin(
         provider: 'google',
         token: googleAuth.idToken ?? '',
@@ -112,7 +111,7 @@ class LoginController extends GetxController {
     }
   }
 
-  // ✅ CORRECT APPLE LOGIN
+  // CORRECT APPLE LOGIN
   Future<void> loginWithApple() async {
     try {
       isLoading.value = true;

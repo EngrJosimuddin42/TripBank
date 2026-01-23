@@ -12,7 +12,7 @@ class OnboardingController extends GetxController {
       await _storage.markAsOpened();
       Get.offAllNamed(Routes.LOGIN);
     } catch (e) {
-      print('❌ Error saving onboarding status: $e');
+      print(' Error saving onboarding status: $e');
       Get.offAllNamed(Routes.LOGIN);
     }
   }

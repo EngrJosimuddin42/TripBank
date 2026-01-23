@@ -10,21 +10,66 @@ class DestinationsView extends GetView<HomeController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFFEDE5A),
-        title: Text(
-          'Featured Destinations',
-          style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w600),
+        backgroundColor: const Color(0xFFFDFDFD),
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(103),
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Color(0xFFFEDE5A),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(24),
+              ),
+            ),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                child: Row(
+                  children: [
+                    IconButton(
+                      onPressed: () => Get.back(),
+                      icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                    ),
+                    Text(
+                      'Featured Destinations',
+                      style: GoogleFonts.roboto(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Get.back(),
-        ),
-      ),
+
       body: Obx(() {
-        if (controller.destinations.isEmpty) {
-          return const Center(child: Text('No destinations available'));
+
+        // allDestinationsWithSubtitle
+
+        final destinations = controller.allDestinationsWithSubtitle;
+
+        if (destinations.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.location_off, size: 80, color: Colors.grey[400]),
+                const SizedBox(height: 16),
+                Text(
+                  'No destinations available',
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          );
         }
+
         return GridView.builder(
           padding: const EdgeInsets.all(16),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -33,27 +78,84 @@ class DestinationsView extends GetView<HomeController> {
             mainAxisSpacing: 16,
             childAspectRatio: 0.75,
           ),
-          itemCount: controller.destinations.length,
+          itemCount: destinations.length,
           itemBuilder: (context, index) {
-            final dest = controller.destinations[index];
-            final bool isFavorite = dest['isFavorite'] as bool? ?? false;
+            final dest = destinations[index];
+            final color = controller.getDestinationColor(index);
+
             return InkWell(
-              onTap: () => controller.onDestinationTap(index),
+              onTap: () {
+
+                // Original index
+                final originalIndex = controller.getHotelsController.destinations.indexOf(dest);
+                controller.onDestinationTap(originalIndex);
+              },
               child: Card(
                 elevation: 4,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: ClipRRect(
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                        child: CachedNetworkImage(
-                          imageUrl: dest['image'] ?? '',
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          placeholder: (_, __) => Container(color: Colors.grey[300]),
-                        ),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          ClipRRect(
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(16),
+                            ),
+                            child: CachedNetworkImage(
+                              imageUrl: dest['image'] ?? '',
+                              fit: BoxFit.cover,
+                              placeholder: (_, __) => Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      color.withValues(alpha: 0.6),
+                                      color,
+                                    ],
+                                  ),
+                                ),
+                                child: const Center(
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                              ),
+                              errorWidget: (_, __, ___) => Container(
+                                color: Colors.grey[300],
+                                child: const Icon(
+                                  Icons.image_not_supported,
+                                  size: 40,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          // Gradient overlay
+
+                          Container(
+                            decoration: const BoxDecoration(
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(16),
+                              ),
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.transparent,
+                                  Color.fromRGBO(0, 0, 0, 0.5),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     Padding(
@@ -61,16 +163,25 @@ class DestinationsView extends GetView<HomeController> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                              Text(
-                                dest['name'],
-                                style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              Text(
-                                dest['subtitle'],
-                                style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[700]),
-                              ),
+                          Text(
+                            dest['name'] ?? '',
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            dest['subtitle'] ?? '',
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              color: Colors.grey[700],
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ],
                       ),
                     ),

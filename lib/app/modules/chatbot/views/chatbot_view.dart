@@ -52,7 +52,9 @@ class ChatbotView extends GetView<ChatbotController> {
 
       body: Column(
         children: [
+
           // Chat messages area
+
           Expanded(
             child: Obx(() => ListView.builder(
               controller: controller.scrollController,
@@ -66,6 +68,7 @@ class ChatbotView extends GetView<ChatbotController> {
           ),
 
           // Input area
+
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
@@ -81,7 +84,9 @@ class ChatbotView extends GetView<ChatbotController> {
             child: SafeArea(
               child: Row(
                 children: [
+
                   // Text input field with microphone icon
+
                   Expanded(
                     child: Obx(() => Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -120,6 +125,7 @@ class ChatbotView extends GetView<ChatbotController> {
                           ),
 
                           // Microphone icon for voice input
+
                           IconButton(
                             icon: Icon(
                               controller.isListening.value
@@ -141,6 +147,7 @@ class ChatbotView extends GetView<ChatbotController> {
                   const SizedBox(width: 8),
 
                   // Send button
+
                   Obx(() => Container(
                     child: controller.isLoadingResponse.value
                         ? Padding(
@@ -169,20 +176,20 @@ class ChatbotView extends GetView<ChatbotController> {
   }
 
 
-  // ✅ Build Drawer (Sidebar)
+  // Build Drawer
+
   Widget _buildDrawer() {
     return Drawer(
       backgroundColor: Color(0xFFFDFDFD),
       child: SafeArea(
         child: Column(
           children: [
-            // New Chat Button
             Padding(
               padding: const EdgeInsets.all(16),
               child: InkWell(
                 onTap: () {
                   controller.startNewChat();
-                  Get.back(); // Close drawer
+                  Get.back();
                 },
                 child: Container(
                   child: Row(
@@ -205,6 +212,7 @@ class ChatbotView extends GetView<ChatbotController> {
             Divider(color: Colors.grey[300]),
 
             // History Header with Loading Indicator
+
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Row(
@@ -238,6 +246,7 @@ class ChatbotView extends GetView<ChatbotController> {
             Divider(color: Colors.grey[300]),
 
             // Chat History List
+
             Expanded(
               child: Obx(() {
                 if (controller.chatHistory.isEmpty &&
@@ -268,7 +277,8 @@ class ChatbotView extends GetView<ChatbotController> {
                   );
                 }
 
-                // ✅ History list
+                //  History list
+
                 return ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   itemCount: controller.chatHistory.length,
@@ -285,7 +295,8 @@ class ChatbotView extends GetView<ChatbotController> {
     );
   }
 
-  // ✅ Build History Item
+  //  Build History Item
+
   Widget _buildHistoryItem(Map<String, dynamic> chat) {
     return InkWell(
       onTap: () => controller.loadChatHistory(chat['id']),
@@ -310,7 +321,8 @@ class ChatbotView extends GetView<ChatbotController> {
     );
   }
 
-  // ✅ Build Message Bubble
+  // Build Message Bubble
+
   Widget _buildMessageBubble(ChatMessage message) {
     final isBot = message.isBot;
     final isWelcomeMessage = message.isWelcome;
@@ -329,7 +341,8 @@ class ChatbotView extends GetView<ChatbotController> {
                 const SizedBox(width: 8),
               ],
 
-              // Welcome message-এর জন্য আলাদা স্টাইলিং
+              // Welcome message
+
               if (isWelcomeMessage)
                 Expanded(
                   child: Container(
@@ -342,7 +355,6 @@ class ChatbotView extends GetView<ChatbotController> {
                   ),
                 )
               else
-              // সাধারণ মেসেজ (AI বা User)
                 Flexible(
                   child: Container(
                     padding: const EdgeInsets.all(12),
@@ -364,7 +376,6 @@ class ChatbotView extends GetView<ChatbotController> {
             ],
           ),
 
-          // AI message-এর জন্য action buttons
           if (isBot && !isWelcomeMessage)
             Padding(
               padding: const EdgeInsets.only(top: 8, left: 38),
@@ -409,6 +420,7 @@ class ChatbotView extends GetView<ChatbotController> {
   }
 
   // Reusable action button
+
   Widget _actionButton({
     required IconData icon,
     required String label,
@@ -431,6 +443,7 @@ class ChatbotView extends GetView<ChatbotController> {
   }
 
   // Relative Time Format
+
   String _formatTime(DateTime time) {
     final diff = DateTime.now().difference(time);
     if (diff.inMinutes < 1) return 'Just now';
@@ -439,7 +452,8 @@ class ChatbotView extends GetView<ChatbotController> {
     return '${diff.inDays}d ago';
   }
 
-  // ✅ Build welcome text with different colors
+  //  Build welcome text with different colors
+
   Widget _buildWelcomeText(String text) {
     final parts = text.split('\n');
 

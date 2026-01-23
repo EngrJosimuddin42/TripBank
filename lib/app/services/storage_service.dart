@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 class StorageService extends GetxService {
   late GetStorage _box;
 
-  // Platform-specific options for better security
   final _secureStorage = const FlutterSecureStorage(
     aOptions: AndroidOptions(
       encryptedSharedPreferences: true,
@@ -22,14 +21,14 @@ class StorageService extends GetxService {
     return this;
   }
 
-  // ==================== Token Management ====================
+  //Token Management
 
   Future<void> saveToken(String token) async {
     try {
       await _secureStorage.write(key: 'auth_token', value: token);
-      if (kDebugMode) debugPrint('✅ Token saved successfully');
+      if (kDebugMode) debugPrint(' Token saved successfully');
     } catch (e) {
-      if (kDebugMode) debugPrint('❌ Error saving token: $e');
+      if (kDebugMode) debugPrint(' Error saving token: $e');
       rethrow;
     }
   }
@@ -37,10 +36,10 @@ class StorageService extends GetxService {
   Future<String?> getToken() async {
     try {
       final token = await _secureStorage.read(key: 'auth_token');
-      if (kDebugMode && token != null) debugPrint('🔑 Token retrieved');
+      if (kDebugMode && token != null) debugPrint(' Token retrieved');
       return token;
     } catch (e) {
-      if (kDebugMode) debugPrint('❌ Error reading token: $e');
+      if (kDebugMode) debugPrint('Error reading token: $e');
       return null;
     }
   }
@@ -48,9 +47,9 @@ class StorageService extends GetxService {
   Future<void> removeToken() async {
     try {
       await _secureStorage.delete(key: 'auth_token');
-      if (kDebugMode) debugPrint('🗑️ Token removed');
+      if (kDebugMode) debugPrint(' Token removed');
     } catch (e) {
-      if (kDebugMode) debugPrint('❌ Error removing token: $e');
+      if (kDebugMode) debugPrint(' Error removing token: $e');
     }
   }
 
@@ -59,12 +58,12 @@ class StorageService extends GetxService {
       final token = await getToken();
       return token != null && token.isNotEmpty;
     } catch (e) {
-      if (kDebugMode) debugPrint('❌ Error checking login status: $e');
+      if (kDebugMode) debugPrint('Error checking login status: $e');
       return false;
     }
   }
 
-  // ==================== User Data ====================
+  //User Data
 
   Future<void> saveUser(Map<String, dynamic> user) async {
     try {
@@ -73,9 +72,9 @@ class StorageService extends GetxService {
       userCopy.remove('credit_card');
       userCopy.remove('token');
       await _box.write('user', userCopy);
-      if (kDebugMode) debugPrint('👤 User data saved');
+      if (kDebugMode) debugPrint(' User data saved');
     } catch (e) {
-      if (kDebugMode) debugPrint('❌ Error saving user: $e');
+      if (kDebugMode) debugPrint('Error saving user: $e');
       rethrow;
     }
   }
@@ -85,103 +84,135 @@ class StorageService extends GetxService {
       final user = _box.read<Map>('user');
       return user?.cast<String, dynamic>();
     } catch (e) {
-      if (kDebugMode) debugPrint('❌ Error reading user: $e');
+      if (kDebugMode) debugPrint('Error reading user: $e');
       return null;
     }
   }
 
-  // ==================== Favorites Management ====================
+  // Save favorite hotels
 
-  /// Save favorite hotels
   Future<void> saveFavoriteHotels(List<Map<String, dynamic>> hotels) async {
     try {
       await _box.write('favorite_hotels', hotels);
-      if (kDebugMode) debugPrint('💖 Favorite hotels saved (${hotels.length} items)');
+      if (kDebugMode) debugPrint(' Favorite hotels saved (${hotels.length} items)');
     } catch (e) {
-      if (kDebugMode) debugPrint('❌ Error saving favorite hotels: $e');
+      if (kDebugMode) debugPrint(' Error saving favorite hotels: $e');
       rethrow;
     }
   }
 
-  /// Get favorite hotels
+  // Get favorite hotels
+
   List<Map<String, dynamic>> getFavoriteHotels() {
     try {
       final data = _box.read<List>('favorite_hotels');
       if (data == null) return [];
       return data.map((e) => Map<String, dynamic>.from(e)).toList();
     } catch (e) {
-      if (kDebugMode) debugPrint('❌ Error reading favorite hotels: $e');
+      if (kDebugMode) debugPrint(' Error reading favorite hotels: $e');
       return [];
     }
   }
 
-  /// Save favorite tours
+  // Save favorite tours
+
   Future<void> saveFavoriteTours(List<Map<String, dynamic>> tours) async {
     try {
       await _box.write('favorite_tours', tours);
-      if (kDebugMode) debugPrint('💖 Favorite tours saved (${tours.length} items)');
+      if (kDebugMode) debugPrint('Favorite tours saved (${tours.length} items)');
     } catch (e) {
-      if (kDebugMode) debugPrint('❌ Error saving favorite tours: $e');
+      if (kDebugMode) debugPrint(' Error saving favorite tours: $e');
       rethrow;
     }
   }
 
-  /// Get favorite tours
+  // Get favorite tours
+
   List<Map<String, dynamic>> getFavoriteTours() {
     try {
       final data = _box.read<List>('favorite_tours');
       if (data == null) return [];
       return data.map((e) => Map<String, dynamic>.from(e)).toList();
     } catch (e) {
-      if (kDebugMode) debugPrint('❌ Error reading favorite tours: $e');
+      if (kDebugMode) debugPrint(' Error reading favorite tours: $e');
       return [];
     }
   }
 
-  /// Save favorite places
-  Future<void> saveFavoritePlaces(List<Map<String, dynamic>> places) async {
+  // Save favorite cars
+
+  Future<void> saveFavoriteCars(List<Map<String, dynamic>> cars) async {
     try {
-      await _box.write('favorite_places', places);
-      if (kDebugMode) debugPrint('💖 Favorite places saved (${places.length} items)');
+      await _box.write('favorite_cars', cars);
+      if (kDebugMode) debugPrint(' Favorite cars saved (${cars.length} items)');
     } catch (e) {
-      if (kDebugMode) debugPrint('❌ Error saving favorite places: $e');
+      if (kDebugMode) debugPrint('Error saving favorite cars: $e');
       rethrow;
     }
   }
 
-  /// Get favorite places
+  // Get favorite cars
+
+  List<Map<String, dynamic>> getFavoriteCars() {
+    try {
+      final data = _box.read<List>('favorite_cars');
+      if (data == null) return [];
+      return data.map((e) => Map<String, dynamic>.from(e)).toList();
+    } catch (e) {
+      if (kDebugMode) debugPrint(' Error reading favorite cars: $e');
+      return [];
+    }
+  }
+
+  // Save favorite places
+
+  Future<void> saveFavoritePlaces(List<Map<String, dynamic>> places) async {
+    try {
+      await _box.write('favorite_places', places);
+      if (kDebugMode) debugPrint(' Favorite places saved (${places.length} items)');
+    } catch (e) {
+      if (kDebugMode) debugPrint(' Error saving favorite places: $e');
+      rethrow;
+    }
+  }
+
+  // Get favorite places
+
   List<Map<String, dynamic>> getFavoritePlaces() {
     try {
       final data = _box.read<List>('favorite_places');
       if (data == null) return [];
       return data.map((e) => Map<String, dynamic>.from(e)).toList();
     } catch (e) {
-      if (kDebugMode) debugPrint('❌ Error reading favorite places: $e');
+      if (kDebugMode) debugPrint(' Error reading favorite places: $e');
       return [];
     }
   }
 
-  /// Clear all favorites
+  // Clear all favorites
+
   Future<void> clearAllFavorites() async {
     try {
       await _box.remove('favorite_hotels');
       await _box.remove('favorite_tours');
+      await _box.remove('favorite_cars');
       await _box.remove('favorite_places');
-      if (kDebugMode) debugPrint('🗑️ All favorites cleared');
+      if (kDebugMode) debugPrint(' All favorites cleared');
     } catch (e) {
-      if (kDebugMode) debugPrint('❌ Error clearing favorites: $e');
+      if (kDebugMode) debugPrint('Error clearing favorites: $e');
     }
   }
 
-  // ==================== First Time User ====================
+
+  //  First Time User
 
   Future<bool> isFirstTime() async {
     try {
       final value = _box.read<bool>('first_time');
-      if (kDebugMode) debugPrint('🔍 First time check: ${value ?? true}');
+      if (kDebugMode) debugPrint('First time check: ${value ?? true}');
       return value ?? true;
     } catch (e) {
-      if (kDebugMode) debugPrint('❌ Error checking first time: $e');
+      if (kDebugMode) debugPrint(' Error checking first time: $e');
       return true;
     }
   }
@@ -189,22 +220,45 @@ class StorageService extends GetxService {
   Future<void> markAsOpened() async {
     try {
       await _box.write('first_time', false);
-      if (kDebugMode) debugPrint('✅ Marked as opened (not first time)');
+      if (kDebugMode) debugPrint(' Marked as opened (not first time)');
     } catch (e) {
-      if (kDebugMode) debugPrint('❌ Error marking as opened: $e');
+      if (kDebugMode) debugPrint(' Error marking as opened: $e');
     }
   }
 
   Future<void> resetFirstTime() async {
     try {
       await _box.write('first_time', true);
-      if (kDebugMode) debugPrint('🔄 Reset to first time (for testing)');
+      if (kDebugMode) debugPrint(' Reset to first time (for testing)');
     } catch (e) {
-      if (kDebugMode) debugPrint('❌ Error resetting first time: $e');
+      if (kDebugMode) debugPrint('Error resetting first time: $e');
     }
   }
 
-  // ==================== Settings ====================
+  //Save all bookings
+
+  Future<void> saveBookings(List<Map<String, dynamic>> bookings) async {
+    try {
+      await _box.write('my_bookings', bookings);
+      if (kDebugMode) debugPrint(' Bookings saved (${bookings.length} items)');
+    } catch (e) {
+      if (kDebugMode) debugPrint(' Error saving bookings: $e');
+      rethrow;
+    }
+  }
+
+  //Get all bookings
+
+  List<Map<String, dynamic>> getBookings() {
+    try {
+      final data = _box.read<List>('my_bookings');
+      if (data == null) return [];
+      return data.map((e) => Map<String, dynamic>.from(e)).toList();
+    } catch (e) {
+      if (kDebugMode) debugPrint(' Error reading bookings: $e');
+      return [];
+    }
+  }
 
   Future<void> saveThemeMode(String mode) async {
     await _box.write('theme_mode', mode);
@@ -212,15 +266,13 @@ class StorageService extends GetxService {
 
   String getThemeMode() => _box.read<String>('theme_mode') ?? 'system';
 
-  // ==================== Cleanup ====================
-
   Future<void> clearAll() async {
     try {
       await _secureStorage.deleteAll();
       await _box.erase();
-      if (kDebugMode) debugPrint('🧹 All storage cleared successfully');
+      if (kDebugMode) debugPrint('All storage cleared successfully');
     } catch (e) {
-      if (kDebugMode) debugPrint('❌ Error clearing storage: $e');
+      if (kDebugMode) debugPrint('Error clearing storage: $e');
     }
   }
 }

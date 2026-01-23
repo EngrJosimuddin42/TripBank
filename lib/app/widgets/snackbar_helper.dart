@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 class SnackbarHelper {
 
   // Success Snackbar
+
   static void showSuccess(String message, {String title = 'Success'}) {
     Get.snackbar(
       '',
@@ -38,6 +39,7 @@ class SnackbarHelper {
   }
 
   // Error Snackbar
+
   static void showError(String message, {String title = 'Error'}) {
     Get.snackbar(
       '',
@@ -70,7 +72,9 @@ class SnackbarHelper {
       forwardAnimationCurve: Curves.easeOutBack,
     );
   }
-  // Warning / Info Snackbar
+
+  // Warning Snackbar
+
   static void showWarning(String message, {String title = 'Warning'}) {
     Get.snackbar(
       title,
@@ -86,6 +90,7 @@ class SnackbarHelper {
   }
 
   // Network Error
+
   static void showNetworkError() {
     showError(
       'No internet connection or server error. Please try again.',

@@ -216,8 +216,6 @@ class ForgotPasswordOTPView extends GetView<PasswordController> {
                     onPressed: controller.isLoading.value
                         ? null
                         : () async {
-
-                      // ✅ Testing Purpose - Direct Create New page navigation
                       Get.to(() => const CreateNewPasswordView());
 
                      // bool verified = await controller.verifyOTP();
@@ -227,8 +225,8 @@ class ForgotPasswordOTPView extends GetView<PasswordController> {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: isOtpComplete
-                          ? const Color(0xFFFECD08) // OTP পূর্ণ হলে গোল্ডেন
-                          : const Color(0xFFB5B5B5), // না হলে ধূসর
+                          ? const Color(0xFFFECD08)
+                          : const Color(0xFFB5B5B5),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(100),
                       ),

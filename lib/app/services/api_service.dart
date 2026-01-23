@@ -8,7 +8,8 @@ import '../services/auth_service.dart';
 class ApiService {
   final AuthService _authService = Get.find<AuthService>();
 
-  // Get headers with token (now synchronous)
+  // Get headers with token
+
   Map<String, String> _getHeaders() {
     final token = _authService.getToken();
     return {
@@ -19,6 +20,7 @@ class ApiService {
   }
 
   // GET Request
+
   Future<Map<String, dynamic>> get(String endpoint) async {
     try {
       final headers = _getHeaders();
@@ -40,6 +42,7 @@ class ApiService {
   }
 
   // POST Request
+
   Future<Map<String, dynamic>> post(
       String endpoint,
       Map<String, dynamic> body,
@@ -65,6 +68,7 @@ class ApiService {
   }
 
   // PUT Request
+
   Future<Map<String, dynamic>> put(
       String endpoint,
       Map<String, dynamic> body,
@@ -90,6 +94,7 @@ class ApiService {
   }
 
   // DELETE Request
+
   Future<Map<String, dynamic>> delete(String endpoint) async {
     try {
       final headers = _getHeaders();
@@ -111,6 +116,7 @@ class ApiService {
   }
 
   // Handle Response
+
   Map<String, dynamic> _handleResponse(http.Response response) {
     switch (response.statusCode) {
       case 200:
@@ -135,6 +141,7 @@ class ApiService {
   }
 
   // Get error message from response
+
   String _getErrorMessage(http.Response response) {
     try {
       final data = jsonDecode(response.body);
@@ -145,6 +152,7 @@ class ApiService {
   }
 
   // Get validation errors
+
   Map<String, List<String>> _getValidationErrors(http.Response response) {
     try {
       final data = jsonDecode(response.body);
@@ -158,12 +166,12 @@ class ApiService {
         );
       }
     } catch (e) {
-      // Ignore
     }
     return {};
   }
 
   // Upload file with multipart
+
   Future<Map<String, dynamic>> uploadFile(
       String endpoint,
       File file, {
@@ -178,11 +186,13 @@ class ApiService {
       request.headers.addAll(headers);
 
       // Add file
+
       request.files.add(
         await http.MultipartFile.fromPath(fieldName, file.path),
       );
 
       // Add additional fields
+
       if (additionalFields != null) {
         request.fields.addAll(additionalFields);
       }
@@ -200,6 +210,7 @@ class ApiService {
 }
 
 // Custom Exceptions
+
 class ApiException implements Exception {
   final String message;
   ApiException(this.message);

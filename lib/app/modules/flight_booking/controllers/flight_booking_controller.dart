@@ -1,24 +1,33 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_utils/src/get_utils/get_utils.dart';
+import 'dart:math';
+import 'package:intl/intl.dart';
+import '../../../constants/app_strings.dart';
+import '../../../models/booking_model.dart';
 import '../../../models/flight_model.dart';
+import '../../../widgets/airport_search_dialog.dart';
+import '../../my_bookings/controllers/my_bookings_controller.dart';
+import 'flight_search_controller.dart';
 
 class FlightBookingController extends GetxController {
+
   // Trip type
-  final selectedTripType = 'One Way'.obs;
-  final tripTypes = ['One Way', 'Round Way', 'Multi Way'];
+  final selectedTripType = AppStrings.oneWay.obs;
+  final tripTypes = [AppStrings.oneWay, AppStrings.roundWay, AppStrings.multiWay];
 
   // Departure Flight Locations
-  final departureFromLocation = 'Abuja'.obs;
-  final departureFromCode = 'ABJ'.obs;
-  final departureToLocation = 'London'.obs;
-  final departureToCode = 'LHR'.obs;
+  final departureFromLocation = ''.obs;
+  final departureFromCode = ''.obs;
+  final departureToLocation = ''.obs;
+  final departureToCode = ''.obs;
+  var isLoading = false.obs;
 
   // Return Flight Locations
-  final returnFromLocation = 'London'.obs;
-  final returnFromCode = 'LGW'.obs;
-  final returnToLocation = 'Abuja'.obs;
-  final returnToCode = 'ABJ'.obs;
+  final returnFromLocation = ''.obs;
+  final returnFromCode = ''.obs;
+  final returnToLocation = ''.obs;
+  final returnToCode = ''.obs;
 
   // Dates
   final departureDate = Rx<DateTime?>(null);
@@ -28,10 +37,25 @@ class FlightBookingController extends GetxController {
   final adults = 1.obs;
   final children = 0.obs;
   final infants = 0.obs;
+  final selectedTitle = 'MR.'.obs;
 
   // Class
   final selectedClass = 'Economy'.obs;
-  final classes = ['Economy', 'Premium Economy', 'Business', 'First Class'];
+
+  // Dynamic class list getter
+  List<String> get classes {
+    try {
+      final searchController = Get.find<FlightSearchController>();
+      if (searchController.availableClasses.isEmpty) {
+        return ['Economy', 'Business'];
+      }
+      return searchController.availableClasses
+          .map((FlightClass c) => c.name)
+          .toList();
+    } catch (e) {
+      return ['Economy', 'Business'];
+    }
+  }
 
   // Time preferences
   final timeOptions = ['Early morning', 'Morning', 'Afternoon', 'Evening'];
@@ -40,100 +64,93 @@ class FlightBookingController extends GetxController {
   final departureSelectedTimeSlots = <String>[].obs;
   final returnSelectedTimeSlots = <String>[].obs;
 
-  // Search Results
-  final searchResults = <Flight>[].obs;
-  final allFlights = <Flight>[].obs;
-  final isLoadingFlights = false.obs;
-  final selectedFlight = Rx<Flight?>(null);
-
-  // Filter Options
-  final priceRange = const RangeValues(0, 5000).obs;
-  final selectedAirlines = <String>[].obs;
-  final selectedStops = <String>[].obs;
-  final sortBy = 'Cheapest'.obs;
-  final maxTravelTime = 30.0.obs;
-  final selectedFacilities = <String>[].obs;
-
   // Passenger Details
   final passengers = <Passenger>[].obs;
   final contactEmail = ''.obs;
   final contactPhone = ''.obs;
   final RxMap<String, String> passengerData = <String, String>{}.obs;
+
+  // Multi-way flights
   final multiWayFlights = <MultiWayFlight>[].obs;
 
-  // Payment
+  // Selected flight (from details page)
+  final selectedFlight = Rxn<Flight>();
+
+  // Payment Methods
   final selectedPaymentMethod = ''.obs;
   final paymentMethods = [
-    {'name': 'PayPal', 'icon': 'Credit Card'},
-    {'name': 'Stripe', 'icon': 'Credit Card'},
-    {'name': 'Payoneer', 'icon': 'Credit Card'},
-    {'name': 'Coinbase Commerce', 'icon': 'Crypto'},
+    {'name': 'PayPal', 'icon': 'assets/images/paypal.png'},
+    {'name': 'Stripe', 'icon': 'assets/images/stripe.png'},
+    {'name': 'Paystack', 'icon': 'assets/images/paystack.png'},
+    {'name': 'Coinbase Commerce', 'icon': 'assets/images/coinbase.png'},
   ];
 
   // Booking
-  final currentBooking = Rx<Booking?>(null);
+  final currentBooking = Rxn<Booking>();
 
   @override
   void onInit() {
     super.onInit();
     departureDate.value = DateTime.now().add(const Duration(days: 1));
 
-    // Initialize with one multi-way flight
+    // Multi-way initial flight
     multiWayFlights.add(MultiWayFlight(
-      fromLocation: 'Abuja',
-      fromCode: 'ABJ',
-      toLocation: 'London',
-      toCode: 'LHR',
-      date: DateTime.now().add(const Duration(days: 1)),
+      fromLocation: '',
+      fromCode: '',
+      toLocation: '',
+      toCode: '',
+      date: DateTime.now().add(const Duration(days: 7)),
+      selectedTimeSlots: [],
     ));
-
-    // Set up reactive listener for sortBy changes
-    ever(sortBy, (_) {
-      if (searchResults.isNotEmpty) {
-        applyFilters();
-      }
-    });
   }
 
-  @override
-  void onClose() {
-    super.onClose();
-  }
-
-  // Multi-way flight management
-  void addMultiWayFlight() {
-    if (multiWayFlights.length < 5) {
-      multiWayFlights.add(MultiWayFlight(
-        fromLocation: multiWayFlights.last.toLocation,
-        fromCode: multiWayFlights.last.toCode,
-        toLocation: 'Dubai',
-        toCode: 'DXB',
-        date: multiWayFlights.last.date.add(const Duration(days: 1)),
-      ));
-    }
-  }
-
-  void removeMultiWayFlight(int index) {
-    if (multiWayFlights.length > 1) {
-      multiWayFlights.removeAt(index);
-    }
-  }
-
+  // Multi-way flight management - UPDATED METHOD
   void updateMultiWayFlight(int index, {
     String? fromLocation,
     String? fromCode,
     String? toLocation,
     String? toCode,
     DateTime? date,
+    String? preferredTime,
+    List<String>? selectedTimeSlots,
   }) {
-    final flight = multiWayFlights[index];
-    multiWayFlights[index] = MultiWayFlight(
-      fromLocation: fromLocation ?? flight.fromLocation,
-      fromCode: fromCode ?? flight.fromCode,
-      toLocation: toLocation ?? flight.toLocation,
-      toCode: toCode ?? flight.toCode,
-      date: date ?? flight.date,
-    );
+    if (index >= 0 && index < multiWayFlights.length) {
+      final flight = multiWayFlights[index];
+      multiWayFlights[index] = MultiWayFlight(
+        fromLocation: fromLocation ?? flight.fromLocation,
+        fromCode: fromCode ?? flight.fromCode,
+        toLocation: toLocation ?? flight.toLocation,
+        toCode: toCode ?? flight.toCode,
+        date: date ?? flight.date,
+        preferredTime: preferredTime ?? flight.preferredTime,
+        selectedTimeSlots: selectedTimeSlots ?? flight.selectedTimeSlots,
+      );
+      multiWayFlights.refresh();
+    }
+  }
+
+  void updateMultiWayFlightTime(int index, String time) {
+    if (index < multiWayFlights.length) {
+      final flight = multiWayFlights[index];
+      updateMultiWayFlight(index, preferredTime: time);
+    }
+  }
+
+  void removeMultiWayFlight(int index) {
+    if (multiWayFlights.length > 1) multiWayFlights.removeAt(index);
+  }
+
+  void addMultiWayFlight() {
+    if (multiWayFlights.length < 6) {
+      multiWayFlights.add(MultiWayFlight(
+        fromLocation: '',
+        fromCode: '',
+        toLocation: '',
+        toCode: '',
+        date: DateTime.now().add(const Duration(days: 7)),
+        selectedTimeSlots: [],
+      ));
+    }
   }
 
   void swapMultiWayLocations(int index) {
@@ -144,10 +161,41 @@ class FlightBookingController extends GetxController {
       toLocation: flight.fromLocation,
       toCode: flight.fromCode,
       date: flight.date,
+      preferredTime: flight.preferredTime,
+      selectedTimeSlots: flight.selectedTimeSlots,
     );
+    multiWayFlights.refresh();
   }
 
-  // Save passenger data
+  // Passenger management
+  void addPassenger({
+    required String title,
+    required String firstName,
+    required String lastName,
+    required DateTime dateOfBirth,
+    required String passportNumber,
+    required String type,
+    String? email,
+    String? phone,
+  }) {
+    passengers.add(Passenger(
+      title: title,
+      firstName: firstName,
+      lastName: lastName,
+      dateOfBirth: dateOfBirth,
+      passportNumber: passportNumber,
+      type: type,
+      email: email,
+      phone: phone,
+    ));
+  }
+
+  void clearPassengers() {
+    passengers.clear();
+  }
+
+  int get totalPassengers => adults.value + children.value + infants.value;
+
   void savePassengerData({
     required String title,
     required String firstName,
@@ -166,37 +214,79 @@ class FlightBookingController extends GetxController {
       'nin': nin,
       'passport': passport,
     };
+
+    passengers.add(Passenger(
+      title: title,
+      firstName: firstName,
+      lastName: lastName,
+      dateOfBirth: DateTime.parse(dateOfBirth),
+      passportNumber: passport,
+      type: 'Adult',
+      nin: nin,
+      email: email,
+      phone: mobile,
+    ));
+
+    contactEmail.value = email;
+    contactPhone.value = mobile;
   }
 
-  // Swap departure locations
+  String formatDate(DateTime date) {
+    return DateFormat('dd MMM yyyy').format(date);
+  }
+
+  String formatTime(DateTime date) {
+    return DateFormat('HH:mm').format(date);
+  }
+
+
+  //  Swap Departure Locations
+
   void swapDepartureLocations() {
-    final tempLocation = departureFromLocation.value;
-    final tempCode = departureFromCode.value;
+    final temp = departureFromLocation.value;
     departureFromLocation.value = departureToLocation.value;
+    departureToLocation.value = temp;
+    final tempCode = departureFromCode.value;
     departureFromCode.value = departureToCode.value;
-    departureToLocation.value = tempLocation;
     departureToCode.value = tempCode;
-  }
+    if (selectedTripType.value == 'Round Way') {
+      final tempReturn = returnFromLocation.value;
+      returnFromLocation.value = returnToLocation.value;
+      returnToLocation.value = tempReturn;
 
-  // Swap return locations
-  void swapReturnLocations() {
-    final tempLocation = returnFromLocation.value;
-    final tempCode = returnFromCode.value;
-    returnFromLocation.value = returnToLocation.value;
-    returnFromCode.value = returnToCode.value;
-    returnToLocation.value = tempLocation;
-    returnToCode.value = tempCode;
-  }
-
-  // Update trip type
-  void updateTripType(String type) {
-    selectedTripType.value = type;
-    if (type == 'One Way' || type == 'Multi Way') {
-      returnDate.value = null;
+      final tempReturnCode = returnFromCode.value;
+      returnFromCode.value = returnToCode.value;
+      returnToCode.value = tempReturnCode;
     }
   }
 
-  // Passenger controls
+  void swapReturnLocations() {
+    final temp = returnFromLocation.value;
+    returnFromLocation.value = returnToLocation.value;
+    returnToLocation.value = temp;
+    final tempCode = returnFromCode.value;
+    returnFromCode.value = returnToCode.value;
+    returnToCode.value = tempCode;
+  }
+
+  // Trip type
+  void updateTripType(String type) {
+    selectedTripType.value = type;
+
+    if (type == AppStrings.oneWay || type == AppStrings.multiWay) {
+      returnDate.value = null;
+    } else if (type == AppStrings.roundWay) {
+      // Round Way select  automatically return locations fill
+      if (departureFromLocation.value.isNotEmpty && departureToLocation.value.isNotEmpty) {
+        returnFromLocation.value = departureToLocation.value;
+        returnFromCode.value = departureToCode.value;
+        returnToLocation.value = departureFromLocation.value;
+        returnToCode.value = departureFromCode.value;
+      }
+    }
+  }
+
+  // Passenger counters
   void incrementAdults() => adults.value < 9 ? adults.value++ : null;
   void decrementAdults() => adults.value > 1 ? adults.value-- : null;
   void incrementChildren() => children.value < 9 ? children.value++ : null;
@@ -204,292 +294,180 @@ class FlightBookingController extends GetxController {
   void incrementInfants() => infants.value < adults.value ? infants.value++ : null;
   void decrementInfants() => infants.value > 0 ? infants.value-- : null;
 
-  // Total passengers
-  int get totalPassengers => adults.value + children.value + infants.value;
-
-  // Search flights
-  Future<void> searchFlights() async {
-    if (departureFromCode.value == departureToCode.value) {
-      Get.snackbar('Invalid Route', 'From and To cannot be the same');
-      return;
-    }
-    if (departureDate.value == null) {
-      Get.snackbar('Date Required', 'Please select departure date');
-      return;
-    }
-    if (selectedTripType.value == 'Round Way' &&
-        (returnDate.value == null || returnDate.value!.isBefore(departureDate.value!))) {
-      Get.snackbar('Invalid Return Date', 'Return date must be after departure');
-      return;
-    }
-
-    isLoadingFlights.value = true;
-    try {
-      await Future.delayed(const Duration(seconds: 2));
-      final flights = _generateDemoFlights();
-      allFlights.assignAll(flights);
-      searchResults.assignAll(flights);
-      Get.toNamed('/flight-results');
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to search flights');
-    } finally {
-      isLoadingFlights.value = false;
-    }
-  }
-
-  String _getTimeCategory(String timeSlot) {
-    final parts = timeSlot.split(' ');
-    final timePart = parts[0];
-    final period = parts[1];
-
-    final hourMinute = timePart.split(':');
-    int hour = int.parse(hourMinute[0]);
-
-    if (period == 'pm' && hour != 12) hour += 12;
-    if (period == 'am' && hour == 12) hour = 0;
-
-    if (hour >= 0 && hour < 6) {
-      return 'Early morning';
-    } else if (hour >= 6 && hour < 12) {
-      return 'Morning';
-    } else if (hour >= 12 && hour < 18) {
-      return 'Afternoon';
-    } else {
-      return 'Evening';
-    }
-  }
-
-  void toggleDepartureTimeSlot(String timeSlot) {
-    departureSelectedTimeSlots.clear();
-    departureSelectedTimeSlots.add(timeSlot);
-
-    final category = _getTimeCategory(timeSlot);
-    departurePreferredTimes.clear();
-    departurePreferredTimes.add(category);
-  }
-
-  void toggleReturnTimeSlot(String timeSlot) {
-    returnSelectedTimeSlots.clear();
-    returnSelectedTimeSlots.add(timeSlot);
-
-    final category = _getTimeCategory(timeSlot);
-    returnPreferredTimes.clear();
-    returnPreferredTimes.add(category);
-  }
-
-  // Generate demo flights
-  List<Flight> _generateDemoFlights() {
-    final airlines = [
-      {'name': 'Singapore Airlines', 'code': 'SQ'},
-      {'name': 'Emirates', 'code': 'EK'},
-      {'name': 'Qatar Airways', 'code': 'QR'},
-      {'name': 'British Airways', 'code': 'BA'},
-      {'name': 'Turkish Airlines', 'code': 'TK'},
-    ];
-
-    final List<Flight> flights = [];
-    for (int i = 0; i < 12; i++) {
-      final airline = airlines[i % airlines.length];
-      final basePrice = 800 + (i * 120);
-      final stops = i % 4;
-      final durationHours = 12 + stops * 3 + (i % 3);
-
-      flights.add(Flight(
-        id: 'FL${2000 + i}',
-        airline: airline['name']!,
-        airlineLogo: 'Airplane',
-        flightNumber: '${airline['code']}${400 + i}',
-        from: departureFromLocation.value,
-        to: departureToLocation.value,
-        fromCode: departureFromCode.value,
-        toCode: departureToCode.value,
-        departureTime: departureDate.value!.add(Duration(hours: 2 + i)),
-        arrivalTime: departureDate.value!.add(Duration(hours: durationHours)),
-        duration: '${durationHours}h ${(i % 60)}m',
-        stops: stops,
-        stopDetails: stops > 0 ? ['DXB', 'DOH'][i % 2] : null,
-        price: basePrice.toDouble(),
-        cabinClass: selectedClass.value,
-        availableSeats: 15 - i,
-        isRefundable: i % 3 != 0,
-        baggageAllowance: '30kg checked + 7kg carry-on',
-      ));
-    }
-    return flights;
-  }
-
-  // Select flight
-  void selectFlight(Flight flight) {
+  void bookFlight(Flight flight) {
     selectedFlight.value = flight;
-    Get.toNamed('/flight-details');
+    Get.toNamed('/passenger-details', arguments: {'flight': flight});
   }
 
-  // Book flight
-  void bookFlight() {
-    if (selectedFlight.value == null) {
-      Get.snackbar('Error', 'No flight selected');
-      return;
-    }
-    Get.toNamed('/passenger-details');
-  }
-
-  // Continue to payment
   void continueToPayment() {
-    if (passengers.length != totalPassengers) {
-      Get.snackbar('Incomplete', 'Please fill details for all passengers');
+    if (passengers.isEmpty) {
+      Get.snackbar('Error', 'Please add passenger details');
       return;
     }
-    if (contactEmail.value.isEmpty || !GetUtils.isEmail(contactEmail.value)) {
-      Get.snackbar('Invalid Email', 'Enter a valid email');
-      return;
-    }
-    if (contactPhone.value.isEmpty || contactPhone.value.length < 10) {
-      Get.snackbar('Invalid Phone', 'Enter a valid phone number');
-      return;
-    }
-    Get.toNamed('/payment');
+    Get.toNamed('/payment', arguments: {
+      'flight': selectedFlight.value,
+      'passengers': passengers.toList(),
+      'contactEmail': contactEmail.value,
+      'contactPhone': contactPhone.value,
+    });
   }
 
-  // Make payment
+
   Future<void> makePayment() async {
     if (selectedPaymentMethod.value.isEmpty) {
-      Get.snackbar('Required', 'Please select payment method');
+      if (Get.isDialogOpen ?? false) Get.back();
+      Get.snackbar('Required', 'Please select a payment method');
       return;
     }
-
-    Get.dialog(
-      const Center(
-        child: Card(
-          child: Padding(
-            padding: EdgeInsets.all(32),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(color: Color(0xFFFECD08)),
-                SizedBox(height: 24),
-                Text('Processing Payment...', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-              ],
-            ),
-          ),
-        ),
-      ),
-      barrierDismissible: false,
-    );
-
-    await Future.delayed(const Duration(seconds: 3));
-
-    final flight = selectedFlight.value;
-    if (flight == null) {
-      Get.back();
-      Get.snackbar('Error', 'Flight not found');
-      return;
-    }
-
-    final totalPrice = flight.price * totalPassengers * 1.15;
-
-    currentBooking.value = Booking(
-      bookingId: 'BK${DateTime.now().millisecondsSinceEpoch}',
-      flight: flight,
-      passengers: passengers.toList(),
-      totalPrice: totalPrice,
-      bookingDate: DateTime.now(),
-      status: 'Confirmed',
-      pnr: 'TP${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}',
-    );
-
-    Get.back();
-    Get.snackbar('Success!', 'Booking confirmed!');
-    Get.offAllNamed('/booking-success');
-  }
-
-  // Apply filters
-  void applyFilters() {
-    var filtered = allFlights.where((flight) {
-      final inPrice = flight.price >= priceRange.value.start &&
-          flight.price <= priceRange.value.end;
-
-      bool matchesStops = true;
-      if (selectedStops.isNotEmpty) {
-        final stopFilter = selectedStops.first;
-        if (stopFilter == '0') {
-          matchesStops = flight.stops == 0;
-        } else if (stopFilter == '1') {
-          matchesStops = flight.stops >= 1;
-        } else {
-          matchesStops = flight.stops >= 2;
+    if (selectedFlight.value == null && Get.arguments != null) {
+      if (Get.arguments is Map) {
+        final args = Get.arguments as Map;
+        if (args['flight'] != null) {
+          selectedFlight.value = args['flight'] as Flight;
+        }
+        if (args['passengers'] != null && passengers.isEmpty) {
+          passengers.value = List<Passenger>.from(args['passengers']);
         }
       }
+    }
+    final flight = selectedFlight.value;
+    if (flight == null) {
+      if (Get.isDialogOpen ?? false) Get.back();
+      Get.snackbar(
+        'Error',
+        'Flight data lost. Please search again.',
+        backgroundColor: Colors.red[100],
+        duration: const Duration(seconds: 3),
+      );
+      return;
+    }
 
-      final matchesAirline = selectedAirlines.isEmpty ||
-          selectedAirlines.contains(flight.airline);
+    // Processing Simulation
+    await Future.delayed(const Duration(seconds: 3));
 
-      final durationParts = flight.duration.split('h');
-      final hours = int.tryParse(durationParts[0].trim()) ?? 0;
-      final matchesTravelTime = hours <= maxTravelTime.value;
+    try {
+      final totalPrice = calculateTotalPrice();
+      final pnr = _generatePNR();
 
-      return inPrice && matchesStops && matchesAirline && matchesTravelTime;
-    }).toList();
 
-    _sortFlights(filtered);
-    searchResults.assignAll(filtered);
-    Get.back();
-  }
+      // Create Booking object
 
-  // Reset filters
-  void resetFilters() {
-    priceRange.value = const RangeValues(0, 5000);
-    selectedAirlines.clear();
-    selectedStops.clear();
-    sortBy.value = 'Cheapest';
-    maxTravelTime.value = 30.0;
-    selectedFacilities.clear();
-    searchResults.assignAll(allFlights);
-    Get.back();
-  }
+      currentBooking.value = Booking(
+        bookingId: 'BK${DateTime.now().millisecondsSinceEpoch}',
+        flight: flight,
+        passengers: passengers.toList(),
+        totalPrice: totalPrice,
+        bookingDate: DateTime.now(),
+        status: 'Confirmed',
+        pnr: pnr,
+        paymentMethod: selectedPaymentMethod.value,
+        baseFare: flight.price * totalPassengers,
+        taxes: flight.taxAmount * totalPassengers,
+        otherCharges: flight.otherCharges * totalPassengers,
+      );
 
-  // Sort flights
-  void _sortFlights(List<Flight> flights) {
-    switch (sortBy.value) {
-      case 'Cheapest':
-        flights.sort((a, b) => a.price.compareTo(b.price));
-        break;
-      case 'Fastest':
-        flights.sort((a, b) => a.duration.compareTo(b.duration));
-        break;
-      case 'Earliest':
-        flights.sort((a, b) => a.departureTime.compareTo(b.departureTime));
-        break;
-      case 'Latest':
-        flights.sort((a, b) => b.departureTime.compareTo(a.departureTime));
-        break;
+      // Dynamic imageUrl
+      String dynamicImageUrl = flight.imageUrl ??
+          'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400';
+
+      // MyBookingsController check
+      MyBookingsController myBookingsController;
+      if (Get.isRegistered<MyBookingsController>()) {
+        myBookingsController = Get.find<MyBookingsController>();
+      } else {
+        myBookingsController = Get.put(
+          MyBookingsController(),
+          permanent: true,
+        );
+      }
+
+      // Save My Booking
+      myBookingsController.addBooking(
+        BookingSummary(
+          type: 'Flight',
+          title: '${flight.from} → ${flight.to}',
+          subtitle: '${flight.airline} • ${flight.cabinClass} • ${flight.flightNumber}',
+          dates: DateFormat('dd MMM yyyy').format(flight.departureTime),
+          imageUrl: dynamicImageUrl,
+          bookingId: currentBooking.value!.bookingId,
+          status: 'Confirmed',
+          totalAmount: '${flight.currencySymbol}${totalPrice.toStringAsFixed(0)}',
+          ticketData: {
+            'flight': flight.toJson(),
+            'passengers': passengers.map((p) => p.toJson()).toList(),
+            'totalPrice': totalPrice,
+            'pnr': pnr,
+            'paymentMethod': selectedPaymentMethod.value,
+          },
+        ),
+      );
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+      await Future.delayed(const Duration(milliseconds: 500));
+      Get.offAllNamed('/ticket');
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+      await Future.delayed(const Duration(milliseconds: 300));
+      Get.snackbar(
+        'Error',
+        'Booking failed: $e',
+        backgroundColor: Colors.red[100],
+        colorText: Colors.red[800],
+        duration: const Duration(seconds: 3),
+      );
     }
   }
 
-  // Format helpers
-  String formatDate(DateTime? date) {
-    if (date == null) return '------';
-    final day = date.day.toString().padLeft(2, '0');
-    final month = _getMonthName(date.month);
-    final year = date.year;
-    final weekday = _getWeekdayName(date.weekday);
-    return '$day $month $year • $weekday';
+
+  // Calculate total price (Dynamic based)
+  double calculateTotalPrice() {
+    final flight = selectedFlight.value;
+    if (flight == null) return 0.0;
+
+    // Base fare for all passengers
+    final baseFare = flight.price * totalPassengers;
+
+    // Taxes for all passengers
+    final taxes = flight.taxAmount * totalPassengers;
+
+    // VAT for all passengers
+    final vat = flight.vatAmount * totalPassengers;
+
+    // Other charges for all passengers
+    final otherCharges = flight.otherCharges * totalPassengers;
+
+    return baseFare + taxes + vat + otherCharges;
   }
 
-  String formatTime(DateTime time) {
-    final hour = time.hour > 12 ? time.hour - 12 : (time.hour == 0 ? 12 : time.hour);
-    final minute = time.minute.toString().padLeft(2, '0');
-    final period = time.hour >= 12 ? 'PM' : 'AM';
-    return '$hour:$minute $period';
+
+  String getPassengerBreakdown() {
+    List<String> parts = [];
+
+    if (adults.value > 0) {
+      parts.add('${adults.value} Adult${adults.value > 1 ? 's' : ''}');
+    }
+
+    if (children.value > 0) {
+      parts.add('${children.value} Child${children.value > 1 ? 'ren' : ''}');
+    }
+
+    if (infants.value > 0) {
+      parts.add('${infants.value} Infant${infants.value > 1 ? 's' : ''}');
+    }
+
+    return parts.join(', ');
   }
 
-  String _getMonthName(int month) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return months[month - 1];
-  }
 
-  String _getWeekdayName(int weekday) {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return days[weekday - 1];
+  String _generatePNR() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    final random = Random();
+    return String.fromCharCodes(
+      Iterable.generate(6, (_) => chars.codeUnitAt(random.nextInt(chars.length))),
+    );
   }
 
   // Reset booking
@@ -501,21 +479,73 @@ class FlightBookingController extends GetxController {
     selectedPaymentMethod.value = '';
     currentBooking.value = null;
   }
-}
 
-// MultiWayFlight model class
-class MultiWayFlight {
-  final String fromLocation;
-  final String fromCode;
-  final String toLocation;
-  final String toCode;
-  final DateTime date;
+  // LOCATION SELECTION
+  Future<void> selectLocation({
+    required bool isFrom,
+    required bool isMultiWay,
+    bool? isDeparture,
+    int? flightIndex,
+  }) async {
+    final Airport? selectedAirport = await Get.dialog<Airport>(
+      const AirportSearchDialog(),
+      barrierDismissible: true,
+    );
+    if (selectedAirport == null) {
+      return;
+    }
 
-  MultiWayFlight({
-    required this.fromLocation,
-    required this.fromCode,
-    required this.toLocation,
-    required this.toCode,
-    required this.date,
-  });
+    // Update location based on trip type
+    if (isMultiWay) {
+      // Multi-way flight
+      if (flightIndex != null) {
+        if (isFrom) {
+          updateMultiWayFlight(
+            flightIndex,
+            fromLocation: selectedAirport.city,
+            fromCode: selectedAirport.code,
+          );
+        } else {
+          updateMultiWayFlight(
+            flightIndex,
+            toLocation: selectedAirport.city,
+            toCode: selectedAirport.code,
+          );
+        }
+      }
+    } else {
+      // One Way or Round Way
+      if (isDeparture == true) {
+        // Departure flight
+        if (isFrom) {
+          departureFromLocation.value = selectedAirport.city;
+          departureFromCode.value = selectedAirport.code;
+
+          //  Round Trip automatically Return
+          if (selectedTripType.value == 'Round Way') {
+            returnToLocation.value = selectedAirport.city;
+            returnToCode.value = selectedAirport.code;
+          }
+        } else {
+          departureToLocation.value = selectedAirport.city;
+          departureToCode.value = selectedAirport.code;
+
+          //  Round Trip  automatically Return FROM
+          if (selectedTripType.value == 'Round Way') {
+            returnFromLocation.value = selectedAirport.city;
+            returnFromCode.value = selectedAirport.code;
+          }
+        }
+      } else {
+        // Return flight
+        if (isFrom) {
+          returnFromLocation.value = selectedAirport.city;
+          returnFromCode.value = selectedAirport.code;
+        } else {
+          returnToLocation.value = selectedAirport.city;
+          returnToCode.value = selectedAirport.code;
+        }
+      }
+    }
+  }
 }

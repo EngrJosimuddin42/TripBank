@@ -54,7 +54,7 @@ class OnboardingView extends GetView<OnboardingController> {
                   description: 'Our 24/7 AI assistant finds the best deals and\n guides you every step of your journey.',
                 ),
 
-                // Third Page (optional)
+                // Third Page
                 _buildOnboardingPage(
                   currentPage: currentPage,
                   pageIndex: 2,

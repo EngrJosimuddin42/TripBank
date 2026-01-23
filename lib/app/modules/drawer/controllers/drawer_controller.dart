@@ -19,7 +19,6 @@ class MenuItem {
 }
 
 class DrawerController extends GetxController {
-  // Reactive variables — API থেকে আপডেট হবে
   final userName = 'Loading...'.obs;
   final userType = 'User'.obs;
   final userAddress = 'Fetching location...'.obs;
@@ -31,28 +30,29 @@ class DrawerController extends GetxController {
     fetchDrawer();
   }
 
-// এটা রিয়েল API কল হবে
+
   Future<void> fetchDrawer() async {
     try {
       isLoading.value = true;
 
-      // ------------------ TEMPORARY DEMO DATA ------------------
+      // TEMPORARY DEMO DATA
+
       await Future.delayed(const Duration(seconds: 1));
 
       userName.value = 'Josimuddin';
       userType.value = 'Premium User';
       userAddress.value = 'My Address: Aqua Tower 43, Mohakhali C/A,Dhaka 1212';
-      // লোডিং শেষ
       isLoading.value = false;
 
     } catch (e) {
-      // যদি কোনো এরর হয় (ভবিষ্যতে রিয়েল API কলের জন্য জরুরি)
       isLoading.value = false;
       SnackbarHelper.showError('Failed to load profile data');
       print('Error fetching drawer data: $e');
     }
   }
+
   // Methods
+
   void editProfile() {
     final nameController = TextEditingController(text: userName.value);
     final addressController = TextEditingController(text: userAddress.value);
@@ -100,7 +100,7 @@ class DrawerController extends GetxController {
                 userName.value = newName;
                 userAddress.value = newAddress;
 
-                Get.back(); // ডায়ালগ বন্ধ
+                Get.back();
                 SnackbarHelper.showSuccess('Profile updated successfully!');
               } else {
                 SnackbarHelper.showError('Please fill all fields');
@@ -120,18 +120,19 @@ class DrawerController extends GetxController {
   }
 
   // Menu Items
+
   List<MenuItem> get menuItems => [
-    MenuItem(icon:Image.asset('assets/images/search.png'),label: 'Track My Bookings', color: Color(0xFFFECD08), onTap: trackBookings),
+    MenuItem(icon: Image.asset('assets/images/group.png'), label: 'My Bookings', color: Color(0xFFFECD08), onTap: openBookings),
     MenuItem(icon: Image.asset('assets/images/favorite.png'), label: 'Saved', color: Color(0xFFFECD08), onTap: openSaved),
     MenuItem(icon: Image.asset('assets/images/chat_bot.png'), label: 'AI Chatbot', color: Color(0xFFFECD08), onTap: openAIChatbot),
     MenuItem(icon:Image.asset('assets/images/history.png'), label: 'My History', color: Color(0xFFFECD08), onTap: openHistory),
     MenuItem(icon: Image.asset('assets/images/info.png'), label: 'Legal Info', color: Color(0xFFFECD08), onTap: openLegalInfo),
   ];
-// বাকি মেথডগুলো
-  void trackBookings() => Get.snackbar('Track Bookings', 'Opening bookings');
+
+  void openBookings() {Get.toNamed(Routes.MY_BOOKINGS);}
   void openSaved() {Get.toNamed(Routes.SAVED);}
   void openAIChatbot() { Get.toNamed(Routes.CHATBOT);}
-  void openHistory() => Get.snackbar('History', 'Opening history');
+  void openHistory() { Get.toNamed(Routes.MY_TRIPS);}
   void openLegalInfo() => Get.snackbar('Legal', 'Opening legal information');
 
   void logout() {
@@ -181,6 +182,7 @@ class DrawerController extends GetxController {
   }
 
   // Optional update methods
+
   void updateUserName(String name) => userName.value = name;
   void updateUserAddress(String address) => userAddress.value = address;
 }

@@ -8,12 +8,12 @@ import 'app/routes/app_pages.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ✅ Portrait mode lock করুন
+  //  Portrait mode lock
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
 
-  // ✅ Initialize all dependencies
+  // Initialize all dependencies
   await DependencyInjection.init();
 
   runApp(const MyApp());
@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
           initialRoute: Routes.HOME,
           getPages: AppPages.routes,
 
-          // ✅ Smooth transition
+          // Smooth transition
           defaultTransition: Transition.fadeIn,
           transitionDuration: const Duration(milliseconds: 150),
 

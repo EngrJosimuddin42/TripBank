@@ -3,8 +3,6 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tripbank/app/modules/register/controllers/register_controller.dart';
 
-import '../../../widgets/snackbar_helper.dart';
-
 class RegisterView extends GetView<RegisterController> {
   const RegisterView({super.key});
 
@@ -388,7 +386,7 @@ class RegisterView extends GetView<RegisterController> {
                   final bool isLoading = controller.isLoading.value;
 
                   return ElevatedButton(
-                    // ✅ Testing Purpose - Direct success dialog
+                    // Testing Purpose - Direct success dialog
                     onPressed: () async {
                       controller.showSuccessDialog();
                      // if (isLoading) return;

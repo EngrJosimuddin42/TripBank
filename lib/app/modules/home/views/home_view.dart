@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../models/hotel_model.dart';
 import '../../../widgets/draggable_chat_bubble.dart';
 import '../../drawer/views/drawer_view.dart';
 import '../../explore/controllers/explore_controller.dart';
 import '../../explore/views/explore_view.dart';
+import '../../hotels_booking/controllers/hotels_booking_controller.dart';
+import '../../my_trips/controllers/my_trips_controller.dart';
+import '../../my_trips/views/my_trips_view.dart';
 import '../../profile/controllers/profile_controller.dart';
 import '../../profile/views/profile_view.dart';
+import '../../tours_booking/controllers/tours_booking_controller.dart';
 import '../controllers/home_controller.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../../models/tour_model.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({Key? key}) : super(key: key);
@@ -35,7 +41,6 @@ class HomeView extends GetView<HomeController> {
               ),
             ],
           ),
-          // ✅ Conditional Draggable Chatbot - শুধু Home tab এ দেখাবে
           Obx(() => controller.currentIndex.value == 0
               ? const DraggableChatBubble()
               : const SizedBox.shrink()
@@ -76,24 +81,40 @@ class HomeView extends GetView<HomeController> {
                 children: [
                   const SizedBox(height: 12),
                   _buildSearchBar(),
-                  const SizedBox(height: 20),
-                  _buildQuickActions(),
-                  const SizedBox(height: 16),
-                  _buildGoodPlaceSection(),
-                  const SizedBox(height: 24),
-                  _buildFeaturedDestinations(),
-                  const SizedBox(height: 24),
-                  _buildPopularHotels(),
-                  const SizedBox(height: 24),
-                  _buildPopularTours(),
-                  const SizedBox(height: 80),
+
+                  //  Search results section
+
+                  Obx(() {
+                    if (controller.searchQuery.value.isNotEmpty) {
+                      return _buildSearchResults();
+                    }
+
+                    // Normal home content
+
+                    return Column(
+                      children: [
+                        const SizedBox(height: 20),
+                        _buildQuickActions(),
+                        const SizedBox(height: 16),
+                        _buildGoodPlaceSection(),
+                        const SizedBox(height: 24),
+                        _buildFeaturedDestinations(),
+                        const SizedBox(height: 24),
+                        _buildPopularHotels(),
+                        const SizedBox(height: 24),
+                        _buildPopularTours(),
+                        const SizedBox(height: 80),
+                      ],
+                    );
+                  }),
                 ],
               ),
             ),
           ),
         ),
 
-        // Fixed Header Background + AppBar Content
+        //  Header Background + AppBar Content
+
         Container(
           height: 140,
           decoration: const BoxDecoration(
@@ -226,7 +247,6 @@ class HomeView extends GetView<HomeController> {
         child: Stack(
           clipBehavior: Clip.none,
           children: [
-            // Notification Icon
             Center(
               child: Image.asset(
                 'assets/images/notifications.png',
@@ -236,7 +256,6 @@ class HomeView extends GetView<HomeController> {
               ),
             ),
 
-            // Notification Badge (Red Dot)
             Obx(() => controller.hasNotifications.value
                 ? Positioned(
               right: -2,
@@ -283,7 +302,7 @@ class HomeView extends GetView<HomeController> {
             boxShadow: controller.isSearching.value
                 ? [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -292,7 +311,9 @@ class HomeView extends GetView<HomeController> {
           ),
           child: Row(
             children: [
+
               // Back button when searching
+
               if (controller.isSearching.value)
                 IconButton(
                   icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -303,8 +324,6 @@ class HomeView extends GetView<HomeController> {
                     controller.searchFocusNode.unfocus();
                   },
                 ),
-
-              // Search Icon
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Icon(
@@ -337,7 +356,6 @@ class HomeView extends GetView<HomeController> {
                     : InkWell(
                   onTap: () {
                     controller.isSearching.value = true;
-                    // ফোকাস দিয়ে কীবোর্ড আনা
                     Future.delayed(const Duration(milliseconds: 100), () {
                       controller.searchFocusNode.requestFocus();
                     });
@@ -356,7 +374,6 @@ class HomeView extends GetView<HomeController> {
                 ),
               ),
 
-              // Clear button when typing
               if (controller.isSearching.value &&
                   controller.searchQuery.value.isNotEmpty)
                 IconButton(
@@ -372,6 +389,190 @@ class HomeView extends GetView<HomeController> {
       ),
     );
   }
+
+  //  Search results widget
+  Widget _buildSearchResults() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Obx(() {
+        final hasResults = controller.filteredDestinations.isNotEmpty ||
+            controller.filteredHotels.isNotEmpty ||
+            controller.filteredTours.isNotEmpty;
+
+        if (!hasResults) {
+          return Center(
+            child: Column(
+              children: [
+                const SizedBox(height: 60),
+                Icon(Icons.search_off, size: 80, color: Colors.grey[400]),
+                const SizedBox(height: 16),
+                Text(
+                  'No results found',
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Try searching with different keywords',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    color: Colors.grey[500],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 16),
+
+            // Destinations results
+            if (controller.filteredDestinations.isNotEmpty) ...[
+              Text(
+                'Destinations',
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ...controller.filteredDestinations.map((dest) {
+                final originalIndex = controller.getHotelsController.destinations.indexOf(dest);
+
+                return _buildSearchResultItem(
+                  dest['name'] as String? ?? '',
+                  dest['subtitle'] as String? ?? '',
+                  Icons.location_city,
+                      () => controller.onDestinationTap(originalIndex),
+                );
+              }),
+              const SizedBox(height: 24),
+            ],
+
+            // Hotels results
+            if (controller.filteredHotels.isNotEmpty) ...[
+              Text(
+                'Hotels',
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ...controller.filteredHotels.map((hotel) =>
+                  _buildSearchResultItem(
+                    hotel['name'] as String,
+                    hotel['location'] as String,
+                    Icons.hotel,
+                        () => controller.onHotelTap(
+                        controller.hotels.indexOf(hotel)
+                    ),
+                  ),
+              ),
+              const SizedBox(height: 24),
+            ],
+
+            // Tours results
+            if (controller.filteredTours.isNotEmpty) ...[
+              Text(
+                'Tours',
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+        const SizedBox(height: 12),
+        ...controller.filteredTours.map((tour) =>
+        _buildSearchResultItem(
+        tour.title,
+        '${tour.location} • ${tour.duration}',
+        Icons.tour,
+        () => controller.onTourTapObject(tour),
+        ),
+        ).toList(),
+            ],
+          ],
+        );
+      }),
+    );
+  }
+
+//  Search result item widget
+  Widget _buildSearchResultItem(
+      String title,
+      String subtitle,
+      IconData icon,
+      VoidCallback onTap,
+      ) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFFAE6),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                color: const Color(0xFFFECD08),
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.inter(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: Colors.grey[600],
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: Colors.grey[400],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 
   Widget _buildQuickActions() {
     return Padding(
@@ -406,10 +607,10 @@ class HomeView extends GetView<HomeController> {
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                      Image.asset(imagePath,
-                      width: 32,
-                      height: 32,
-                    ),
+                        Image.asset(imagePath,
+                          width: 32,
+                          height: 32,
+                        ),
                         const SizedBox(height: 6),
                         Text(
                           action['label'] as String,
@@ -515,7 +716,7 @@ class HomeView extends GetView<HomeController> {
                   elevation: 0,
                 ),
                 child: Text(
-                  controller.goodPlaceData['buttonText'] as String,
+                  controller.goodPlaceData['buttonText'] ?? 'Book Now',
                   style: GoogleFonts.inter(
                     fontWeight: FontWeight.w400,
                     fontSize: 14,
@@ -532,7 +733,7 @@ class HomeView extends GetView<HomeController> {
 
   Widget _buildFeaturedDestinations() {
     return Obx(() {
-      if (controller.destinations.isEmpty) return const SizedBox.shrink();
+      if (controller.displayedDestinations.isEmpty) return const SizedBox.shrink();
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -566,7 +767,7 @@ class HomeView extends GetView<HomeController> {
   }
 
   Widget _buildDestinationCard(int index) {
-    final destination = controller.destinations[index];
+    final destination = controller.displayedDestinations[index];
     final color = controller.getDestinationColor(index);
     final imageUrl = destination['image'] as String?;
 
@@ -583,7 +784,6 @@ class HomeView extends GetView<HomeController> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Background Image with Caching
             if (imageUrl != null && imageUrl.isNotEmpty)
               CachedNetworkImage(
                 imageUrl: imageUrl,
@@ -593,7 +793,7 @@ class HomeView extends GetView<HomeController> {
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [color.withOpacity(0.6), color],
+                      colors: [color.withValues(alpha: 0.6), color],
                     ),
                   ),
                   child: const Center(
@@ -608,7 +808,7 @@ class HomeView extends GetView<HomeController> {
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [color.withOpacity(0.6), color],
+                      colors: [color.withValues(alpha: 0.6), color],
                     ),
                   ),
                   child: const Icon(
@@ -624,12 +824,13 @@ class HomeView extends GetView<HomeController> {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [color.withOpacity(0.6), color],
+                    colors: [color.withValues(alpha: 0.6), color],
                   ),
                 ),
               ),
 
             // Dark overlay for text readability
+
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
@@ -644,6 +845,7 @@ class HomeView extends GetView<HomeController> {
             ),
 
             // Text Content
+
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -679,8 +881,26 @@ class HomeView extends GetView<HomeController> {
 
   Widget _buildPopularHotels() {
     return Obx(() {
-      final hotelList = controller.hotels;
-      if (hotelList.isEmpty) return const SizedBox.shrink();
+      if (controller.isLoadingHotels) {
+        return const Padding(
+          padding: EdgeInsets.all(20),
+          child: Center(child: CircularProgressIndicator()),
+        );
+      }
+
+      final hotelList = controller.popularHotels;
+
+      if (hotelList.isEmpty) {
+        return const Padding(
+          padding: EdgeInsets.all(20),
+          child: Center(
+            child: Text(
+              'No popular hotels available',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+          ),
+        );
+      }
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -691,10 +911,10 @@ class HomeView extends GetView<HomeController> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
               children: List.generate(
-                controller.displayedHotels.length,
+                hotelList.length,
                     (index) => Padding(
                   padding: const EdgeInsets.only(bottom: 16),
-                  child: _buildHotelCard(index),
+                  child: _buildHotelCard(hotelList[index]),
                 ),
               ),
             ),
@@ -704,14 +924,14 @@ class HomeView extends GetView<HomeController> {
     });
   }
 
-  Widget _buildHotelCard(int index) {
+  Widget _buildHotelCard(Hotel hotel) {
+    final hotelsCtrl = Get.find<HotelsBookingController>();
+
     return Obx(() {
-      final hotel = controller.hotels[index];
-      final isFavorite = hotel['isFavorite'] as bool;
-      final imageUrl = hotel['image'] as String?;
+      final isFavorite = hotelsCtrl.isHotelFavorite(hotel.id);
 
       return InkWell(
-        onTap: () => controller.onHotelTap(index),
+        onTap: () => hotelsCtrl.navigateToHotelDetails(hotel),
         borderRadius: BorderRadius.circular(15),
         child: Container(
           height: 150,
@@ -728,20 +948,21 @@ class HomeView extends GetView<HomeController> {
           ),
           child: Row(
             children: [
+
               // Hotel Image
+
               Container(
                 width: 140,
                 height: 150,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.only(
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(15),
                     bottomLeft: Radius.circular(15),
                   ),
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: imageUrl != null && imageUrl.isNotEmpty
-                    ? CachedNetworkImage(
-                  imageUrl: imageUrl,
+                child: CachedNetworkImage(
+                  imageUrl: hotel.image,
                   fit: BoxFit.cover,
                   placeholder: (context, url) => Container(
                     color: Colors.grey[300],
@@ -757,18 +978,11 @@ class HomeView extends GetView<HomeController> {
                       color: Colors.grey,
                     ),
                   ),
-                )
-                    : Container(
-                  color: Colors.grey[300],
-                  child: const Icon(
-                    Icons.hotel,
-                    size: 40,
-                    color: Colors.grey,
-                  ),
                 ),
               ),
 
               // Hotel Info
+
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(12),
@@ -776,9 +990,11 @@ class HomeView extends GetView<HomeController> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+
                       // Hotel Name
+
                       Text(
-                        hotel['name'] as String,
+                        hotel.name,
                         style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -789,6 +1005,7 @@ class HomeView extends GetView<HomeController> {
                       ),
 
                       // Location
+
                       Row(
                         children: [
                           const Icon(
@@ -797,54 +1014,58 @@ class HomeView extends GetView<HomeController> {
                             color: Color(0xFF4A5565),
                           ),
                           const SizedBox(width: 4),
-                          Text(
-                            hotel['location'] as String,
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              color: const Color(0xFF4A5565),
+                          Expanded(
+                            child: Text(
+                              hotel.location,
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                color: const Color(0xFF4A5565),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
                       ),
 
-                      // Rating & Price Row
+                      // Rating & Reviews Row
+
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          // Rating
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.star,
-                                size: 16,
-                                color: Color(0xFFFDC700),
+                          const Icon(
+                            Icons.star,
+                            size: 16,
+                            color: Color(0xFFFDC700),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${hotel.rating}',
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: const Color(0xFF0A0A0A),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              '(${hotel.reviews} reviews)',
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                                color: const Color(0xFF99A1AF),
                               ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${hotel['rating']}',
-                                style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                  color: const Color(0xFF0A0A0A),
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '(${hotel['reviews']} reviews)',
-                                style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                  color: const Color(0xFF99A1AF),
-                                ),
-                              ),
-                            ],
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ],
                       ),
 
                       // Price
+
                       Text(
-                        '${hotel['price']}/night',
+                        '${hotel.formattedPrice}/night',
                         style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
@@ -857,10 +1078,11 @@ class HomeView extends GetView<HomeController> {
               ),
 
               // Favorite Button
+
               Padding(
                 padding: const EdgeInsets.only(right: 12, top: 12),
                 child: InkWell(
-                  onTap: () => controller.toggleHotelFavorite(index),
+                  onTap: () => hotelsCtrl.toggleHotelFavorite(hotel.id),
                   child: Icon(
                     isFavorite ? Icons.favorite : Icons.favorite_border,
                     size: 20,
@@ -877,7 +1099,7 @@ class HomeView extends GetView<HomeController> {
 
   Widget _buildPopularTours() {
     return Obx(() {
-      if (controller.tours.isEmpty) return const SizedBox.shrink();
+      if (controller.displayedTours.isEmpty) return const SizedBox.shrink();
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -890,7 +1112,10 @@ class HomeView extends GetView<HomeController> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: controller.displayedTours.length,
-              itemBuilder: (context, index) => _buildTourCard(index),
+              itemBuilder: (context, index) {
+                final tour = controller.displayedTours[index];
+                return _buildTourCard(tour);
+              },
             ),
           ),
         ],
@@ -898,14 +1123,14 @@ class HomeView extends GetView<HomeController> {
     });
   }
 
-  Widget _buildTourCard(int index) {
+  Widget _buildTourCard(Tour tour) {
+    final toursBookingCtrl = Get.find<ToursBookingController>();
+
     return Obx(() {
-      final tour = controller.tours[index];
-      final isFavorite = tour['isFavorite'] as bool? ?? false;
-      final imageUrl = tour['image'] as String?;
+      final isFavorite = toursBookingCtrl.isTourFavorite(tour.id);
 
       return InkWell(
-        onTap: () => controller.onTourTap(index),
+        onTap: () => toursBookingCtrl.onTourTap(tour),
         borderRadius: BorderRadius.circular(10),
         child: Container(
           width: 180,
@@ -924,7 +1149,9 @@ class HomeView extends GetView<HomeController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+
               // Tour Image
+
               Container(
                 height: 140,
                 width: double.infinity,
@@ -934,9 +1161,8 @@ class HomeView extends GetView<HomeController> {
                     top: Radius.circular(10),
                   ),
                 ),
-                child: imageUrl != null && imageUrl.isNotEmpty
-                    ? CachedNetworkImage(
-                  imageUrl: imageUrl,
+                child: CachedNetworkImage(
+                  imageUrl: tour.imageUrl,
                   fit: BoxFit.cover,
                   placeholder: (context, url) => Container(
                     color: Colors.grey[300],
@@ -952,18 +1178,11 @@ class HomeView extends GetView<HomeController> {
                       color: Colors.grey,
                     ),
                   ),
-                )
-                    : Container(
-                  color: Colors.grey[300],
-                  child: const Icon(
-                    Icons.landscape,
-                    size: 40,
-                    color: Colors.grey,
-                  ),
                 ),
               ),
 
               // Tour Info
+
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(12),
@@ -971,9 +1190,11 @@ class HomeView extends GetView<HomeController> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+
                       // Tour Name
+
                       Text(
-                        tour['name'] as String,
+                        tour.title,
                         style: GoogleFonts.poppins(
                           fontSize: 15,
                           fontWeight: FontWeight.w400,
@@ -984,6 +1205,7 @@ class HomeView extends GetView<HomeController> {
                       ),
 
                       // Rating and Days
+
                       Row(
                         children: [
                           const Icon(
@@ -993,16 +1215,16 @@ class HomeView extends GetView<HomeController> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            '${tour['rating']}',
+                            '${tour.rating}',
                             style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.w400,
                               color: const Color(0xFF0A0A0A),
                             ),
                           ),
-                          const SizedBox(width: 60),
+                          const SizedBox(width: 40),
                           Text(
-                            '${tour['days']} Days',
+                            tour.duration,
                             style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.w400,
@@ -1013,11 +1235,12 @@ class HomeView extends GetView<HomeController> {
                       ),
 
                       // Price and Favorite Row
+
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            tour['price'] as String,
+                            '\$${tour.price}',
                             style: GoogleFonts.poppins(
                               fontSize: 16,
                               fontWeight: FontWeight.w400,
@@ -1025,7 +1248,7 @@ class HomeView extends GetView<HomeController> {
                             ),
                           ),
                           InkWell(
-                            onTap: () => controller.toggleTourFavorite(index),
+                            onTap: () => toursBookingCtrl.toggleTourFavorite(tour.id),
                             child: Icon(
                               isFavorite ? Icons.favorite : Icons.favorite_border,
                               size: 20,
@@ -1090,12 +1313,10 @@ class HomeView extends GetView<HomeController> {
   }
 
   Widget _buildMyTripsPage() {
-    return const Center(
-      child: Text(
-        'My Trips Page',
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-      ),
-    );
+    if (!Get.isRegistered<MyTripsController>()) {
+      Get.lazyPut(() => MyTripsController());
+    }
+    return const MyTripsView();
   }
 
   Widget _buildProfilePage() {

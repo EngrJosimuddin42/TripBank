@@ -9,6 +9,7 @@ class UserRepository {
   UserRepository(this._apiService);
 
   // Get current user profile
+
   Future<User> getProfile() async {
     try {
       final response = await _apiService.get(ApiConstants.profile);

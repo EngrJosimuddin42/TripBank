@@ -25,19 +25,23 @@ class ChatbotController extends GetxController {
   final scrollController = ScrollController();
   final messages = <ChatMessage>[].obs;
 
-  // ✅ API Service & Auth Service
+  // API Service & Auth Service
+
   final ApiService _apiService = Get.find<ApiService>();
   final AuthService _authService = Get.find<AuthService>();
 
   // Chat History
+
   final chatHistory = <Map<String, dynamic>>[].obs;
   final currentChatId = ''.obs;
 
   // Loading states
+
   final isLoadingResponse = false.obs;
   final isLoadingHistory = false.obs;
 
   // Speech to text
+
   late stt.SpeechToText speech;
   final isListening = false.obs;
   final speechEnabled = false.obs;
@@ -61,12 +65,9 @@ class ChatbotController extends GetxController {
     super.onClose();
   }
 
-  // ✅ Welcome message তাৎক্ষণিক দেখানোর জন্য আলাদা method
   void _showWelcomeMessage() {
     messages.clear();
     messageController.clear();
-
-    // ✅ API call এর আগেই welcome message
     messages.add(ChatMessage(
       text: 'Hello, ${_getUserName()}\nHow can I help you today?',
       isBot: true,
@@ -74,7 +75,7 @@ class ChatbotController extends GetxController {
     ));
   }
 
-  // ✅ Background-এ chat create করার জন্য আলাদা method
+
   Future<void> _createNewChatInBackground() async {
     try {
       final response = await _apiService.post(ApiConstants.chatNew, {});
@@ -90,7 +91,7 @@ class ChatbotController extends GetxController {
     }
   }
 
-  // ✅ Load chat history from API
+
   Future<void> _loadChatHistory() async {
     try {
       isLoadingHistory.value = true;
@@ -100,7 +101,9 @@ class ChatbotController extends GetxController {
       if (response['success'] == true && response['data'] != null) {
         final List<dynamic> chats = response['data'];
 
-        // ✅ যদি real data আসে, তাহলে demo data replace
+
+        //  demo
+
         if (chats.isNotEmpty) {
           chatHistory.assignAll(chats.map((chat) => {
             'id': chat['id'].toString(),
@@ -120,7 +123,8 @@ class ChatbotController extends GetxController {
     }
   }
 
-  // ✅ Fallback demo data (Instant loading)
+  //  Fallback demo data (Instant loading)
+
   void _loadDemoChatHistory() {
     chatHistory.assignAll([
       {
@@ -162,19 +166,22 @@ class ChatbotController extends GetxController {
     ]);
   }
 
-  // ✅ Start new chat (with API)
+  //  Start new chat (with API)
+
   Future<void> startNewChat() async {
     _showWelcomeMessage();
     await _createNewChatInBackground();
   }
 
-  // ✅ Load specific chat from history (with API)
+  //  Load specific chat from history (with API)
+
   Future<void> loadChatHistory(String chatId) async {
     try {
       currentChatId.value = chatId;
       messages.clear();
 
       // Call API to get chat messages
+
       final response =
       await _apiService.get('${ApiConstants.chatById}/$chatId');
 
@@ -189,7 +196,7 @@ class ChatbotController extends GetxController {
         )).toList());
       }
 
-      Get.back(); // Close drawer
+      Get.back();
     } catch (e) {
       print('Error loading chat: $e');
       Get.snackbar(
@@ -202,6 +209,7 @@ class ChatbotController extends GetxController {
   }
 
   // Initialize speech to text
+
   Future<void> _initSpeech() async {
     speech = stt.SpeechToText();
 
@@ -237,6 +245,7 @@ class ChatbotController extends GetxController {
   }
 
   // Toggle listening
+
   Future<void> toggleListening() async {
     if (!speechEnabled.value) {
       Get.snackbar(
@@ -271,13 +280,16 @@ class ChatbotController extends GetxController {
         },
         listenFor: const Duration(seconds: 30),
         pauseFor: const Duration(seconds: 3),
-        partialResults: true,
-        listenMode: stt.ListenMode.confirmation,
+
+          listenOptions: stt.SpeechListenOptions(
+              partialResults: true,
+        listenMode: stt.ListenMode.confirmation)
       );
     }
   }
 
-  // ✅ Get user name from AuthService
+  //  Get user name from AuthService
+
   String _getUserName() {
     final user = _authService.currentUser.value;
 
@@ -297,12 +309,14 @@ class ChatbotController extends GetxController {
     if (text.isEmpty) return;
 
     // Stop listening if active
+
     if (isListening.value) {
       speech.stop();
       isListening.value = false;
     }
 
     // Add user message
+
     messages.add(ChatMessage(
       text: text,
       isBot: false,
@@ -312,14 +326,17 @@ class ChatbotController extends GetxController {
     _scrollToBottom();
 
     // Get bot response from API
+
     _generateBotResponse(text);
   }
 
-  // ✅ Generate bot response using API
+  // Generate bot response using API
+
   Future<void> _generateBotResponse(String userMessage) async {
     isLoadingResponse.value = true;
 
     // Show typing indicator
+
     messages.add(ChatMessage(
       text: 'Typing...',
       isBot: true,
@@ -327,7 +344,9 @@ class ChatbotController extends GetxController {
     _scrollToBottom();
 
     try {
+
       // Call API
+
       final response = await _apiService.post(
         ApiConstants.chatSendMessage,
         {
@@ -337,9 +356,11 @@ class ChatbotController extends GetxController {
       );
 
       // Remove typing indicator
+
       messages.removeLast();
 
       // Add bot response
+
       if (response['success'] == true && response['data'] != null) {
         messages.add(ChatMessage(
           text: response['data']['response'] ?? 'No response',
@@ -355,6 +376,7 @@ class ChatbotController extends GetxController {
       messages.removeLast();
 
       // Show error message
+
       messages.add(ChatMessage(
         text: 'Sorry, something went wrong. Please try again.',
         isBot: true,

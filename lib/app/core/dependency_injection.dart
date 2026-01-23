@@ -8,6 +8,7 @@ import '../services/storage_service.dart';
 
 class DependencyInjection {
   static Future<void> init() async {
+
     // Initialize GetStorage
     await GetStorage.init();
 
@@ -22,6 +23,6 @@ class DependencyInjection {
     Get.lazyPut(() => UserRepository(Get.find<ApiService>()));
     Get.lazyPut(() => AuthRepository(Get.find<ApiService>()));
 
-    print('✅ All dependencies initialized');
+    print(' All dependencies initialized');
   }
 }

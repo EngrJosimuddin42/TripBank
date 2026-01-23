@@ -47,7 +47,6 @@ class ProfileView extends GetView<ProfileController> {
                 child: Obx(() {
                   final imageUrl = controller.profileImageUrl.value;
 
-                  // If URL is empty or invalid, show icon directly
                   if (imageUrl.isEmpty) {
                     return Container(
                       color: Colors.grey[300],
@@ -58,7 +57,6 @@ class ProfileView extends GetView<ProfileController> {
                       ),
                     );
                   }
-                  // Load image from API URL
                   return Image.network(
                     imageUrl,
                     fit: BoxFit.cover,
@@ -219,7 +217,7 @@ class ProfileView extends GetView<ProfileController> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: InkWell(
         onTap: () {
-          Get.toNamed(Routes.POINT_LOYALTY);
+          Get.toNamed(Routes.LOYALTY_PROGRAM);
         },
         borderRadius: BorderRadius.circular(8),
         child: Container(
@@ -262,7 +260,7 @@ class ProfileView extends GetView<ProfileController> {
                     const SizedBox(height: 6),
                     GestureDetector(
                       onTap: () {
-                        Get.toNamed(Routes.POINT_LOYALTY);
+                        Get.toNamed(Routes.LOYALTY_PROGRAM);
                       },
                       child:Text(
                         'Details',

@@ -89,16 +89,20 @@ class User {
     );
   }
 
-  // ✅ Dynamic base URL use করছে
+  // Use Dynamic base URL
+
   String get profileImageUrl {
     if (profileImage != null && profileImage!.isNotEmpty) {
+
       // If already full URL
+
       if (profileImage!.startsWith('http')) {
         return profileImage!;
       }
       return '${ApiConstants.baseUrl}/storage/$profileImage';
     }
     // Default avatar
+
     return 'https://ui-avatars.com/api/?name=${Uri.encodeComponent(name)}&size=200&background=FFC107&color=000';
   }
 

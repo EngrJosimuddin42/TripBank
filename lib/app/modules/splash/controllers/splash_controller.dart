@@ -16,8 +16,6 @@ class SplashController extends GetxController {
   Future<void> _navigateToNextScreen() async {
     try {
       await Future.delayed(const Duration(seconds: 1));
-
-      // শুধু লগইন স্ট্যাটাস চেক
       final bool isLoggedIn = await _storage.isLoggedIn();
 
       if (isLoggedIn) {
@@ -29,8 +27,8 @@ class SplashController extends GetxController {
       Get.offAllNamed(Routes.ONBOARDING);
 
       Get.snackbar(
-        'দুঃখিত!',
-        'কিছু সমস্যা হয়েছে। অনবোর্ডিং থেকে শুরু করছি।',
+        'Sorry!',
+        'Something went wrong. Starting from onboarding.',
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 3),
       );

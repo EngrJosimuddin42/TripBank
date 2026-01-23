@@ -19,7 +19,9 @@ class _DraggableChatBubbleState extends State<DraggableChatBubble> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!isInitialized) {
-      // Screen এর right-bottom corner এ initial position
+
+      //  initial position
+
       xPosition = MediaQuery.of(context).size.width - 80;
       yPosition = MediaQuery.of(context).size.height - 180;
       isInitialized = true;
@@ -46,11 +48,12 @@ class _DraggableChatBubbleState extends State<DraggableChatBubble> {
       child: GestureDetector(
         onPanUpdate: (details) {
           setState(() {
-            // Drag করার সময় position update
+
+            // Drag position update
+
             xPosition += details.delta.dx;
             yPosition += details.delta.dy;
 
-            // Screen boundary check - bubble বাইরে যাওয়া prevent করা
             if (xPosition < 0) xPosition = 0;
             if (yPosition < 0) yPosition = 0;
             if (xPosition > screenWidth - 60) xPosition = screenWidth - 60;
@@ -73,7 +76,7 @@ class _DraggableChatBubbleState extends State<DraggableChatBubble> {
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.3),
+                color: Colors.black.withValues(alpha: 0.3),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -81,7 +84,6 @@ class _DraggableChatBubbleState extends State<DraggableChatBubble> {
           ),
           child: Stack(
             children: [
-              // Chat Icon - Image Asset
               Center(
                 child: Image.asset(
                   'assets/images/chatbot.png',
@@ -89,7 +91,6 @@ class _DraggableChatBubbleState extends State<DraggableChatBubble> {
                   height: 35,
                   color: Colors.white,
                   errorBuilder: (context, error, stackTrace) {
-                    // Fallback to icon if image not found
                     return const Icon(
                       Icons.chat,
                       color: Colors.white,

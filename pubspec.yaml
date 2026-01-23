@@ -27,6 +27,8 @@ dependencies:
   speech_to_text: ^7.0.0
   permission_handler: ^11.3.1
 
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -52,6 +54,7 @@ flutter:
     - assets/images/user.png
     - assets/images/chat_bot.png
     - assets/images/edit.png
+    - assets/images/group.png
     - assets/images/favorite.png
     - assets/images/history.png
     - assets/images/info.png
@@ -67,11 +70,43 @@ flutter:
     - assets/images/swap.png
     - assets/images/bxs_contact.png
     - assets/images/Passenger.png
-    - assets/images/
-    - assets/images/
-    - assets/images/
-    - assets/images/
-    - assets/images/
+    - assets/images/gift_card.png
+    - assets/images/friends.png
+    - assets/images/person.png
+    - assets/images/Icon.png
+    - assets/images/Icon_1.png
+    - assets/images/star.png
+    - assets/images/icon_2.png
+    - assets/images/download.png
+    - assets/images/flight.png
+    - assets/images/flight_1.png
+    - assets/images/air_france.png
+    - assets/images/car_image.jpg
+    - assets/images/paypal.png
+    - assets/images/stripe.png
+    - assets/images/paystack.png
+    - assets/images/coinbase.png
+    - assets/images/coupon.png
+    - assets/images/filter.png
+    - assets/images/location_1.png
+    - assets/images/hotel_1.png
+    - assets/images/hotel_2.png
+    - assets/images/map_preview.png
+    - assets/images/flight_trip.png
+    - assets/images/hotel_trip.png
+    - assets/images/car_trip.png
+    - assets/images/tour_trip.png
+    - assets/images/person_trip.png
+    - assets/images/calendar_trip.png
+    - assets/images/location_trip.png
+    - assets/images/explore_all.png
+    - assets/images/explore_flights.png
+    - assets/images/explore_hotels.png
+    - assets/images/explore_cars.png
+    - assets/images/explore_tours.png
+    - assets/images/flight_2.png
+    - assets/images/flight.jpg
+
 
 
   uses-material-design: true

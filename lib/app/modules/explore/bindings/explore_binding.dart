@@ -7,6 +7,7 @@ class ExploreBinding extends Bindings {
   void dependencies() {
     Get.lazyPut<ExploreController>(
       () => ExploreController(),
+      fenix: false,
     );
   }
 }

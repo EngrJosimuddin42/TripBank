@@ -64,7 +64,7 @@ class RegisterController extends GetxController {
   void onInit() {
     super.onInit();
 
-    // প্রতিটি ফিল্ড চেঞ্জ হলেই ভ্যালিডেশন চালাবে
+    // validation
     firstNameController.addListener(_validateForm);
     lastNameController.addListener(_validateForm);
     emailController.addListener(_validateForm);
@@ -75,7 +75,6 @@ class RegisterController extends GetxController {
     passwordController.addListener(_validateForm);
     confirmPasswordController.addListener(_validateForm);
 
-    // কান্ট্রি চেঞ্জ হলে ফোন লেন্থ রি-চেক
     selectedCountry.listen((_) => _validateForm());
   }
 
@@ -90,22 +89,22 @@ class RegisterController extends GetxController {
     final password = passwordController.text;
     final confirmPassword = confirmPasswordController.text;
 
-    // ইমেইল ভ্যালিডেশন
+    // email validation
     final emailValid = email.isNotEmpty && RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
 
-    // পাসওয়ার্ড ম্যাচ
+    //  password Mach
     final passwordMatch = password == confirmPassword && password.isNotEmpty;
 
-    // NID অথবা Passport এর মধ্যে যেকোনো একটা থাকতে হবে
+    // have NID or Passport
     final idValid = nid.isNotEmpty || passport.isNotEmpty;
 
-    // ফোন নম্বর লেন্থ চেক (সিলেক্টেড কান্ট্রি অনুযায়ী)
+    // Phone Number check
     final country = selectedCountry.value;
     final phoneValid = phone.isNotEmpty &&
         phone.length >= country.minLength &&
         phone.length <= country.maxLength;
 
-    // সব কন্ডিশন চেক
+    // All condition
     final valid = firstName.isNotEmpty &&
         lastName.isNotEmpty &&
         email.isNotEmpty &&
@@ -152,19 +151,14 @@ class RegisterController extends GetxController {
       );
 
       final responseData = jsonDecode(response.body);
-
       if (response.statusCode == 200 || response.statusCode == 201) {
-        // টোকেন থাকলে সেভ করুন
         final token = responseData['token'] ?? responseData['access_token'];
         if (token != null) {
           await storage.saveToken(token);
         }
-
-        // ইউজার ডাটা থাকলে সেভ করুন
         if (responseData['user'] != null) {
           await storage.saveUser(responseData['user']);
         }
-
         showSuccessDialog();
       } else {
         final msg = responseData['message'] ??
@@ -180,6 +174,7 @@ class RegisterController extends GetxController {
       isLoading.value = false;
     }
   }
+
   // Date Picker
   Future<void> pickDate(BuildContext context) async {
     await showDialog(

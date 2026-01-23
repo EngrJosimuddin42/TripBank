@@ -59,7 +59,7 @@ class PasswordController extends GetxController {
     await sendOTP(userEmail.value);
   }
 
-  // 3. Verify OTP
+  // Verify OTP
   Future<bool> verifyOTP() async {
     try {
       isLoading.value = true;
@@ -95,7 +95,7 @@ class PasswordController extends GetxController {
     }
   }
 
-  // 4. Reset Password (Save new password)
+  // Reset Password (Save new password)
   Future<void> resetPassword() async {
     try {
       if (passwordController.text.isEmpty ||
@@ -130,7 +130,7 @@ class PasswordController extends GetxController {
       if (response.statusCode == 200) {
         SnackbarHelper.showSuccess('Password reset successfully');
 
-        // Navigate to login
+
         Get.offAllNamed('/login');
 
         // Clear all data

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-import '../../../widgets/snackbar_helper.dart';
 import '../controllers/password_controller.dart';
 import 'forgot_password_otp_view.dart';
 
@@ -149,7 +147,6 @@ class ForgotPasswordEmailView extends GetView<PasswordController> {
                 onPressed: controller.isLoading.value
                     ? null
                     : () async {
-                  // ✅ Testing Purpose - Direct OTP page navigation
                   Get.to(() => const ForgotPasswordOTPView());
 
                  // if (controller.emailController.text.isEmpty) {

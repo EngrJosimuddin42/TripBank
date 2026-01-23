@@ -1,28 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../controllers/flight_booking_controller.dart';
+import '../../../constants/app_spacing.dart';
+import '../../../constants/app_strings.dart';
+import '../../../models/flight_model.dart';
+import '../../../widgets/horizontal_arrow.dart';
+import '../controllers/flight_details_controller.dart';
 
-class FlightDetailsView extends GetView<FlightBookingController> {
+class FlightDetailsView extends GetView<FlightDetailsController> {
   const FlightDetailsView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFFECD08),
-        elevation: 0,
-        leading: IconButton(
-          onPressed: () => Get.back(),
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-        ),
-        title: Text(
-          'Review Flight Details',
-          style: GoogleFonts.inter(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
+      backgroundColor: const Color(0xFFFDFDFD),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(103),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFFFEDE5A),
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(24),
+              bottomRight: Radius.circular(24),
+            ),
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () => Get.back(),
+                    icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                  ),
+                  Text(
+                    'Flight Details',
+                    style: GoogleFonts.roboto(
+                      color: Colors.black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -32,7 +53,8 @@ class FlightDetailsView extends GetView<FlightBookingController> {
           return const Center(child: Text('No flight selected'));
         }
 
-        final isRoundTrip = controller.selectedTripType.value == 'Round Way';
+        final totalPassengers = controller.totalPassengers.value;
+        final isRoundTrip = controller.isRoundTrip.value;
 
         return Column(
           children: [
@@ -40,14 +62,13 @@ class FlightDetailsView extends GetView<FlightBookingController> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpacing.medium),
 
-                    // Airline Logo/Name
                     _buildAirlineHeader(flight),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.large),
 
-                    // Flight Route - Outbound
+                    // Departure Flight
                     _buildFlightRoute(
                       fromCode: flight.fromCode,
                       toCode: flight.toCode,
@@ -57,79 +78,69 @@ class FlightDetailsView extends GetView<FlightBookingController> {
                       toCity: flight.to,
                       duration: flight.duration,
                       stops: flight.stops,
+                      isReturn: false,
                     ),
 
-                    // Return Flight (if round trip)
-                    if (isRoundTrip) ...[
-                      const SizedBox(height: 16),
+                    // Return Flight
+                    if (isRoundTrip && flight.returnDepartureTime != null) ...[
+                      const SizedBox(height: AppSpacing.small),
                       _buildFlightRoute(
                         fromCode: flight.toCode,
                         toCode: flight.fromCode,
-                        fromDate: flight.arrivalTime.add(const Duration(days: 7)),
-                        toDate: flight.arrivalTime.add(const Duration(days: 7, hours: 12)),
+                        fromDate: flight.returnDepartureTime!,
+                        toDate: flight.returnArrivalTime ?? flight.arrivalTime.add(const Duration(days: 7)),
                         fromCity: flight.to,
                         toCity: flight.from,
-                        duration: flight.duration,
-                        stops: flight.stops,
+                        duration: flight.returnDuration ?? flight.duration,
+                        stops: flight.returnStops ?? flight.stops,
                         isReturn: true,
                       ),
                     ],
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.large),
 
-                    // Price Section
-                    _buildPriceSection(flight),
+                    _buildPriceSection(flight, totalPassengers),
 
-                    const SizedBox(height: 100),
+                    const SizedBox(height: AppSpacing.xlarge),
                   ],
                 ),
               ),
             ),
 
-            // Bottom Button
-            _buildBottomButton(flight),
+            _buildBottomButton(flight, isRoundTrip),
           ],
         );
       }),
     );
   }
 
-  Widget _buildAirlineHeader(flight) {
+  Widget _buildAirlineHeader(Flight flight) {
     return Container(
       padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
       ),
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // You can replace this with actual airline logo
-          Text(
-            'AIRFRANCE',
-            style: GoogleFonts.roboto(
-              fontSize: 20,
-              fontWeight: FontWeight.w900,
-              color: const Color(0xFF002157),
-              letterSpacing: 1.5,
-            ),
+      alignment: Alignment.center,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: flight.airlineLogo.startsWith('http')
+            ? Image.network(
+          flight.airlineLogo,
+          height: 60,
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) => Image.asset(
+            'assets/images/air_france.png',
+            height: 60,
+            fit: BoxFit.contain,
           ),
-          const SizedBox(width: 8),
-          // Plane icon as logo placeholder
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: const Color(0xFFE31E24),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: const Icon(
-              Icons.flight,
-              color: Colors.white,
-              size: 16,
-            ),
-          ),
-        ],
+        )
+            : Image.asset(
+          flight.airlineLogo,
+          height: 60,
+          fit: BoxFit.contain,
+        ),
       ),
     );
   }
@@ -154,93 +165,57 @@ class FlightDetailsView extends GetView<FlightBookingController> {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          // From
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   fromCode,
-                  style: GoogleFonts.inter(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black,
-                  ),
+                  style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.black),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  _formatDate(fromDate),
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
+                  controller.formatDate(fromDate),
+                  style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[600]),
                 ),
                 Text(
                   fromCity,
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
+                  style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[600]),
                 ),
               ],
             ),
           ),
-
-          // Duration & Arrow
           Column(
             children: [
               Text(
                 duration,
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFFFECD08),
-                ),
+                style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFFFECD08)),
               ),
               const SizedBox(height: 4),
-              Icon(
-                isReturn ? Icons.arrow_back : Icons.arrow_forward,
-                color: const Color(0xFFFECD08),
-                size: 24,
-              ),
+              const HorizontalArrow(width: 140),
               const SizedBox(height: 4),
               Text(
-                stops == 0 ? 'Non-stop' : '$stops stop${stops > 1 ? 's' : ''}',
-                style: GoogleFonts.inter(
-                  fontSize: 11,
-                  color: const Color(0xFFFECD08),
-                ),
+                stops == 0 ? AppStrings.nonStop : '$stops ${stops > 1 ? AppStrings.stops : AppStrings.stop}',
+                style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFFFECD08)),
               ),
             ],
           ),
-
-          // To
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
                   toCode,
-                  style: GoogleFonts.inter(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black,
-                  ),
+                  style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.black),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  _formatDate(toDate),
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
+                  controller.formatDate(toDate),
+                  style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[600]),
                 ),
                 Text(
                   toCity,
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
+                  style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[600]),
                   textAlign: TextAlign.right,
                 ),
               ],
@@ -251,13 +226,13 @@ class FlightDetailsView extends GetView<FlightBookingController> {
     );
   }
 
-  Widget _buildPriceSection(flight) {
-    final basePrice = flight.price;
-    final taxPrice = basePrice * 0.12;
-    final totalPassengers = controller.totalPassengers;
-    final baseFareTotal = basePrice * totalPassengers;
-    final taxTotal = taxPrice * totalPassengers;
-    final total = baseFareTotal + taxTotal;
+  Widget _buildPriceSection(Flight flight, int totalPassengers) {
+    final breakdown = controller.getPriceBreakdown();
+    final baseFare = breakdown['baseFare']!;
+    final taxAmount = breakdown['taxes']!;
+    final vatAmount = breakdown['vat']!;
+    final otherCharges = breakdown['otherCharges']!;
+    final grandTotal = breakdown['total']!;
 
     final showDetails = true.obs;
 
@@ -269,36 +244,26 @@ class FlightDetailsView extends GetView<FlightBookingController> {
       ),
       child: Column(
         children: [
-          // Price Header
           Padding(
             padding: const EdgeInsets.all(20),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '\$ ${basePrice.toStringAsFixed(0)}',
-                  style: GoogleFonts.inter(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black,
-                  ),
+                  '${flight.currencySymbol}${grandTotal.toStringAsFixed(0)}',
+                  style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+                Text(
+                  '$totalPassengers ${totalPassengers > 1 ? AppStrings.travelers : AppStrings.traveler}',
+                  style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[700]),
                 ),
                 Obx(() => GestureDetector(
                   onTap: () => showDetails.value = !showDetails.value,
                   child: Row(
                     children: [
-                      Text(
-                        'Fare Details',
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      const SizedBox(width: 4),
+                      Text(AppStrings.fareDetails, style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[600])),
                       Icon(
-                        showDetails.value
-                            ? Icons.keyboard_arrow_up
-                            : Icons.keyboard_arrow_down,
+                        showDetails.value ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
                         size: 20,
                         color: Colors.grey[600],
                       ),
@@ -308,79 +273,70 @@ class FlightDetailsView extends GetView<FlightBookingController> {
               ],
             ),
           ),
-
-          // Expandable Fare Details
           Obx(() => AnimatedCrossFade(
             duration: const Duration(milliseconds: 300),
-            crossFadeState: showDetails.value
-                ? CrossFadeState.showFirst
-                : CrossFadeState.showSecond,
-            firstChild: Column(
-              children: [
-                const Divider(height: 1),
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
+            crossFadeState: showDetails.value ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+            firstChild: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  // Base Fare
+                  _buildFareRow(
+                    '$totalPassengers x ${AppStrings.baseFare} (ADULT)${controller.isRoundTrip.value ? " x 2" : ""}',
+                    baseFare,
+                    flight.currencySymbol,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Taxes
+                  _buildFareRow(
+                    '$totalPassengers x ${AppStrings.taxesFees} (ADULT)${controller.isRoundTrip.value ? " x 2" : ""}',
+                    taxAmount,
+                    flight.currencySymbol,
+                  ),
+                  const SizedBox(height: 16),
+                  const Divider(height: 1),
+                  const SizedBox(height: 16),
+
+                  // AIT & VAT
+                  _buildFareRow(
+                    AppStrings.aitVat,
+                    vatAmount,
+                    flight.currencySymbol,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Other Charges
+                  _buildFareRow(
+                    AppStrings.otherCharges,
+                    otherCharges,
+                    flight.currencySymbol,
+                  ),
+                  const SizedBox(height: 16),
+                  const Divider(height: 1),
+                  const SizedBox(height: 20),
+
+                  _buildBulletList([
+                    flight.airline,
+                    flight.flightNumber,
+                    '${flight.cabinClass} ($totalPassengers)',
+                    flight.baggageAllowance,
+                    if (flight.fareRules != null) flight.fareRules!,
+                  ]),
+                  const SizedBox(height: 20),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Base Fare
-                      _buildFareRow(
-                        '1 x Base fare (ADULT)',
-                        baseFareTotal,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildFareRow(
-                        '1 x Tax (ADULT)',
-                        taxTotal,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildFareRow(
-                        'AIT & VAT',
-                        0,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildFareRow(
-                        'Other charges',
-                        0,
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Flight Details Bullets
-                      _buildBulletList([
-                        flight.airline,
-                        flight.flightNumber,
-                        '${flight.cabinClass} (${controller.totalPassengers})',
-                        'Baggage (per PAX): Adult-20KGS',
-                      ]),
-
-                      const SizedBox(height: 20),
-
-                      // Total
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Total',
-                            style: GoogleFonts.inter(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.black,
-                            ),
-                          ),
-                          Text(
-                            '\$${total.toStringAsFixed(0)}',
-                            style: GoogleFonts.inter(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFFFECD08),
-                            ),
-                          ),
-                        ],
+                      Text(AppStrings.total, style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w700)),
+                      Text(
+                        '${flight.currencySymbol}${grandTotal.toStringAsFixed(0)}',
+                        style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w700, color: const Color(0xFFFECD08)),
                       ),
                     ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             secondChild: const SizedBox.shrink(),
           )),
@@ -389,23 +345,17 @@ class FlightDetailsView extends GetView<FlightBookingController> {
     );
   }
 
-  Widget _buildFareRow(String label, double amount) {
+  Widget _buildFareRow(String label, double amount, String currencySymbol) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
-          style: GoogleFonts.inter(
-            fontSize: 13,
-            color: Colors.grey[700],
-          ),
+          style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[700]),
         ),
         Text(
-          'USD \$${amount.toStringAsFixed(0)}',
-          style: GoogleFonts.inter(
-            fontSize: 13,
-            color: Colors.grey[700],
-          ),
+          '$currencySymbol${amount.toStringAsFixed(0)}',
+          style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[700]),
         ),
       ],
     );
@@ -420,20 +370,11 @@ class FlightDetailsView extends GetView<FlightBookingController> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                '• ',
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  color: Colors.black,
-                ),
-              ),
+              Text('• ', style: GoogleFonts.inter(fontSize: 14, color: Colors.black)),
               Expanded(
                 child: Text(
                   item,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: Colors.black,
-                  ),
+                  style: GoogleFonts.inter(fontSize: 14, color: Colors.black),
                 ),
               ),
             ],
@@ -443,7 +384,7 @@ class FlightDetailsView extends GetView<FlightBookingController> {
     );
   }
 
-  Widget _buildBottomButton(flight) {
+  Widget _buildBottomButton(Flight flight, bool isRoundTrip) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -460,7 +401,9 @@ class FlightDetailsView extends GetView<FlightBookingController> {
         child: SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: controller.bookFlight,
+            onPressed: () {
+              controller.bookFlight();
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFFECD08),
               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -470,7 +413,7 @@ class FlightDetailsView extends GetView<FlightBookingController> {
               elevation: 0,
             ),
             child: Text(
-              'Provide Details',
+              isRoundTrip ? AppStrings.selectRoundTrip : AppStrings.provideDetails,
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
@@ -481,12 +424,5 @@ class FlightDetailsView extends GetView<FlightBookingController> {
         ),
       ),
     );
-  }
-
-  String _formatDate(DateTime date) {
-    final day = date.day.toString().padLeft(2, '0');
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    final month = months[date.month - 1];
-    return '$day $month, ${date.year}';
   }
 }

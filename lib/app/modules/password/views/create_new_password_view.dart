@@ -214,7 +214,6 @@ class CreateNewPasswordView extends GetView<PasswordController> {
               height: 52,
               child: ElevatedButton(
                   onPressed: () {
-                    // ✅ Testing Purpose - Direct login navigation
                     Get.offAllNamed('/login');
                     // ? null
                     // : () => controller.resetPassword(),

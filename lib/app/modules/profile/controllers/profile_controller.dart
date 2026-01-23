@@ -30,7 +30,7 @@ class RewardBadge {
 }
 
 class ProfileController extends GetxController {
-  // Reactive variables — API থেকে আপডেট হবে
+  // Reactive variables
   final userName = 'Loading...'.obs;
   final userType = 'User'.obs;
   final userAddress = 'Fetching location...'.obs;
@@ -38,7 +38,11 @@ class ProfileController extends GetxController {
   final profileImageUrl = ''.obs;
   final isLoading = true.obs;
 
-// Dynamic Reward Badges — API থেকে আসবে
+  //  TourTicketView
+  final userEmail = ''.obs;
+  final userPhone = ''.obs;
+
+  // Dynamic Reward Badges
   final rewardBadges = <RewardBadge>[].obs;
 
   @override
@@ -47,26 +51,31 @@ class ProfileController extends GetxController {
     fetchUserProfile();
   }
 
-  // এটা রিয়েল API কল হবে
+
   Future<void> fetchUserProfile() async {
     try {
       isLoading.value = true;
 
-      // ------------------ TEMPORARY DEMO DATA  ------------------
-      await Future.delayed(const Duration(seconds: 1));
 
+      //  TEMPORARY DEMO DATA
+      await Future.delayed(const Duration(seconds: 1));
       userName.value = 'Josimuddin';
       userType.value = 'Premium User';
       userAddress.value = 'Address: Aqua Tower\n43 Mohakhali C/A,Dhaka 1212';
       rewardPoints.value = '15,216 Points';
       profileImageUrl.value = 'https://via.placeholder.com/150';
+      userEmail.value = 'josimuddin@example.com';
+      userPhone.value = '+880 1712-345678';
 
-// ---------- Dynamic Badges (এখানে API থেকে আসবে) ----------
+      // Dynamic Badges
       rewardBadges.assignAll([
         RewardBadge(
           label: 'Gold',
           color: const Color(0xFFFFD700),
-          icon: Image.asset('assets/images/gold.png', width: 24, height: 24,
+          icon: Image.asset(
+            'assets/images/gold.png',
+            width: 24,
+            height: 24,
             errorBuilder: (context, error, stackTrace) {
               return const Icon(Icons.monetization_on, size: 24, color: Color(0xFFFFD700));
             },
@@ -75,7 +84,10 @@ class ProfileController extends GetxController {
         RewardBadge(
           label: 'Platinum',
           color: const Color(0xFF00BCD4),
-          icon: Image.asset('assets/images/platinum.png', width: 24, height: 24,
+          icon: Image.asset(
+            'assets/images/platinum.png',
+            width: 24,
+            height: 24,
             errorBuilder: (context, error, stackTrace) {
               return const Icon(Icons.star, size: 24, color: Color(0xFF00BCD4));
             },
@@ -84,7 +96,10 @@ class ProfileController extends GetxController {
         RewardBadge(
           label: 'Diamond',
           color: const Color(0xFF2196F3),
-          icon: Image.asset('assets/images/diamond.png', width: 24, height: 24,
+          icon: Image.asset(
+            'assets/images/diamond.png',
+            width: 24,
+            height: 24,
             errorBuilder: (context, error, stackTrace) {
               return const Icon(Icons.diamond, size: 24, color: Color(0xFF2196F3));
             },
@@ -94,14 +109,15 @@ class ProfileController extends GetxController {
     } catch (e) {
       Get.snackbar('Error', 'Failed to load profile. Please try again.');
       userName.value = 'Guest User';
+      userEmail.value = 'guest@example.com';
+      userPhone.value = 'Not available';
       profileImageUrl.value = '';
     } finally {
       isLoading.value = false;
     }
   }
 
-
-// Helper methods for color & icon (যদি API শুধু label পাঠায়)
+  // Helper methods for color & icon
   Color _getColorForLabel(String label) {
     switch (label) {
       case 'Gold':
@@ -127,10 +143,13 @@ class ProfileController extends GetxController {
         return Icons.auto_awesome;
     }
   }
+
   // Methods
   void editProfile() {
     final nameController = TextEditingController(text: userName.value);
     final addressController = TextEditingController(text: userAddress.value);
+    final emailController = TextEditingController(text: userEmail.value);
+    final phoneController = TextEditingController(text: userPhone.value);
 
     Get.dialog(
       AlertDialog(
@@ -139,27 +158,50 @@ class ProfileController extends GetxController {
           'Edit Profile',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(
-                labelText: 'Name',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                prefixIcon: const Icon(Icons.person_outline),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(
+                  labelText: 'Name',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  prefixIcon: const Icon(Icons.person_outline),
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: addressController,
-              decoration: InputDecoration(
-                labelText: 'Address',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                prefixIcon: const Icon(Icons.location_on_outlined),
+              const SizedBox(height: 16),
+              TextField(
+                controller: emailController,
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  prefixIcon: const Icon(Icons.email_outlined),
+                ),
+                keyboardType: TextInputType.emailAddress,
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              TextField(
+                controller: phoneController,
+                decoration: InputDecoration(
+                  labelText: 'Phone',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  prefixIcon: const Icon(Icons.phone_outlined),
+                ),
+                keyboardType: TextInputType.phone,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: addressController,
+                decoration: InputDecoration(
+                  labelText: 'Address',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  prefixIcon: const Icon(Icons.location_on_outlined),
+                ),
+                maxLines: 2,
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -169,13 +211,17 @@ class ProfileController extends GetxController {
           ElevatedButton(
             onPressed: () {
               final newName = nameController.text.trim();
+              final newEmail = emailController.text.trim();
+              final newPhone = phoneController.text.trim();
               final newAddress = addressController.text.trim();
 
-              if (newName.isNotEmpty && newAddress.isNotEmpty) {
+              if (newName.isNotEmpty && newEmail.isNotEmpty && newPhone.isNotEmpty && newAddress.isNotEmpty) {
                 userName.value = newName;
+                userEmail.value = newEmail;
+                userPhone.value = newPhone;
                 userAddress.value = newAddress;
 
-                Get.back(); // ডায়ালগ বন্ধ
+                Get.back();
                 SnackbarHelper.showSuccess('Profile updated successfully!');
               } else {
                 SnackbarHelper.showError('Please fill all fields');
@@ -196,17 +242,50 @@ class ProfileController extends GetxController {
 
   // Menu Items
   List<MenuItem> get menuItems => [
-    MenuItem(icon:Image.asset('assets/images/search.png'),label: 'Track My Bookings', color: Color(0xFFFECD08), onTap: trackBookings),
-    MenuItem(icon: Image.asset('assets/images/favorite.png'), label: 'Saved', color: Color(0xFFFECD08), onTap: openSaved),
-    MenuItem(icon: Image.asset('assets/images/chat_bot.png'), label: 'AI Chatbot', color: Color(0xFFFECD08), onTap: openAIChatbot),
-    MenuItem(icon:Image.asset('assets/images/history.png'), label: 'My History', color: Color(0xFFFECD08), onTap: openHistory),
-    MenuItem(icon: Image.asset('assets/images/info.png'), label: 'Legal Info', color: Color(0xFFFECD08), onTap: openLegalInfo),
+    MenuItem(
+        icon: Image.asset('assets/images/group.png'),
+        label: 'My Bookings',
+        color: Color(0xFFFECD08),
+        onTap: openBookings),
+    MenuItem(
+        icon: Image.asset('assets/images/favorite.png'),
+        label: 'Saved',
+        color: Color(0xFFFECD08),
+        onTap: openSaved),
+    MenuItem(
+        icon: Image.asset('assets/images/chat_bot.png'),
+        label: 'AI Chatbot',
+        color: Color(0xFFFECD08),
+        onTap: openAIChatbot),
+    MenuItem(
+        icon: Image.asset('assets/images/history.png'),
+        label: 'My History',
+        color: Color(0xFFFECD08),
+        onTap: openHistory),
+    MenuItem(
+        icon: Image.asset('assets/images/info.png'),
+        label: 'Legal Info',
+        color: Color(0xFFFECD08),
+        onTap: openLegalInfo),
   ];
-// বাকি মেথডগুলো
-  void trackBookings() => Get.snackbar('Track Bookings', 'Opening bookings');
-  void openSaved() {Get.toNamed(Routes.SAVED);}
-  void openAIChatbot() {Get.toNamed(Routes.CHATBOT);}
-  void openHistory() => Get.snackbar('History', 'Opening history');
+
+
+  void openBookings() {
+    Get.toNamed(Routes.MY_BOOKINGS);
+  }
+
+  void openSaved() {
+    Get.toNamed(Routes.SAVED);
+  }
+
+  void openAIChatbot() {
+    Get.toNamed(Routes.CHATBOT);
+  }
+
+  void openHistory() {
+    Get.toNamed(Routes.MY_TRIPS);
+  }
+
   void openLegalInfo() => Get.snackbar('Legal', 'Opening legal information');
 
   void logout() {
@@ -257,6 +336,8 @@ class ProfileController extends GetxController {
 
   // Optional update methods
   void updateUserName(String name) => userName.value = name;
+  void updateUserEmail(String email) => userEmail.value = email;
+  void updateUserPhone(String phone) => userPhone.value = phone;
   void updateUserAddress(String address) => userAddress.value = address;
   void updateProfileImage(String url) => profileImageUrl.value = url;
 }

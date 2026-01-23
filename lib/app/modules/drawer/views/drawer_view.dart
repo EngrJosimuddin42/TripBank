@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart' hide DrawerController;
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import '../controllers/drawer_controller.dart';
 import 'package:flutter/services.dart';
 
@@ -10,7 +9,7 @@ class DrawerView extends GetView<DrawerController> {
 
   @override
   Widget build(BuildContext context) {
-    // স্ট্যাটাস বার হলুদ করো
+
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarColor: Color(0xFFFEDE5A),
       statusBarIconBrightness: Brightness.dark,
@@ -19,7 +18,7 @@ class DrawerView extends GetView<DrawerController> {
     return Container(
       color: const Color(0xFFFFFAE6),
       child: SafeArea(
-        top: false,  // স্ট্যাটাস বারের উপর দিয়ে হেডার যাবে
+        top: false,
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,7 +43,6 @@ class DrawerView extends GetView<DrawerController> {
                 ),
               ),
 
-              // প্রোফাইল ইনফো (প্রিমিয়াম + অ্যাড্রেস)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24,vertical: 34),
                 child: Column(
