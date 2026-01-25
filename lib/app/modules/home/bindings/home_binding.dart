@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:tripbank/app/services/favorites_service.dart';
 import '../../drawer/controllers/drawer_controller.dart';
 import '../../hotels_booking/controllers/hotels_booking_controller.dart';
+import '../../my_bookings/controllers/my_bookings_controller.dart';
 import '../../tours_booking/controllers/tours_booking_controller.dart';
 import '../controllers/home_controller.dart';
 
@@ -12,6 +13,7 @@ class HomeBinding extends Bindings {
     Get.lazyPut<DrawerController>(() => DrawerController());
     Get.lazyPut<ToursBookingController>(() => ToursBookingController());
     Get.lazyPut<HotelsBookingController>(() => HotelsBookingController());
+    Get.lazyPut<MyBookingsController>(() => MyBookingsController());
     Get.lazyPut(() => FavoritesService());
   }
 }

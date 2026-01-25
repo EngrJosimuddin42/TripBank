@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../widgets/snackbar_helper.dart';
 import '../controllers/flight_booking_controller.dart';
 
 class TicketView extends GetView<FlightBookingController> {
@@ -468,7 +469,7 @@ class TicketView extends GetView<FlightBookingController> {
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
+                    color: Colors.grey.withValues(alpha: 0.2),
                     blurRadius: 10,
                     offset: const Offset(0, -2),
                   ),
@@ -480,11 +481,9 @@ class TicketView extends GetView<FlightBookingController> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        Get.snackbar(
-                          'Download',
-                          'E-ticket downloading...',
-                          backgroundColor: Colors.green[100],
-                          colorText: Colors.green[800],
+                        SnackbarHelper.showSuccess(
+                            'Your E-ticket is being downloaded to your device.',
+                            title: 'E-Ticket Download'
                         );
                       },
                       style: ElevatedButton.styleFrom(

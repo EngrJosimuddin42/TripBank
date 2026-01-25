@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tripbank/app/modules/my_bookings/views/my_bookings_view.dart';
 import '../../../models/hotel_model.dart';
 import '../../../widgets/draggable_chat_bubble.dart';
 import '../../drawer/views/drawer_view.dart';
 import '../../explore/controllers/explore_controller.dart';
 import '../../explore/views/explore_view.dart';
 import '../../hotels_booking/controllers/hotels_booking_controller.dart';
-import '../../my_trips/controllers/my_trips_controller.dart';
-import '../../my_trips/views/my_trips_view.dart';
+import '../../my_bookings/controllers/my_bookings_controller.dart';
 import '../../profile/controllers/profile_controller.dart';
 import '../../profile/views/profile_view.dart';
 import '../../tours_booking/controllers/tours_booking_controller.dart';
@@ -58,7 +58,7 @@ class HomeView extends GetView<HomeController> {
         case 1:
           return _buildExplorePage();
         case 2:
-          return _buildMyTripsPage();
+          return _buildMyBookingsPage();
         case 3:
           return _buildProfilePage();
         default:
@@ -1312,11 +1312,11 @@ class HomeView extends GetView<HomeController> {
     return const ExploreView();
   }
 
-  Widget _buildMyTripsPage() {
-    if (!Get.isRegistered<MyTripsController>()) {
-      Get.lazyPut(() => MyTripsController());
+  Widget _buildMyBookingsPage() {
+    if (!Get.isRegistered<MyBookingsController>()) {
+      Get.lazyPut(() => MyBookingsController());
     }
-    return const MyTripsView();
+    return const MyBookingsView();
   }
 
   Widget _buildProfilePage() {

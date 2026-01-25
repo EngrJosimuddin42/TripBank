@@ -5,6 +5,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../../constants/api_constants.dart';
 import '../../../services/api_service.dart';
 import '../../../services/auth_service.dart';
+import '../../../widgets/snackbar_helper.dart';
 
 class ChatMessage {
   final String text;
@@ -86,7 +87,6 @@ class ChatbotController extends GetxController {
         currentChatId.value = DateTime.now().millisecondsSinceEpoch.toString();
       }
     } catch (e) {
-      print('Error creating new chat: $e');
       currentChatId.value = DateTime.now().millisecondsSinceEpoch.toString();
     }
   }
@@ -117,7 +117,6 @@ class ChatbotController extends GetxController {
         }
       }
     } catch (e) {
-      print('Error loading chat history: $e');
     } finally {
       isLoadingHistory.value = false;
     }
@@ -198,12 +197,9 @@ class ChatbotController extends GetxController {
 
       Get.back();
     } catch (e) {
-      print('Error loading chat: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to load chat history',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red[100],
+      SnackbarHelper.showError(
+          'Failed to load chat history. Please check your connection.',
+          title: 'Connection Error'
       );
     }
   }
@@ -219,27 +215,21 @@ class ChatbotController extends GetxController {
       if (status.isGranted) {
         speechEnabled.value = await speech.initialize(
           onError: (error) {
-            print('Speech recognition error: $error');
             isListening.value = false;
           },
           onStatus: (status) {
-            print('Speech recognition status: $status');
             if (status == 'done' || status == 'notListening') {
               isListening.value = false;
             }
           },
         );
       } else {
-        Get.snackbar(
-          'Permission Required',
-          'Microphone permission is needed for voice input',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red[100],
-          duration: const Duration(seconds: 3),
+        SnackbarHelper.showError(
+            'Microphone permission is needed for voice input.',
+            title: 'Permission Required'
         );
       }
     } catch (e) {
-      print('Speech init error: $e');
       speechEnabled.value = false;
     }
   }
@@ -248,12 +238,9 @@ class ChatbotController extends GetxController {
 
   Future<void> toggleListening() async {
     if (!speechEnabled.value) {
-      Get.snackbar(
-        'Voice Input Unavailable',
-        'Please enable microphone permission in settings',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.orange[100],
-        duration: const Duration(seconds: 3),
+      SnackbarHelper.showWarning(
+          'Please enable microphone permission in settings.',
+          title: 'Voice Input Unavailable'
       );
       return;
     }
@@ -381,13 +368,9 @@ class ChatbotController extends GetxController {
         text: 'Sorry, something went wrong. Please try again.',
         isBot: true,
       ));
-
-      Get.snackbar(
-        'Error',
-        e.message,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red[100],
-        duration: const Duration(seconds: 3),
+      SnackbarHelper.showError(
+          e.message.isNotEmpty ? e.message : 'An unexpected error occurred.',
+          title: 'Chat Error'
       );
     } catch (e) {
       messages.removeLast();
@@ -396,8 +379,6 @@ class ChatbotController extends GetxController {
         text: 'Network error. Please check your connection.',
         isBot: true,
       ));
-
-      print('Chatbot error: $e');
     } finally {
       isLoadingResponse.value = false;
       _scrollToBottom();

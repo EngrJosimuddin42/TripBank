@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import '../../../routes/app_pages.dart';
 import '../../../services/storage_service.dart';
+import '../../../widgets/snackbar_helper.dart';
 
 class SplashController extends GetxController {
   final StorageService _storage = Get.find<StorageService>();
@@ -25,13 +26,11 @@ class SplashController extends GetxController {
       }
     } catch (e, stack) {
       Get.offAllNamed(Routes.ONBOARDING);
-
-      Get.snackbar(
-        'Sorry!',
-        'Something went wrong. Starting from onboarding.',
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 3),
+      SnackbarHelper.showError(
+          'Something went wrong. Starting from onboarding.',
+          title: 'Something Went Wrong'
       );
+
     } finally {
       isLoading.value = false;
     }

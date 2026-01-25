@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import '../../../models/car_model.dart';
 import '../../../routes/app_pages.dart';
+import '../../../widgets/snackbar_helper.dart';
 
 class CarDetailsController extends GetxController {
 
@@ -92,10 +93,9 @@ class CarDetailsController extends GetxController {
 
   void proceedToPayment() {
     if (selectedCar.value == null) {
-      Get.snackbar(
-        'Error',
-        'No car selected',
-        snackPosition: SnackPosition.BOTTOM,
+      SnackbarHelper.showWarning(
+          'Please choose a car before proceeding to payment.',
+          title: 'No Car Selected'
       );
       return;
     }

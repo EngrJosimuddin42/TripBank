@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'dart:math';
 
+import '../../../widgets/snackbar_helper.dart';
+
 class LoyaltyProgramController extends GetxController {
 
   var selectedTab = 0.obs;
@@ -71,12 +73,12 @@ class LoyaltyProgramController extends GetxController {
     }
 
     if (finalAmount <= 0) {
-      Get.snackbar('Error', 'Please select or enter an amount');
+      SnackbarHelper.showWarning(
+          'Please select or enter an amount',
+          title: 'Invalid Amount'
+      );
       return;
     }
-
-    // Navigate to payment or confirmation
-    print('Proceeding with amount: $finalAmount');
   }
 
   void _loadMockData() {
@@ -171,20 +173,17 @@ class LoyaltyProgramController extends GetxController {
   Future<void> fetchMembershipData() async {
     try {
       await Future.delayed(const Duration(seconds: 1));
-      print(' Membership data refreshed');
     } catch (e) {
-      print(' Error fetching membership data: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to load membership data',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      SnackbarHelper.showNetworkError();
     }
   }
 
   Future<void> sendGiftCard() async {
     if (recipientName.value.isEmpty || recipientEmail.value.isEmpty || giftAmount.value <= 0) {
-      Get.snackbar('Error', 'Please fill all required fields');
+      SnackbarHelper.showWarning(
+          'Please fill all required fields',
+          title: 'Incomplete Details'
+      );
       return;
     }
 
@@ -199,14 +198,10 @@ class LoyaltyProgramController extends GetxController {
     );
 
     recentlySentCards.insert(0, sentCard);
-
-    Get.snackbar(
-      'Success',
-      'Gift card sent successfully!',
-      backgroundColor: Get.theme.colorScheme.primary,
-      colorText: Get.theme.colorScheme.onPrimary,
+    SnackbarHelper.showSuccess(
+        'Your gift card has been sent successfully!.',
+        title: 'Gift Card Sent'
     );
-
     _clearSendForm();
   }
 
@@ -220,7 +215,10 @@ class LoyaltyProgramController extends GetxController {
 
   Future<void> redeemGiftCard() async {
     if (redeemCode.value.isEmpty) {
-      Get.snackbar('Error', 'Please enter gift card code');
+      SnackbarHelper.showWarning(
+          'Please enter your gift card code to redeem your balance.',
+          title: 'Code Required'
+      );
       return;
     }
 
@@ -232,28 +230,33 @@ class LoyaltyProgramController extends GetxController {
     totalGiftCardBalance.value += amount;
     activeCardsCount.value++;
 
-
-    Get.snackbar(
-      'Success',
-      '\$$amount added to your balance!',
-      backgroundColor: Get.theme.colorScheme.primary,
-      colorText: Get.theme.colorScheme.onPrimary,
+    SnackbarHelper.showSuccess(
+        'Congratulations! \$$amount has been successfully added to your balance.',
+        title: 'Gift Card Redeemed'
     );
-
     redeemCode.value = '';
   }
 
   void copyReferralCode() {
-    Get.snackbar('Copied', 'Referral code copied to clipboard', duration: const Duration(seconds: 2));
+    SnackbarHelper.showInfo(
+        'Referral code has been copied to your clipboard.',
+        title: 'Code Copied'
+    );
   }
 
   void copyReferralLink() {
-    Get.snackbar('Copied', 'Referral link copied to clipboard', duration: const Duration(seconds: 2));
+    SnackbarHelper.showInfo(
+        'Referral link has been copied to your clipboard.',
+        title: 'Link Copied'
+    );
   }
 
   void shareReferralCode() {
 
-    Get.snackbar('Share', 'Opening share dialog...');
+    SnackbarHelper.showInfo(
+        'Preparing to share your referral details...',
+        title: 'Sharing'
+    );
   }
 
   @override

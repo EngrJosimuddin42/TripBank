@@ -671,11 +671,8 @@ class CardBuilders {
 
   // Helper Widgets
 
-  static Widget _buildBookButton({
-    String label = 'Book Now',
-    double padding = 8,
-    required Map data,
-  }) {
+  static Widget _buildBookButton({String label = 'Book Now', double padding = 8,
+    required Map data}) {
     final controller = Get.find<ExploreController>();
     return InkWell(
       onTap: () => controller.navigateToDetails(data),

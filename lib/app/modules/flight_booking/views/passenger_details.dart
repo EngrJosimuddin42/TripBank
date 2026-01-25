@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../widgets/custom_date_picker.dart';
+import '../../../widgets/snackbar_helper.dart';
 import '../controllers/flight_booking_controller.dart';
 
 class PassengerDetailsView extends GetView<FlightBookingController> {
@@ -451,7 +452,10 @@ class PassengerDetailsView extends GetView<FlightBookingController> {
             //  Validation
              if (firstName.isEmpty || lastName.isEmpty || dob.isEmpty ||
                 mobile.isEmpty || email.isEmpty || passport.isEmpty) {
-              Get.snackbar('Error', 'Please fill all required fields');
+               SnackbarHelper.showError(
+                   'All mandatory fields must be filled to proceed.',
+                   title: 'Missing Information'
+               );
               return;
             }
 

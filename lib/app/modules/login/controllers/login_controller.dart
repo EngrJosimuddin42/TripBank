@@ -45,7 +45,10 @@ class LoginController extends GetxController {
   // Password Validation
   bool validatePassword() {
     if (passwordController.text.trim().length < 6) {
-      SnackbarHelper.showError('Password must be at least 6 characters');
+      SnackbarHelper.showWarning(
+          'Password must be at least 6 characters',
+          title: 'Password Required'
+      );
       return false;
     }
     return true;

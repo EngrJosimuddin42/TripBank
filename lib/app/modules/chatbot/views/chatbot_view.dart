@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../widgets/snackbar_helper.dart';
 import '../controllers/chatbot_controller.dart';
 import 'package:flutter/services.dart';
 
@@ -386,25 +387,29 @@ class ChatbotView extends GetView<ChatbotController> {
                     label: 'Copy',
                     onTap: () {
                       Clipboard.setData(ClipboardData(text: message.text));
-                      Get.snackbar('Copied!', 'Message copied to clipboard',
-                          backgroundColor: Colors.green[100],
-                          colorText: Colors.green[800],
-                          duration: const Duration(seconds: 2));
-                    },
+                      SnackbarHelper.showSuccess(
+                          'Message copied to clipboard',
+                          title: 'Copied!'
+                      );
+                      }
                   ),
                   const SizedBox(width: 20),
                   _actionButton(
                     icon: Icons.thumb_up_outlined,
                     label: 'Like',
-                    onTap: () => Get.snackbar('Thank you!', 'We appreciate your feedback',
-                        backgroundColor: Colors.blue[100], colorText: Colors.blue[800]),
+                    onTap: () => SnackbarHelper.showSuccess(
+                        'We appreciate your feedback!',
+                        title: 'Thank you!'
+                    ),
                   ),
                   const SizedBox(width: 20),
                   _actionButton(
                     icon: Icons.thumb_down_outlined,
                     label: 'Dislike',
-                    onTap: () => Get.snackbar('Feedback received', 'How can we improve?',
-                        backgroundColor: Colors.orange[100], colorText: Colors.orange[800]),
+                    onTap: () => SnackbarHelper.showWarning(
+                        'How can we improve? Let us know!',
+                        title: 'Feedback received'
+                    ),
                   ),
                   const Spacer(),
                   Text(

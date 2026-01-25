@@ -37,7 +37,6 @@ class AuthService extends GetxService {
         currentUser.value = User.fromJson(userMap);
         isLoggedIn.value = true;
       } catch (e) {
-        print('Error loading user: $e');
         logout();
       }
     }

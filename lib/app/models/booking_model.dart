@@ -39,7 +39,6 @@ class BookingSummary {
   };
 
   // Create from JSON
-
   factory BookingSummary.fromJson(Map<String, dynamic> json) => BookingSummary(
     type: json['type'] ?? '',
     title: json['title'] ?? '',
@@ -54,4 +53,42 @@ class BookingSummary {
         ? DateTime.parse(json['bookingDate'])
         : DateTime.now(),
   );
+
+  String get displayLocation {
+    final sub = subtitle.trim();
+    if (sub.contains('Airlines') ||
+        sub.contains('Airline') ||
+        sub.contains('Flight') ||
+        sub.toLowerCase().contains('class')) {
+      final parts = sub.split('+');
+      if (parts.isNotEmpty) {
+        String airlinePart = parts.first.trim();
+        String city = _guessCityFromAirline(airlinePart);
+        return '$airlinePart, $city';
+      }
+    }
+    final commaParts = sub.split(',');
+    if (commaParts.length > 1) {
+      return commaParts.first.trim();
+    }
+    return sub.split(RegExp(r'[•+−]')).first.trim();
+  }
+
+
+  // Helper function (private)
+  String _guessCityFromAirline(String airline) {
+    final lower = airline.toLowerCase();
+    if (lower.contains('singapore')) return 'Singapore';
+    if (lower.contains('emirates')) return 'Dubai';
+    if (lower.contains('qatar')) return 'Doha';
+    if (lower.contains('biman')) return 'Bangladesh';
+    if (lower.contains('qatar')) return 'Doha';
+    if (lower.contains('indigo')) return 'India';
+    if (lower.contains('air india')) return 'India';
+    if (lower.contains('sparrow')) return 'Bangladesh';
+
+    return 'Destination';
+  }
+
+
 }

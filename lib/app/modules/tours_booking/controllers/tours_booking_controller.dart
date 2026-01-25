@@ -3,6 +3,7 @@ import '../../../constants/app_strings.dart';
 import '../../../models/booking_model.dart';
 import '../../../models/tour_model.dart';
 import '../../../services/favorites_service.dart';
+import '../../../widgets/snackbar_helper.dart';
 import '../../my_bookings/controllers/my_bookings_controller.dart';
 
 class ToursBookingController extends GetxController {
@@ -648,10 +649,9 @@ class ToursBookingController extends GetxController {
   // BOOKING FLOW
   void proceedToPayment() {
     if (selectedDate.value == null) {
-      Get.snackbar(
-        AppStrings.error,
+      SnackbarHelper.showWarning(
         AppStrings.selectDateError,
-        snackPosition: SnackPosition.BOTTOM,
+        title: AppStrings.error,
       );
       return;
     }
@@ -666,7 +666,10 @@ class ToursBookingController extends GetxController {
 
   void confirmBooking() {
     if (selectedTour.value == null) {
-      Get.snackbar('Error', 'No tour selected');
+      SnackbarHelper.showWarning(
+          'No tour selected',
+          title: 'No Tour Selected'
+      );
       return;
     }
 

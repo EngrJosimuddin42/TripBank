@@ -120,7 +120,7 @@ class MyGiftCardsView extends GetView<LoyaltyProgramController> {
                   border: Border.all(color: Color(0xFFE5E7EB), width: 1),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
+                      color: Colors.black.withValues(alpha: 0.03),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),
@@ -210,7 +210,7 @@ class MyGiftCardsView extends GetView<LoyaltyProgramController> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     elevation: 4,
-                    shadowColor: Colors.black.withOpacity(0.2),
+                    shadowColor: Colors.black.withValues(alpha: 0.2),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -256,7 +256,7 @@ class MyGiftCardsView extends GetView<LoyaltyProgramController> {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
+                color: Colors.black.withValues(alpha: 0.08),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -281,14 +281,14 @@ class MyGiftCardsView extends GetView<LoyaltyProgramController> {
       margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [color, color.withOpacity(0.8)],
+          colors: [color, color.withValues(alpha: 0.8)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.3),
+            color: color.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -326,7 +326,7 @@ class MyGiftCardsView extends GetView<LoyaltyProgramController> {
                     Text(
                       'Balance',
                       style: GoogleFonts.inter(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         fontSize: 12,
                         fontWeight: FontWeight.w400,
                       ),
@@ -350,7 +350,7 @@ class MyGiftCardsView extends GetView<LoyaltyProgramController> {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -362,7 +362,7 @@ class MyGiftCardsView extends GetView<LoyaltyProgramController> {
                       Text(
                         'Card Code',
                         style: GoogleFonts.inter(
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
                         ),
@@ -406,19 +406,19 @@ class MyGiftCardsView extends GetView<LoyaltyProgramController> {
                 Text(
                   'From: $from',
                   style: GoogleFonts.inter(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                     fontSize: 13,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
                 Row(
                   children: [
-                    Icon(Icons.calendar_today, color: Colors.white.withOpacity(0.9), size: 14),
+                    Icon(Icons.calendar_today, color: Colors.white.withValues(alpha: 0.9), size: 14),
                     const SizedBox(width: 6),
                     Text(
                       expiry,
                       style: GoogleFonts.inter(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         fontSize: 13,
                         fontWeight: FontWeight.w400,
                       ),

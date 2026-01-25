@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../models/flight_model.dart';
+import '../../../widgets/snackbar_helper.dart';
 import 'flight_booking_controller.dart';
 import 'flight_search_controller.dart';
 
@@ -56,7 +57,10 @@ class FlightDetailsController extends GetxController {
 
     if (selectedFlight.value == null) {
       Future.delayed(Duration.zero, () {
-        Get.snackbar('Error', 'No flight data found');
+        SnackbarHelper.showError(
+            'No flight data found. Redirecting back...',
+            title: 'Data Missing'
+        );
         Get.back();
       });
     }
@@ -65,7 +69,10 @@ class FlightDetailsController extends GetxController {
   //  Book Flight Method
   void bookFlight() {
     if (selectedFlight.value == null) {
-      Get.snackbar('Error', 'Please select a flight');
+      SnackbarHelper.showError(
+          'Please select a flight to proceed with the booking.',
+          title: 'No Flight Selected'
+      );
       return;
     }
 
@@ -97,10 +104,9 @@ class FlightDetailsController extends GetxController {
       });
 
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to proceed with booking: $e',
-        backgroundColor: Colors.red[100],
+      SnackbarHelper.showError(
+          'Failed to proceed with booking. Please try again.',
+          title: 'Booking Error'
       );
     }
   }

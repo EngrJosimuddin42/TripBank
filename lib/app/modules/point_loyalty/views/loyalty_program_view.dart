@@ -63,7 +63,7 @@ class LoyaltyProgramView extends GetView<LoyaltyProgramController> {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -125,7 +125,7 @@ class LoyaltyProgramView extends GetView<LoyaltyProgramController> {
                           Text(
                             'Total Points',
                             style: GoogleFonts.inter(
-                              color: Colors.white.withOpacity(0.9),
+                              color: Colors.white.withValues(alpha: 0.9),
                               fontSize: 14,
                               fontWeight: FontWeight.w400,
                             ),
@@ -139,7 +139,7 @@ class LoyaltyProgramView extends GetView<LoyaltyProgramController> {
                   Text(
                     'Since ${controller.memberSince.value}',
                     style: GoogleFonts.inter(
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
                     ),
@@ -149,7 +149,7 @@ class LoyaltyProgramView extends GetView<LoyaltyProgramController> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
@@ -183,7 +183,7 @@ class LoyaltyProgramView extends GetView<LoyaltyProgramController> {
                           borderRadius: BorderRadius.circular(4),
                           child: LinearProgressIndicator(
                             value: controller.progressPercentage.value / 100,
-                            backgroundColor: Colors.white.withOpacity(0.3),
+                            backgroundColor: Colors.white.withValues(alpha:0.3),
                             valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
                             minHeight: 8,
                           ),
@@ -206,7 +206,7 @@ class LoyaltyProgramView extends GetView<LoyaltyProgramController> {
                   Text(
                     'You\'re on track to reach ${controller.nextTier.value} by ${controller.targetDate.value}', // Dynamic
                     style: GoogleFonts.inter(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
                     ),
@@ -252,7 +252,7 @@ class LoyaltyProgramView extends GetView<LoyaltyProgramController> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 2),
                   ),
@@ -634,7 +634,7 @@ class LoyaltyProgramView extends GetView<LoyaltyProgramController> {
                     width: 56,
                     height: 56,
                     decoration: BoxDecoration(
-                      color: isCurrent ? color : color.withOpacity(0.3),
+                      color: isCurrent ? color : color.withValues(alpha: 0.3),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -650,7 +650,7 @@ class LoyaltyProgramView extends GetView<LoyaltyProgramController> {
                     Container(
                       height: 40,
                       width: 2,
-                      color: const Color(0xFF00BFA5).withOpacity(0.4),
+                      color: const Color(0xFF00BFA5).withValues(alpha: 0.4),
                     ),
                 ],
               ),
@@ -712,7 +712,7 @@ class LoyaltyProgramView extends GetView<LoyaltyProgramController> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -725,8 +725,8 @@ class LoyaltyProgramView extends GetView<LoyaltyProgramController> {
             height: 48,
             decoration: BoxDecoration(
               color: isActive
-                  ? const Color(0xFFFECD08).withOpacity(0.15)
-                  : Colors.grey.withOpacity(0.1),
+                  ? const Color(0xFFFECD08).withValues(alpha: 0.15)
+                  : Colors.grey.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(

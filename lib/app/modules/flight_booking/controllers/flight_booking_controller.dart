@@ -7,6 +7,7 @@ import '../../../constants/app_strings.dart';
 import '../../../models/booking_model.dart';
 import '../../../models/flight_model.dart';
 import '../../../widgets/airport_search_dialog.dart';
+import '../../../widgets/snackbar_helper.dart';
 import '../../my_bookings/controllers/my_bookings_controller.dart';
 import 'flight_search_controller.dart';
 
@@ -73,8 +74,10 @@ class FlightBookingController extends GetxController {
   // Multi-way flights
   final multiWayFlights = <MultiWayFlight>[].obs;
 
+
   // Selected flight (from details page)
   final selectedFlight = Rxn<Flight>();
+  var isFromSaved = false.obs;
 
   // Payment Methods
   final selectedPaymentMethod = ''.obs;
@@ -85,6 +88,21 @@ class FlightBookingController extends GetxController {
     {'name': 'Coinbase Commerce', 'icon': 'assets/images/coinbase.png'},
   ];
 
+
+  void proceedFromExplore() {
+    if (isFromSaved.value && selectedFlight.value != null) {
+      Get.toNamed('/flight-details', arguments: selectedFlight.value);
+      isFromSaved.value = false;
+    }
+  }
+
+
+  @override
+  void onClose() {
+    isFromSaved.value = false;
+    super.onClose();
+  }
+
   // Booking
   final currentBooking = Rxn<Booking>();
 
@@ -92,6 +110,7 @@ class FlightBookingController extends GetxController {
   void onInit() {
     super.onInit();
     departureDate.value = DateTime.now().add(const Duration(days: 1));
+
 
     // Multi-way initial flight
     multiWayFlights.add(MultiWayFlight(
@@ -301,7 +320,10 @@ class FlightBookingController extends GetxController {
 
   void continueToPayment() {
     if (passengers.isEmpty) {
-      Get.snackbar('Error', 'Please add passenger details');
+      SnackbarHelper.showWarning(
+          'Please add at least one passenger detail to continue.',
+          title: 'Missing Details'
+      );
       return;
     }
     Get.toNamed('/payment', arguments: {
@@ -316,7 +338,10 @@ class FlightBookingController extends GetxController {
   Future<void> makePayment() async {
     if (selectedPaymentMethod.value.isEmpty) {
       if (Get.isDialogOpen ?? false) Get.back();
-      Get.snackbar('Required', 'Please select a payment method');
+      SnackbarHelper.showWarning(
+          'Please select a payment method to complete your booking.',
+          title: 'Payment Method Required'
+      );
       return;
     }
     if (selectedFlight.value == null && Get.arguments != null) {
@@ -333,11 +358,9 @@ class FlightBookingController extends GetxController {
     final flight = selectedFlight.value;
     if (flight == null) {
       if (Get.isDialogOpen ?? false) Get.back();
-      Get.snackbar(
-        'Error',
-        'Flight data lost. Please search again.',
-        backgroundColor: Colors.red[100],
-        duration: const Duration(seconds: 3),
+      SnackbarHelper.showError(
+          'Flight data lost. Please search again.',
+          title: 'Data Unavailable'
       );
       return;
     }
@@ -411,16 +434,12 @@ class FlightBookingController extends GetxController {
         Get.back();
       }
       await Future.delayed(const Duration(milliseconds: 300));
-      Get.snackbar(
-        'Error',
-        'Booking failed: $e',
-        backgroundColor: Colors.red[100],
-        colorText: Colors.red[800],
-        duration: const Duration(seconds: 3),
+      SnackbarHelper.showError(
+          'We couldn\'t complete your booking at this moment. Please try again or contact support.',
+          title: 'Booking Failed'
       );
     }
   }
-
 
   // Calculate total price (Dynamic based)
   double calculateTotalPrice() {

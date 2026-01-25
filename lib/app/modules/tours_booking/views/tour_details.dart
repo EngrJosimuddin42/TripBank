@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../constants/app_strings.dart';
 import '../../../widgets/custom_date_picker.dart';
+import '../../../widgets/snackbar_helper.dart';
 import '../controllers/tours_booking_controller.dart';
 
 class TourDetailsView extends StatelessWidget {
@@ -390,11 +391,9 @@ class TourDetailsView extends StatelessWidget {
                           Expanded(
                             child: OutlinedButton.icon(
                               onPressed: () {
-                                Get.snackbar(
-                                  'PDF',
-                                  'Downloading tour details...',
-                                  backgroundColor: Colors.white,
-                                  colorText: Colors.black87,
+                                SnackbarHelper.showInfo(
+                                    'Downloading tour details...',
+                                    title: 'PDF Download'
                                 );
                               },
                               icon: const Icon(Icons.picture_as_pdf_outlined, size: 20),
@@ -420,7 +419,6 @@ class TourDetailsView extends StatelessWidget {
                                   firstDate: DateTime(2000),
                                   lastDate: DateTime(2100),
                                   onDateSelected: (date) {
-                                    debugPrint('Selected date: $date');
                                   },
                                 ),
                               );

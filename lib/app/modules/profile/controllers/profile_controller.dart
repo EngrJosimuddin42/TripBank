@@ -107,7 +107,10 @@ class ProfileController extends GetxController {
         ),
       ]);
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load profile. Please try again.');
+      SnackbarHelper.showError(
+          'Failed to load profile. Please try again.',
+          title: 'Loading Failed'
+      );
       userName.value = 'Guest User';
       userEmail.value = 'guest@example.com';
       userPhone.value = 'Not available';
@@ -243,11 +246,6 @@ class ProfileController extends GetxController {
   // Menu Items
   List<MenuItem> get menuItems => [
     MenuItem(
-        icon: Image.asset('assets/images/group.png'),
-        label: 'My Bookings',
-        color: Color(0xFFFECD08),
-        onTap: openBookings),
-    MenuItem(
         icon: Image.asset('assets/images/favorite.png'),
         label: 'Saved',
         color: Color(0xFFFECD08),
@@ -283,10 +281,14 @@ class ProfileController extends GetxController {
   }
 
   void openHistory() {
-    Get.toNamed(Routes.MY_TRIPS);
+    Get.toNamed(Routes.MY_BOOKINGS);
   }
 
-  void openLegalInfo() => Get.snackbar('Legal', 'Opening legal information');
+  void openLegalInfo() =>
+      SnackbarHelper.showInfo(
+          'Redirecting to our Terms of Service and Privacy Policy...',
+          title: 'Legal Information'
+      );
 
   void logout() {
     Get.defaultDialog(

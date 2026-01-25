@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../widgets/car_location_search_dialog.dart';
 import '../../../widgets/custom_date_picker.dart';
+import '../../../widgets/snackbar_helper.dart';
 import '../controllers/cars_booking_controller.dart';
 
 class CarsBookingView extends GetView<CarsBookingController> {
@@ -594,10 +595,9 @@ class CarsBookingView extends GetView<CarsBookingController> {
                       ? controller.ArrivingSelectedTimeSlots
                       : controller.returnSelectedTimeSlots;
                   if (selectedSlots.isEmpty) {
-                    Get.snackbar(
-                      'Select Time',
-                      'Please select at least one time slot',
-                      snackPosition: SnackPosition.BOTTOM,
+                    SnackbarHelper.showWarning(
+                        'Please select at least one time slot to continue.',
+                        title: 'Select Time'
                     );
                   } else {
                     Get.back();
@@ -895,12 +895,9 @@ class CarsBookingView extends GetView<CarsBookingController> {
 
       if (controller.ArrivingDate.value != null &&
           picked.isBefore(controller.ArrivingDate.value!)) {
-        Get.snackbar(
-          'Invalid Selection',
-          'Return date cannot be before pickup date',
-          backgroundColor: Colors.red[700],
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
+        SnackbarHelper.showWarning(
+            'Return date cannot be before pickup date.',
+            title: 'Invalid Selection'
         );
         return;
       }
@@ -921,11 +918,9 @@ class CarsBookingView extends GetView<CarsBookingController> {
         controller.returnToCode.value        = controller.ArrivingFromCode.value;
         controller.returnToTerminal.value    = controller.ArrivingFromTerminal.value;
         controller.returnToCountry.value     = controller.ArrivingFromCountry.value;
-        Get.snackbar(
-          'Return Locations Filled',
-          'Return trip: ${controller.ArrivingToLocation.value} → ${controller.ArrivingFromLocation.value}',
-          duration: const Duration(seconds: 4),
-          snackPosition: SnackPosition.BOTTOM,
+        SnackbarHelper.showSuccess(
+            'Return trip: ${controller.ArrivingToLocation.value} → ${controller.ArrivingFromLocation.value}',
+            title: 'Return Locations Filled'
         );
       }
     }

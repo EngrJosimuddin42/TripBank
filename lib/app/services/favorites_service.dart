@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:async';
 import '../constants/api_constants.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
 import '../services/storage_service.dart';
+import '../widgets/snackbar_helper.dart';
 
 class FavoritesService extends GetxService {
   final ApiService _apiService = Get.find<ApiService>();
@@ -47,10 +47,7 @@ class FavoritesService extends GetxService {
 
       final cars = _storageService.getFavoriteCars();
       favoriteCars.assignAll(cars);
-
-      print(' Local favorites loaded from StorageService');
     } catch (e) {
-      print(' Error loading local favorites: $e');
     }
   }
 
@@ -62,9 +59,7 @@ class FavoritesService extends GetxService {
       await _storageService.saveFavoriteTours(favoriteTours.toList());
       await _storageService.saveFavoriteCars(favoriteCars.toList());
 
-      print(' Favorites saved to StorageService');
     } catch (e) {
-      print(' Error saving favorites: $e');
     }
   }
 
@@ -72,10 +67,8 @@ class FavoritesService extends GetxService {
 
   Future<void> syncWithServer() async {
     if (!_authService.isAuthenticated) {
-      print('️ User not authenticated, skipping sync');
       return;
     }
-
     isSyncing.value = true;
     try {
       final response = await _apiService.get(
@@ -96,10 +89,8 @@ class FavoritesService extends GetxService {
         }
 
         await _saveLocalFavorites();
-        print(' Favorites synced with server');
       }
     } catch (e) {
-      print(' Error syncing favorites: $e');
     } finally {
       isSyncing.value = false;
     }
@@ -114,7 +105,6 @@ class FavoritesService extends GetxService {
     // Check if already exists
 
     if (_isFavorite(type, item['id'] ?? item['name'])) {
-      print(' Item already in favorites');
       return true;
     }
 
@@ -133,7 +123,7 @@ class FavoritesService extends GetxService {
         ).timeout(const Duration(seconds: 10));
 
         if (response['success'] == true) {
-          print(' Favorite added to server: $type');
+          SnackbarHelper.showSuccess('${type.capitalizeFirst} added to favorites');
           return true;
         } else {
           // Rollback if server fails
@@ -141,16 +131,15 @@ class FavoritesService extends GetxService {
           (e['id'] ?? e['name']) == (item['id'] ?? item['name'])
           );
           await _saveLocalFavorites();
-          _showError('Failed to add favorite');
+          SnackbarHelper.showError('Failed to add favorite');
           return false;
         }
       } catch (e) {
-        print(' Error adding favorite to server: $e');
-        _showError('Added locally, will sync later');
+        SnackbarHelper.showWarning('Added locally, will sync when online');
         return true;
       }
     }
-
+    SnackbarHelper.showSuccess('Added to favorites locally');
     return true;
   }
 
@@ -167,7 +156,6 @@ class FavoritesService extends GetxService {
     );
 
     if (item == null) {
-      print(' Item not found in favorites');
       return false;
     }
 
@@ -185,7 +173,7 @@ class FavoritesService extends GetxService {
         ).timeout(const Duration(seconds: 10));
 
         if (response['success'] == true) {
-          print(' Favorite removed from server: $type');
+          SnackbarHelper.showSuccess('${type.capitalizeFirst} removed from favorites');
           return true;
         } else {
 
@@ -193,12 +181,11 @@ class FavoritesService extends GetxService {
 
           targetList.add(item);
           await _saveLocalFavorites();
-          _showError('Failed to remove favorite');
+          SnackbarHelper.showError('Failed to remove favorite');
           return false;
         }
       } catch (e) {
-        print('Error removing favorite from server: $e');
-        _showError('Removed locally, will sync later');
+        SnackbarHelper.showWarning('Removed locally, will sync later');
         return true;
       }
     }
@@ -247,7 +234,6 @@ class FavoritesService extends GetxService {
       case 'cars':
         return favoriteCars;
       default:
-        print(' Unknown favorite type: $type');
         return null;
     }
   }
@@ -266,18 +252,5 @@ class FavoritesService extends GetxService {
     favoriteCars.clear();
 
     await _storageService.clearAllFavorites();
-
-    print(' All favorites cleared');
-  }
-
-  void _showError(String message) {
-    Get.snackbar(
-      'Error',
-      message,
-      backgroundColor: Colors.red.withValues(alpha: 0.1),
-      colorText: Colors.red[900],
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 2),
-    );
   }
 }

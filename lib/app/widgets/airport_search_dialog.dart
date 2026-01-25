@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tripbank/app/widgets/snackbar_helper.dart';
 import '../models/flight_model.dart';
 
 class AirportSearchDialog extends StatefulWidget {
@@ -119,12 +120,7 @@ class _AirportSearchDialogState extends State<AirportSearchDialog> {
           airport.country.toLowerCase().contains(query.toLowerCase()))
           .toList();
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to search airports: $e',
-        backgroundColor: Colors.red[100],
-        colorText: Colors.red[800],
-      );
+      SnackbarHelper.showError('Failed to search airports: $e');
     } finally {
       _isLoading.value = false;
     }

@@ -89,6 +89,42 @@ class SnackbarHelper {
     );
   }
 
+
+  // Info Snackbar
+  static void showInfo(String message, {String title = 'Information'}) {
+    Get.snackbar(
+      '',
+      '',
+      titleText: Text(
+        title,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      messageText: Text(
+        message,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+        ),
+      ),
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.blueAccent.withValues(alpha: 0.9),
+      duration: const Duration(seconds: 4),
+      margin: const EdgeInsets.all(16),
+      borderRadius: 12,
+      icon: const Icon(Icons.info_outline, color: Colors.white, size: 28),
+      shouldIconPulse: true,
+      barBlur: 20,
+      isDismissible: true,
+      forwardAnimationCurve: Curves.easeOutBack,
+    );
+  }
+
+
   // Network Error
 
   static void showNetworkError() {

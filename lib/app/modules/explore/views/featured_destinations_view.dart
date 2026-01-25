@@ -52,6 +52,7 @@ class FeaturedDestinationsView extends GetView<ExploreController> {
               child: Obx(() {
 
                 // Loading State
+
                 if (controller.isLoading.value) {
                   return const Center(
                     child: CircularProgressIndicator(

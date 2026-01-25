@@ -11,8 +11,6 @@ abstract class Routes {
   static const FORGOT_PASSWORD_OTP = _Paths.FORGOT_PASSWORD_OTP;
   static const CREATE_NEW_PASSWORD = _Paths.CREATE_NEW_PASSWORD;
   static const PROFILE = _Paths.PROFILE;
-  static const MY_TRIPS = _Paths.MY_TRIPS;
-  static const MY_TRIP_DETAILS = _Paths.MY_TRIP_DETAILS;
   static const EXPLORE = _Paths.EXPLORE;
   static const HOTELS = _Paths.HOTELS;
   static const TOURS = _Paths.TOURS;
@@ -75,8 +73,6 @@ abstract class _Paths {
   static const FORGOT_PASSWORD_OTP = '/forgot-password-otp';
   static const CREATE_NEW_PASSWORD = '/create-new-password';
   static const PROFILE = '/profile';
-  static const MY_TRIPS = '/my-trips';
-  static const MY_TRIP_DETAILS = '/my-trip-details';
   static const EXPLORE = '/explore';
   static const HOTELS = '/hotels';
   static const TOURS = '/tours';
@@ -111,7 +107,6 @@ abstract class _Paths {
   static const CAR_DETAILS = '/car-details';
   static const MAKE_PAYMENT = '/make-payment';
   static const CAR_TICKET = '/car-ticket';
-  static const carPayment = '/car-payment';
 
   // Tour Booking Pages
   static const TOUR_DETAILS = '/tour-details';
@@ -126,4 +121,5 @@ abstract class _Paths {
   static const MY_GIFT_CARDS = '/my-gift-cards';
   static const REFER_FRIENDS = '/refer-friends';
   static const MY_BOOKINGS = '/my-bookings';
+  static const MY_BOOKINGS_DETAILS = '/my-bookings-details';
 }

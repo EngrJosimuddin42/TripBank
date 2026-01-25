@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../models/hotel_model.dart';
+import '../../../widgets/snackbar_helper.dart';
 import '../controllers/hotels_booking_controller.dart';
 
 class AllHotelsView extends GetView<HotelsBookingController> {
@@ -556,7 +557,10 @@ class AllHotelsView extends GetView<HotelsBookingController> {
   Widget _buildViewOnMapCard() {
     return _buildSectionCard(
       child: GestureDetector(
-        onTap: () => Get.snackbar('Map', 'Map view coming soon'),
+        onTap: () =>
+            SnackbarHelper.showInfo(
+                'We are working on integrating an interactive map. Stay tuned!',
+                title: 'Map View Coming Soon'),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

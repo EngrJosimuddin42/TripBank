@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../widgets/snackbar_helper.dart';
 import '../controllers/cars_booking_controller.dart';
 import '../../../constants/app_strings.dart';
 
@@ -568,21 +569,15 @@ class MakePaymentView extends GetView<CarsBookingController> {
           ElevatedButton(
             onPressed: () {
               if (_couponController.text.isEmpty) {
-                Get.snackbar(
-                  'Error',
-                  'Please enter a coupon code',
-                  snackPosition: SnackPosition.BOTTOM,
-                  backgroundColor: Colors.red[100],
-                  colorText: Colors.red[800],
+                SnackbarHelper.showWarning(
+                    'Please enter a coupon code to receive a discount.',
+                    title: 'Input Required'
                 );
                 return;
               }
-              Get.snackbar(
-                AppStrings.coupon,
-                AppStrings.couponAppliedSuccess,
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.green[100],
-                colorText: Colors.green[800],
+              SnackbarHelper.showSuccess(
+                  AppStrings.couponAppliedSuccess,
+                  title: AppStrings.coupon
               );
             },
             style: ElevatedButton.styleFrom(
@@ -789,36 +784,26 @@ class MakePaymentView extends GetView<CarsBookingController> {
 
   void _confirmPayment() {
     if (controller.selectedPaymentMethod.value.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please select a payment method',
-        backgroundColor: Colors.red[100],
-        colorText: Colors.red[800],
-        snackPosition: SnackPosition.BOTTOM,
+      SnackbarHelper.showWarning(
+          'Please select a payment method to proceed with your booking.',
+          title: 'Payment Method Required'
       );
       return;
     }
 
     // Validate car selection
     if (controller.selectedCar.value == null) {
-      Get.snackbar(
-        'Error',
-        'No car selected',
-        backgroundColor: Colors.red[100],
-        colorText: Colors.red[800],
-        snackPosition: SnackPosition.BOTTOM,
+      SnackbarHelper.showError(
+          'Something went wrong. No car was found in your selection.',
+          title: 'Selection Error'
       );
       return;
     }
 
     // Show success message
-    Get.snackbar(
-      'Success',
-      'Payment confirmed successfully!',
-      backgroundColor: Colors.green[100],
-      colorText: Colors.green[800],
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 2),
+    SnackbarHelper.showSuccess(
+        'Payment confirmed successfully! Your car is now reserved.',
+        title: 'Success'
     );
 
     // Save booking

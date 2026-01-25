@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../constants/app_config.dart';
 import '../../../constants/app_strings.dart';
 import '../../../models/flight_model.dart';
+import '../../../widgets/snackbar_helper.dart';
 import 'flight_booking_controller.dart';
 
 class FlightSearchController extends GetxController {
@@ -157,7 +158,10 @@ class FlightSearchController extends GetxController {
       searchResults.assignAll(flights);
       Get.toNamed('/search-all-flight');
     } catch (e) {
-      Get.snackbar('Error', 'Failed to search flights');
+      SnackbarHelper.showError(
+          'Failed to search flights. Please try again later.',
+          title: 'Search Error'
+      );
     } finally {
       isLoadingFlights.value = false;
     }

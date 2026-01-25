@@ -7,25 +7,21 @@ class MyBookingsController extends GetxController {
   final RxList<BookingSummary> bookings = <BookingSummary>[].obs;
   final StorageService _storage = Get.find<StorageService>();
 
-  final selectedFilter = 'All'.obs;
-  final filterOptions = ['All', 'Flight', 'Hotel', 'Car', 'Bus'].obs;
-
-  final selectedStatus = 'All'.obs;
-  final statusOptions = ['All', 'Confirmed', 'Canceled', 'Completed', 'Pending'].obs;
+  final selectedTab = 0.obs;
 
   @override
   void onInit() {
     super.onInit();
     _loadBookings();
 
-    // ✅ FIX: Add dummy data if storage is empty AND save it
+    // Add dummy data if storage is empty
     if (bookings.isEmpty) {
       _addDummyData();
       _saveBookings();
     }
   }
 
-  // স্টোরেজ থেকে ডাটা লোড করার আসল মেথড
+  // Load bookings from storage
   void _loadBookings() {
     try {
       final List<dynamic> rawData = _storage.getBookings();
@@ -36,27 +32,118 @@ class MyBookingsController extends GetxController {
         }).toList();
 
         bookings.assignAll(loadedBookings);
-        debugPrint("✅ MyBookings: ${bookings.length} items loaded from storage");
+        debugPrint(" MyBookings: ${bookings.length} items loaded from storage");
       } else {
-        debugPrint("⚠️ MyBookings: Storage is empty");
+        debugPrint(" MyBookings: Storage is empty");
       }
     } catch (e) {
-      debugPrint("❌ Error loading bookings: $e");
+      debugPrint(" Error loading bookings: $e");
     }
   }
 
-  // ডাটা সেভ করার মেথড
+  // Save bookings to storage
   void _saveBookings() {
     try {
       final dataToSave = bookings.map((b) => b.toJson()).toList();
       _storage.saveBookings(dataToSave);
-      debugPrint("💾 Saved ${bookings.length} bookings to storage");
+      debugPrint("Saved ${bookings.length} bookings to storage");
     } catch (e) {
-      debugPrint("❌ Error saving bookings: $e");
+      debugPrint(" Error saving bookings: $e");
     }
   }
 
-  // নতুন বুকিং যোগ করা
+  // Add dummy data
+  void _addDummyData() {
+    bookings.addAll([
+      // Today's booking with tag
+      BookingSummary(
+        bookingId: 'TB-294830',
+        type: 'Flight',
+        title: 'Dubai Business Trip',
+        subtitle: 'Dubai, UAE',
+        dates: '12-17 Dec 2025 • 5 days',
+        totalAmount: '\$1,250',
+        status: 'Confirmed',
+        imageUrl: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400',
+        bookingDate: DateTime.now(),
+        ticketData: {
+          'services': ['Flight', 'Hotel', 'Tour'],
+          'travelers': 2,
+          'tag': 'Next Adventure',
+        },
+      ),
+
+      // Upcoming bookings
+      BookingSummary(
+        bookingId: 'TB-294831',
+        type: 'Hotel',
+        title: 'Tokyo Cherry Tour',
+        subtitle: 'Tokyo, Japan',
+        dates: '5-8 Jan 2026 • 4 days',
+        totalAmount: '\$850',
+        status: 'Confirmed',
+        imageUrl: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400',
+        bookingDate: DateTime.now().subtract(const Duration(days: 5)),
+        ticketData: {
+          'services': ['Hotel'],
+          'travelers': 3,
+        },
+      ),
+
+      BookingSummary(
+        bookingId: 'TB-294832',
+        type: 'Car',
+        title: 'Airport Pickup Car Rental',
+        subtitle: 'New York, USA',
+        dates: 'Pickup 17 Dec • 3 days',
+        totalAmount: '\$450',
+        status: 'Confirmed',
+        imageUrl: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=400',
+        bookingDate: DateTime.now().subtract(const Duration(days: 7)),
+        ticketData: {
+          'services': ['Car'],
+          'travelers': 3,
+        },
+      ),
+
+      BookingSummary(
+        bookingId: 'TB-294833',
+        type: 'Tour',
+        title: 'Bali Island Adventure',
+        subtitle: 'Bali, Indonesia',
+        dates: '20-25 Feb 2026 • 6 days',
+        totalAmount: '\$1,850',
+        status: 'Confirmed',
+        imageUrl: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=400',
+        bookingDate: DateTime.now().subtract(const Duration(days: 10)),
+        ticketData: {
+          'services': ['Tour'],
+          'travelers': 5,
+        },
+      ),
+
+      // Canceled booking
+      BookingSummary(
+        bookingId: 'TB-284920',
+        type: 'Flight',
+        title: 'Paris Flight Booking',
+        subtitle: 'Paris, France',
+        dates: '20-25 Nov 2025 • 6 days',
+        totalAmount: '\$2,100',
+        status: 'Canceled',
+        imageUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400',
+        bookingDate: DateTime.now().subtract(const Duration(days: 75)),
+        ticketData: {
+          'services': ['Flight'],
+          'travelers': 2,
+          'canceledOn': '15 Nov 2025',
+          'refundAmount': '\$2,100',
+        },
+      ),
+    ]);
+  }
+
+  // Add new booking
   void addBooking(BookingSummary booking) {
     bookings.insert(0, booking);
     _saveBookings();
@@ -70,46 +157,34 @@ class MyBookingsController extends GetxController {
     );
   }
 
-  // ফিল্টার করা লিস্ট যেটা View-তে ব্যবহার করবেন
+  // Filtered bookings based on tab
   List<BookingSummary> get filteredBookings {
-    return bookings.where((b) {
-      bool typeMatch = selectedFilter.value == 'All' || b.type == selectedFilter.value;
-      bool statusMatch = selectedStatus.value == 'All' || b.status == selectedStatus.value;
-      return typeMatch && statusMatch;
-    }).toList();
+    switch (selectedTab.value) {
+      case 0: // All
+        return bookings;
+      case 1: // Today
+        final today = DateTime.now();
+        return bookings.where((b) {
+          return b.bookingDate.year == today.year &&
+              b.bookingDate.month == today.month &&
+              b.bookingDate.day == today.day;
+        }).toList();
+      case 2: // Upcoming
+        return bookings.where((b) => b.status == 'Confirmed').toList();
+      case 3: // Canceled
+        return bookings.where((b) => b.status == 'Canceled').toList();
+      default:
+        return bookings;
+    }
   }
 
-  void _addDummyData() {
-    final dummy = BookingSummary(
-      type: 'Hotel',
-      title: 'Grand Palace Resort',
-      subtitle: 'Cox\'s Bazar, Bangladesh',
-      dates: '20-22 Jan 2026',
-      imageUrl: 'https://placehold.jp/300x200.png',
-      bookingId: 'BK12345678',
-      status: 'Confirmed',
-      totalAmount: '\$250',
-      ticketData: {},
-    );
-    bookings.add(dummy);
-    debugPrint("➕ Added dummy booking");
-  }
+  // Change tab
+  void changeTab(int index) => selectedTab.value = index;
 
   // Get booking by ID
   BookingSummary? getBookingById(String bookingId) {
     return bookings.firstWhereOrNull((b) => b.bookingId == bookingId);
   }
-
-  // Get bookings by type
-  List<BookingSummary> getBookingsByType(String type) {
-    return bookings.where((b) => b.type == type).toList();
-  }
-
-  // Get confirmed bookings count
-  int get confirmedCount => bookings.where((b) => b.status == 'Confirmed').length;
-
-  // Get canceled bookings count
-  int get canceledCount => bookings.where((b) => b.status == 'Canceled').length;
 
   // Cancel booking
   Future<void> cancelBooking(String bookingId) async {
@@ -122,7 +197,7 @@ class MyBookingsController extends GetxController {
     final confirmed = await Get.dialog<bool>(
       AlertDialog(
         title: const Text('Cancel Booking'),
-        content: Text('Are you sure you want to cancel booking #${bookingId.substring(bookingId.length - 8)}?'),
+        content: const Text('Are you sure you want to cancel this trip?'),
         actions: [
           TextButton(
             onPressed: () => Get.back(result: false),
@@ -144,11 +219,72 @@ class MyBookingsController extends GetxController {
 
       Get.snackbar(
         'Booking Canceled',
-        'Your booking has been canceled successfully',
+        'Your trip has been canceled successfully',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red[100],
         colorText: Colors.red[900],
       );
+    }
+  }
+
+  // Delete booking
+  Future<void> deleteBooking(String bookingId) async {
+    final confirmed = await Get.dialog<bool>(
+      AlertDialog(
+        title: const Text('Delete Booking'),
+        content: const Text('Are you sure you want to delete this booking?'),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: const Text('No'),
+          ),
+          ElevatedButton(
+            onPressed: () => Get.back(result: true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Yes, Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      bookings.removeWhere((b) => b.bookingId == bookingId);
+      _saveBookings();
+
+      Get.snackbar(
+        'Deleted',
+        'Booking removed successfully',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+  // View booking details - Navigate to booking details page
+  void viewBookingDetails(BookingSummary booking) {
+    Get.toNamed('/my-bookings-details', arguments: {'booking': booking});
+  }
+
+  // View specific ticket based on service type
+  void viewServiceTicket(BookingSummary booking, String serviceType) {
+    switch (serviceType) {
+      case 'Flight':
+        Get.toNamed('/ticket', arguments: {'booking': booking});
+        break;
+      case 'Hotel':
+        Get.toNamed('/hotel-ticket', arguments: {'booking': booking});
+        break;
+      case 'Car':
+        Get.toNamed('/car-ticket', arguments: {'booking': booking});
+        break;
+      case 'Tour':
+        Get.toNamed('/tour-ticket', arguments: {'booking': booking});
+        break;
+      default:
+        Get.snackbar(
+          'View Ticket',
+          'Opening $serviceType ticket...',
+          snackPosition: SnackPosition.BOTTOM,
+        );
     }
   }
 
@@ -180,32 +316,6 @@ class MyBookingsController extends GetxController {
     );
   }
 
-  // View ticket details
-  void viewTicketDetails(String bookingId) {
-    final booking = getBookingById(bookingId);
-    if (booking == null) {
-      Get.snackbar('Error', 'Booking not found');
-      return;
-    }
-
-    switch (booking.type) {
-      case 'Flight':
-        Get.toNamed('/flight-ticket', arguments: {'booking': booking});
-        break;
-      case 'Hotel':
-        Get.toNamed('/hotel-ticket', arguments: {'booking': booking});
-        break;
-      case 'Car':
-        Get.toNamed('/car-ticket', arguments: {'booking': booking});
-        break;
-      case 'Tour':
-        Get.toNamed('/tour-ticket', arguments: {'booking': booking});
-        break;
-      default:
-        Get.snackbar('Error', 'Unknown booking type');
-    }
-  }
-
   // Share ticket
   Future<void> shareTicket(String bookingId) async {
     final booking = getBookingById(bookingId);
@@ -221,102 +331,6 @@ class MyBookingsController extends GetxController {
     );
   }
 
-  // Delete booking from history
-  Future<void> deleteBooking(String bookingId) async {
-    final confirmed = await Get.dialog<bool>(
-      AlertDialog(
-        title: const Text('Delete Booking'),
-        content: const Text('Are you sure you want to delete this booking from history?'),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(result: false),
-            child: const Text('No'),
-          ),
-          ElevatedButton(
-            onPressed: () => Get.back(result: true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Yes, Delete'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      bookings.removeWhere((b) => b.bookingId == bookingId);
-      _saveBookings();
-
-      Get.snackbar(
-        'Deleted',
-        'Booking removed from history',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
-  }
-
-  // Update type filter
-  void updateFilter(String filter) {
-    selectedFilter.value = filter;
-  }
-
-  // Update status filter
-  void updateStatusFilter(String status) {
-    selectedStatus.value = status;
-  }
-
-  // Sort by date (newest first)
-  void sortByDateNewest() {
-    bookings.sort((a, b) => b.bookingDate.compareTo(a.bookingDate));
-    bookings.refresh();
-  }
-
-  // Sort by date (oldest first)
-  void sortByDateOldest() {
-    bookings.sort((a, b) => a.bookingDate.compareTo(b.bookingDate));
-    bookings.refresh();
-  }
-
-  // Sort by amount (highest first)
-  void sortByAmountHighest() {
-    bookings.sort((a, b) {
-      final amountA = double.tryParse(a.totalAmount.replaceAll(RegExp(r'[^\d.]'), '')) ?? 0;
-      final amountB = double.tryParse(b.totalAmount.replaceAll(RegExp(r'[^\d.]'), '')) ?? 0;
-      return amountB.compareTo(amountA);
-    });
-    bookings.refresh();
-  }
-
-  // Clear all bookings
-  Future<void> clearAllBookings() async {
-    final confirmed = await Get.dialog<bool>(
-      AlertDialog(
-        title: const Text('Clear All Bookings'),
-        content: const Text('Are you sure you want to clear all booking history?'),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(result: false),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () => Get.back(result: true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Clear All'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      bookings.clear();
-      _saveBookings();
-
-      Get.snackbar(
-        'Cleared',
-        'All bookings have been cleared',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
-  }
-
   // Get total spending
   double get totalSpending {
     return bookings.fold(0.0, (sum, booking) {
@@ -327,29 +341,9 @@ class MyBookingsController extends GetxController {
     });
   }
 
-  // Get spending by type
-  Map<String, double> get spendingByType {
-    final Map<String, double> spending = {};
+  // Get confirmed bookings count
+  int get confirmedCount => bookings.where((b) => b.status == 'Confirmed').length;
 
-    for (var booking in bookings) {
-      final amount = double.tryParse(
-          booking.totalAmount.replaceAll(RegExp(r'[^\d.]'), '')
-      ) ?? 0;
-
-      spending[booking.type] = (spending[booking.type] ?? 0) + amount;
-    }
-
-    return spending;
-  }
-
-  // Get bookings count by type
-  Map<String, int> get bookingsCountByType {
-    final Map<String, int> counts = {};
-
-    for (var booking in bookings) {
-      counts[booking.type] = (counts[booking.type] ?? 0) + 1;
-    }
-
-    return counts;
-  }
+  // Get canceled bookings count
+  int get canceledCount => bookings.where((b) => b.status == 'Canceled').length;
 }

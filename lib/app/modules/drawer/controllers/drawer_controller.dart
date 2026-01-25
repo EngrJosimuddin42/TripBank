@@ -47,7 +47,6 @@ class DrawerController extends GetxController {
     } catch (e) {
       isLoading.value = false;
       SnackbarHelper.showError('Failed to load profile data');
-      print('Error fetching drawer data: $e');
     }
   }
 
@@ -122,7 +121,6 @@ class DrawerController extends GetxController {
   // Menu Items
 
   List<MenuItem> get menuItems => [
-    MenuItem(icon: Image.asset('assets/images/group.png'), label: 'My Bookings', color: Color(0xFFFECD08), onTap: openBookings),
     MenuItem(icon: Image.asset('assets/images/favorite.png'), label: 'Saved', color: Color(0xFFFECD08), onTap: openSaved),
     MenuItem(icon: Image.asset('assets/images/chat_bot.png'), label: 'AI Chatbot', color: Color(0xFFFECD08), onTap: openAIChatbot),
     MenuItem(icon:Image.asset('assets/images/history.png'), label: 'My History', color: Color(0xFFFECD08), onTap: openHistory),
@@ -132,7 +130,7 @@ class DrawerController extends GetxController {
   void openBookings() {Get.toNamed(Routes.MY_BOOKINGS);}
   void openSaved() {Get.toNamed(Routes.SAVED);}
   void openAIChatbot() { Get.toNamed(Routes.CHATBOT);}
-  void openHistory() { Get.toNamed(Routes.MY_TRIPS);}
+  void openHistory() { Get.toNamed(Routes.MY_BOOKINGS);}
   void openLegalInfo() => Get.snackbar('Legal', 'Opening legal information');
 
   void logout() {

@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import '../../../models/booking_model.dart';
 import '../../../models/car_model.dart';
+import '../../../widgets/snackbar_helper.dart';
 import '../../my_bookings/controllers/my_bookings_controller.dart';
 
 class CarPaymentController extends GetxController {
@@ -63,8 +64,10 @@ class CarPaymentController extends GetxController {
 
   Future<void> applyCoupon(String code) async {
     if (code.isEmpty) {
-      Get.snackbar('Error', 'Please enter a coupon code');
-      return;
+      SnackbarHelper.showWarning(
+          'Please enter a coupon code to get a discount.',
+          title: 'Empty Code'
+      );      return;
     }
 
     // Demo: 10% discount
@@ -73,12 +76,9 @@ class CarPaymentController extends GetxController {
     isCouponApplied.value = true;
     discountAmount.value = calculateTotalAmount() * 0.1;
 
-    Get.snackbar(
-      'Success',
-      'Coupon applied! You saved \$${discountAmount.value.toStringAsFixed(2)}',
-      backgroundColor: Get.theme.colorScheme.primaryContainer,
-      colorText: Get.theme.colorScheme.onPrimaryContainer,
-      snackPosition: SnackPosition.BOTTOM,
+    SnackbarHelper.showSuccess(
+        'Coupon applied! You saved \$${discountAmount.value.toStringAsFixed(2)}',
+        title: 'Coupon Applied'
     );
   }
 
@@ -101,19 +101,18 @@ class CarPaymentController extends GetxController {
 
   Future<void> confirmPayment() async {
     if (selectedPaymentMethod.value.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please select a payment method',
-        backgroundColor: Get.theme.colorScheme.errorContainer,
-        colorText: Get.theme.colorScheme.onErrorContainer,
-        snackPosition: SnackPosition.BOTTOM,
+      SnackbarHelper.showWarning(
+          'Please select how you would like to pay to continue.',
+          title: 'Payment Method Required'
       );
       return;
     }
 
     if (selectedCar.value == null) {
-      Get.snackbar('Error', 'No car selected');
-      return;
+      SnackbarHelper.showError(
+          'Something went wrong. No car was selected for this booking.',
+          title: 'Selection Error'
+      );      return;
     }
     final booking = _createLocalBooking();
 
@@ -123,13 +122,9 @@ class CarPaymentController extends GetxController {
 
     // Show success message
 
-    Get.snackbar(
-      'Success',
-      'Payment confirmed successfully!',
-      backgroundColor: Get.theme.colorScheme.primaryContainer,
-      colorText: Get.theme.colorScheme.onPrimaryContainer,
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 2),
+    SnackbarHelper.showSuccess(
+        'Your booking for has been confirmed successfully!',
+        title: 'Booking Confirmed'
     );
 
     // Navigate to ticket screen

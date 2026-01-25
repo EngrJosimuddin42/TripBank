@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../widgets/snackbar_helper.dart';
 import '../controllers/cars_booking_controller.dart';
 
 class CarTicketView extends GetView<CarsBookingController> {
@@ -589,10 +590,9 @@ class CarTicketView extends GetView<CarsBookingController> {
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: () {
-                  Get.snackbar(
-                    'Coming Soon',
-                    'Journey view will be available soon',
-                    snackPosition: SnackPosition.BOTTOM,
+                  SnackbarHelper.showWarning(
+                      'Journey view will be available soon',
+                      title: 'Coming Soon'
                   );
                 },
                 icon: const Icon(Icons.map, color: Colors.black87, size: 20),
@@ -640,12 +640,9 @@ class CarTicketView extends GetView<CarsBookingController> {
   //  HELPER METHODS
 
   void _downloadTicket() {
-    Get.snackbar(
-      'Download',
-      'Ticket downloading...',
-      backgroundColor: Colors.green[100],
-      colorText: Colors.green[800],
-      snackPosition: SnackPosition.BOTTOM,
+    SnackbarHelper.showSuccess(
+        'Ticket downloading...',
+        title: 'Download Started'
     );
   }
 

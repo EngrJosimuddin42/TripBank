@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../constants/app_strings.dart';
+import '../../../widgets/snackbar_helper.dart';
 import '../controllers/hotels_booking_controller.dart';
 
 class HotelTicketView extends GetView<HotelsBookingController> {
@@ -84,7 +85,7 @@ class HotelTicketView extends GetView<HotelsBookingController> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -236,7 +237,7 @@ class HotelTicketView extends GetView<HotelsBookingController> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -437,12 +438,9 @@ class HotelTicketView extends GetView<HotelsBookingController> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: ElevatedButton.icon(
             onPressed: () {
-              Get.snackbar(
-                'Download',
-                'Downloading booking PDF...',
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: const Color(0xFFFECD08),
-                colorText: Colors.black,
+              SnackbarHelper.showSuccess(
+                  'Downloading booking PDF...',
+                  title: 'Download Started'
               );
             },
             icon: const Icon(Icons.download, color: Colors.black, size: 20),

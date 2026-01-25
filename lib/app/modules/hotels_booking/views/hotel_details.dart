@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../../widgets/snackbar_helper.dart';
 import '../controllers/hotels_booking_controller.dart';
 
 class HotelDetailsView extends GetView<HotelsBookingController> {
@@ -92,24 +93,88 @@ class HotelDetailsView extends GetView<HotelsBookingController> {
   }
 
   Widget _buildImageGallery(List<String> images) {
+    final PageController pageController = PageController();
+    final RxInt currentIndex = 0.obs;
     return SizedBox(
       height: 250,
-      child: PageView.builder(
+      child: Stack(
+        children: [
+      PageView.builder(
+        controller: pageController,
+        onPageChanged: (index) => currentIndex.value = index,
         itemCount: images.length,
         itemBuilder: (context, index) {
           return CachedNetworkImage(
             imageUrl: images[index],
             fit: BoxFit.cover,
-            placeholder: (context, url) => Container(
-              color: Colors.grey[300],
-              child: const Center(child: CircularProgressIndicator()),
-            ),
-            errorWidget: (context, url, error) => Container(
-              color: Colors.grey[300],
-              child: const Icon(Icons.hotel, size: 60, color: Colors.grey),
-            ),
+            placeholder: (context, url) =>
+                Container(
+                  color: Colors.grey[300],
+                  child: const Center(child: CircularProgressIndicator()),
+                ),
+            errorWidget: (context, url, error) =>
+                Container(
+                  color: Colors.grey[300],
+                  child: const Icon(Icons.hotel, size: 60, color: Colors.grey),
+                ),
           );
         },
+      ),
+
+          // Image Slider (first image it Hide)
+          Obx(() => currentIndex.value > 0
+              ? Positioned(
+            left: 10,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: GestureDetector(
+                onTap: () {
+                  pageController.previousPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+                ),
+              ),
+            ),
+          )
+              : const SizedBox.shrink()),
+
+          // Image Slider (Image end it Hide)
+          Obx(() => currentIndex.value < images.length - 1
+              ? Positioned(
+            right: 10,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: GestureDetector(
+                onTap: () {
+                  pageController.nextPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 20),
+                ),
+              ),
+            ),
+          )
+              : const SizedBox.shrink()),
+        ],
       ),
     );
   }
@@ -195,7 +260,11 @@ class HotelDetailsView extends GetView<HotelsBookingController> {
   Widget _buildViewOnMapCard() {
     return _buildSectionCard(
       child: GestureDetector(
-        onTap: () => Get.snackbar('Map', 'Map view coming soon'),
+        onTap: () =>
+            SnackbarHelper.showInfo(
+                'We are working hard to bring the interactive map view to you very soon!',
+                title: 'Map View Coming Soon'
+            ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -363,57 +432,106 @@ class HotelDetailsView extends GetView<HotelsBookingController> {
   }
 
   Widget _buildRoomImages() {
+    final PageController roomPageController = PageController(
+      viewportFraction: 1.0,
+      initialPage: controller.selectedRoomIndex.value,
+    );
+
     return SizedBox(
-      height: 120,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: controller.roomList.length,
-        itemBuilder: (context, index) {
-          return Obx(() {
-            final isSelected = controller.selectedRoomIndex.value == index;
-            return GestureDetector(
-              onTap: () => controller.selectRoom(index),
-              child: Container(
-                width: 160,
-                margin: const EdgeInsets.only(right: 12),
+      height: 180,
+      child: Stack(
+        children: [
+          // Room Image Slider
+          PageView.builder(
+            controller: roomPageController,
+            itemCount: controller.roomList.length,
+            onPageChanged: (index) {
+              controller.selectRoom(index);
+            },
+            itemBuilder: (context, index) {
+              return Container(
+                margin: const EdgeInsets.symmetric(horizontal: 0),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isSelected ? const Color(0xFF8C7104) : Colors.transparent,
-                    width: 3,
-                  ),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: Stack(
-                  children: [
-                    CachedNetworkImage(
-                      imageUrl: controller.roomList[index].image,
-                      width: 160,
-                      height: 120,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        color: Colors.grey[300],
-                        child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.hotel, size: 40, color: Colors.grey),
-                      ),
-                    ),
-                    if (isSelected)
-                      const Align(
-                        alignment: Alignment.topRight,
-                        child: Padding(
-                          padding: EdgeInsets.all(4),
-                          child: Icon(Icons.check_circle, color: Colors.green),
-                        ),
-                      ),
-                  ],
+                child: CachedNetworkImage(
+                  imageUrl: controller.roomList[index].image,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    color: Colors.grey[300],
+                    child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    color: Colors.grey[300],
+                    child: const Icon(Icons.hotel, size: 40, color: Colors.grey),
+                  ),
                 ),
+              );
+            },
+          ),
+
+          Obx(() => controller.selectedRoomIndex.value > 0
+              ? Positioned(
+            left: 10,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: IconButton(
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.black.withValues(alpha: 0.3),
+                ),
+                icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+                onPressed: () {
+                  roomPageController.previousPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
               ),
-            );
-          });
-        },
+            ),
+          )
+              : const SizedBox.shrink()),
+
+          Obx(() => controller.selectedRoomIndex.value < controller.roomList.length - 1
+              ? Positioned(
+            right: 10,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: IconButton(
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.black.withValues(alpha: 0.3),
+                ),
+                icon: const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 20),
+                onPressed: () {
+                  roomPageController.nextPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
+              ),
+            ),
+          )
+              : const SizedBox.shrink()),
+
+          // Room Name Top of Image
+          Positioned(
+            bottom: 12,
+            left: 12,
+            child: Obx(() => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                controller.roomList[controller.selectedRoomIndex.value].name,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+              ),
+            )),
+          ),
+        ],
       ),
     );
   }
@@ -521,7 +639,10 @@ class HotelDetailsView extends GetView<HotelsBookingController> {
         const SizedBox(height: 4),
         GestureDetector(
           onTap: () {
-            Get.snackbar('Policy Details', 'Full cancellation policy details will be shown here');
+            SnackbarHelper.showInfo(
+                'Full cancellation policy details will be shown here',
+                title: 'Policy Details'
+            );
           },
           child: Row(
             children: [

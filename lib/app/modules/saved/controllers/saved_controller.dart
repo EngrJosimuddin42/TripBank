@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import '../../../models/hotel_model.dart';
 import '../../../services/favorites_service.dart';
+import '../../../widgets/snackbar_helper.dart';
 import '../../cars_booking/controllers/cars_booking_controller.dart';
 import '../../tours_booking/controllers/tours_booking_controller.dart';
 import '../../hotels_booking/controllers/hotels_booking_controller.dart';
@@ -86,11 +87,9 @@ class SavedController extends GetxController {
       hotelsController.isFromSaved.value = true;
       Get.toNamed('/hotels-booking', arguments: hotel);
     } catch (e) {
-
-      Get.snackbar(
-        'Error',
-        'Failed to load hotel details. Please try again.',
-        snackPosition: SnackPosition.BOTTOM,
+      SnackbarHelper.showError(
+          'Failed to load hotel details. Please try again.',
+          title: 'Navigation Error'
       );
     }
   }
@@ -115,10 +114,9 @@ class SavedController extends GetxController {
       carsController.isFromSaved.value = true;
       Get.toNamed('/cars-booking', arguments: car);
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to load car details. Please try again.',
-        snackPosition: SnackPosition.BOTTOM,
+      SnackbarHelper.showError(
+          'Failed to load car details. Please try again.',
+          title: 'Car Details Error'
       );
     }
   }

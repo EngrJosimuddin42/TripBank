@@ -8,6 +8,7 @@ import '../../../repositories/user_repository.dart';
 import '../../../routes/app_pages.dart';
 import '../../../services/api_service.dart';
 import '../../../services/auth_service.dart';
+import '../../../widgets/snackbar_helper.dart';
 import '../../hotels_booking/controllers/hotels_booking_controller.dart';
 import '../../tours_booking/controllers/tours_booking_controller.dart';
 import '../../tours_booking/views/tours_booking_view.dart';
@@ -29,8 +30,10 @@ class HomeController extends GetxController {
 
   bool get isLoadingHotels => _hotelsController.isLoadingHotels.value;
   bool get isLoadingTours => _tourBookingController.isLoading.value;
-  List<dynamic> get displayedDestinations => _hotelsController.destinations.take(4).toList();
-
+  List<dynamic> get displayedDestinations => _hotelsController.destinations
+      .where((dest) => dest['subtitle'] != null && dest['subtitle'].toString().trim().isNotEmpty)
+      .take(4)
+      .toList();
 
   // Hotel Getter
 
@@ -168,7 +171,6 @@ class HomeController extends GetxController {
       final user = await _userRepository.getProfile();
       await _authService.updateUser(user);
     } catch (e) {
-      print('Error loading profile: $e');
     } finally {
       isLoadingProfile.value = false;
     }
@@ -210,7 +212,6 @@ class HomeController extends GetxController {
         });
       }
     } catch (e) {
-      print('Error loading banner: $e');
     }
   }
 
@@ -252,7 +253,7 @@ class HomeController extends GetxController {
       return;
     }
 
-    // Search in destinationsx
+    // Search in destinations
 
     filteredDestinations.assignAll(
       _hotelsController.destinations.where((item) {
@@ -303,7 +304,7 @@ class HomeController extends GetxController {
     Get.toNamed(
       '/all-hotels',
       arguments: {
-        'title': destLocation,
+        'title': 'Hotels in $destLocation',
         'hotels': hotelsInLocation,
         'isPopular': false,
       },
@@ -381,10 +382,10 @@ List<Hotel> get displayedHotels {
   // UI Feedback Helper
 
   void _showSuccess(String message) {
-    Get.snackbar('Success', message, backgroundColor: Colors.green.withValues(alpha: 0.1), colorText: Colors.green[900], snackPosition: SnackPosition.BOTTOM);
+    SnackbarHelper.showSuccess('Operation completed successfully!');
   }
 
   void _showError(String message) {
-    Get.snackbar('Error', message, backgroundColor: Colors.red.withValues(alpha: 0.1), colorText: Colors.red[900], snackPosition: SnackPosition.BOTTOM);
+    SnackbarHelper.showError('Something went wrong');
   }
 }

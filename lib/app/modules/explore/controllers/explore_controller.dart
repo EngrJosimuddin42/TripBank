@@ -3,6 +3,11 @@ import '../../../models/car_model.dart';
 import '../../../models/flight_model.dart';
 import '../../../models/hotel_model.dart';
 import '../../../models/tour_model.dart';
+import '../../../widgets/snackbar_helper.dart';
+import '../../cars_booking/controllers/cars_booking_controller.dart';
+import '../../flight_booking/controllers/flight_booking_controller.dart';
+import '../../hotels_booking/controllers/hotels_booking_controller.dart';
+import '../../tours_booking/controllers/tours_booking_controller.dart';
 
 class ExploreController extends GetxController {
   var selectedTab = 0.obs;
@@ -37,15 +42,12 @@ class ExploreController extends GetxController {
     if (_isDataLoaded &&
         featuredDestinations.isNotEmpty &&
         allDestinations.isNotEmpty) {
-      print('⚡ Data already loaded, skipping...');
       return;
     }
 
     isLoading.value = true;
 
     try {
-      print(' Loading data...');
-
       // Simulate API delay
 
       await Future.delayed(const Duration(seconds: 1));
@@ -57,16 +59,10 @@ class ExploreController extends GetxController {
 
       _isDataLoaded = true;
 
-      print(' Loaded ${featuredDestinations.length} featured');
-      print(' Loaded ${allDestinations.length} destinations');
-
     } catch (e) {
-      print('Error loading data: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to load destinations',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      SnackbarHelper.showError(
+          'Failed to load destinations. Please check your internet connection and try again.',
+          title: 'Loading Error');
     } finally {
       isLoading.value = false;
     }
@@ -84,18 +80,14 @@ class ExploreController extends GetxController {
       featuredDestinations.value = _getFeaturedDummyData();
       allDestinations.value = _getAllDestinationsDummyData();
 
-      Get.snackbar(
-        'Success',
-        'Data refreshed successfully',
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 2),
+      SnackbarHelper.showSuccess(
+          'Data refreshed successfully',
+          title: 'Data Refreshed'
       );
     } catch (e) {
-      print('Error refreshing data: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to refresh data',
-        snackPosition: SnackPosition.BOTTOM,
+      SnackbarHelper.showError(
+          'Failed to refresh data. Please try again.',
+          title: 'Refresh Error'
       );
     }
   }
@@ -288,28 +280,72 @@ class ExploreController extends GetxController {
     searchQuery.value = '';
   }
 
+
+
+
   void navigateToDetails(Map data) {
     String type = data['type'] ?? 'hotel';
-
     switch (type.toLowerCase()) {
+
       case 'flight':
         final flight = createFlightFromMap(data);
-        Get.toNamed('/flight-details', arguments: flight);
+
+        // Find or create FlightBookingController
+        final flightController = Get.isRegistered<FlightBookingController>()
+            ? Get.find<FlightBookingController>()
+            : Get.put(FlightBookingController());
+
+        // Set the selected flight and mark as from saved/explore
+        flightController.selectedFlight.value = flight;
+        flightController.isFromSaved.value = true;
+
+        // Navigate to flight booking view
+        Get.toNamed('/flight-booking');
         break;
 
       case 'hotel':
         final hotel = createHotelFromMap(data);
-        Get.toNamed('/hotel-details', arguments: hotel);
+        // Find or create HotelsBookingController
+        final hotelsController = Get.isRegistered<HotelsBookingController>()
+            ? Get.find<HotelsBookingController>()
+            : Get.put(HotelsBookingController());
+
+        // Set the selected hotel and mark as from saved/explore
+        hotelsController.selectedHotel.value = hotel;
+        hotelsController.isFromSaved.value = true;
+
+        // Navigate to hotel booking view
+        Get.toNamed('/hotels-booking');
         break;
 
       case 'car':
         final car = createCarFromMap(data);
-        Get.toNamed('/car-details', arguments: car);
+
+        // Find or create CarsBookingController
+        final carsController = Get.isRegistered<CarsBookingController>()
+            ? Get.find<CarsBookingController>()
+            : Get.put(CarsBookingController());
+
+        // Set the selected car and mark as from saved/explore
+        carsController.selectedCar.value = car;
+        carsController.isFromSaved.value = true;
+
+        // Navigate to car booking view
+        Get.toNamed('/cars-booking');
         break;
 
       case 'tour':
         final tour = createTourFromMap(data);
-        Get.toNamed('/tour-details', arguments: tour);
+        // Find or create ToursBookingController
+        final toursController = Get.isRegistered<ToursBookingController>()
+            ? Get.find<ToursBookingController>()
+            : Get.put(ToursBookingController());
+
+        // Set the selected tour
+        toursController.selectedTour.value = tour;
+
+        // Navigate to tour details
+        Get.toNamed('/tour-details');
         break;
 
       default:
@@ -317,7 +353,6 @@ class ExploreController extends GetxController {
         break;
     }
   }
-
 
 
   // DUMMY DATA ( For Development)

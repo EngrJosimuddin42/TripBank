@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../widgets/custom_date_picker.dart';
+import '../../../widgets/snackbar_helper.dart';
 import '../controllers/flight_booking_controller.dart';
 import '../controllers/flight_search_controller.dart';
 
@@ -709,13 +710,9 @@ class FlightBookingView extends GetView<FlightBookingController> {
                       : searchController.returnSelectedTimeSlots;
 
                   if (selectedSlots.isEmpty) {
-                    Get.snackbar(
-                      'Select Time',
-                      'Please select at least one time slot',
-                      backgroundColor: Colors.orange[100],
-                      colorText: Colors.orange[800],
-                      duration: const Duration(seconds: 2),
-                    );
+                    SnackbarHelper.showWarning(
+                        'Please select at least one time slot to continue.',
+                        title: 'Select Time');
                   } else {
                     Get.back();
                   }
@@ -927,13 +924,9 @@ class FlightBookingView extends GetView<FlightBookingController> {
               child: ElevatedButton(
                 onPressed: () {
                   if (tempSelectedSlots.isEmpty) {
-                    Get.snackbar(
-                      'Select Time',
-                      'Please select at least one time slot',
-                      backgroundColor: Colors.orange[100],
-                      colorText: Colors.orange[800],
-                      duration: const Duration(seconds: 2),
-                    );
+                    SnackbarHelper.showWarning(
+                        'Please select at least one time slot to continue.',
+                        title: 'Select Time');
                   } else {
                     final selectedTime = tempSelectedSlots.first;
                     final category = searchController.getTimeCategory(selectedTime);
@@ -1194,39 +1187,52 @@ class FlightBookingView extends GetView<FlightBookingController> {
   Widget _buildSearchButton() {
     return SizedBox(
       width: double.infinity,
-        child: Obx(() => ElevatedButton(
+      child: Obx(() {
+        final isFromSaved = controller.isFromSaved.value;
+        final buttonText = isFromSaved ? 'OK' : 'Search';
+        final showSearchIcon = !isFromSaved;
+
+        return ElevatedButton(
           onPressed: controller.isLoading.value
               ? null
               : () {
-            Get.find<FlightSearchController>().searchFlights();
+            if (isFromSaved) {
+              // From explore - go directly to flight details
+              controller.proceedFromExplore();
+            } else {
+              // Normal search flow
+              Get.find<FlightSearchController>().searchFlights();
+            }
           },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFFECD08),
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 0,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.search, color: Colors.black, size: 20),
-            const SizedBox(width: 8),
-            Text(
-              'Search',
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.black,
-              ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFFECD08),
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
             ),
-          ],
-        ),
-      ),
-        ),
+            elevation: 0,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (showSearchIcon) ...[
+                const Icon(Icons.search, color: Colors.black, size: 20),
+                const SizedBox(width: 8),
+              ],
+              Text(
+                buttonText,
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
+        );
+      }),
     );
-    }
+  }
 
   Future<void> _selectDate(bool isDeparture) async {
     final DateTime initialDate = isDeparture
@@ -1252,11 +1258,9 @@ class FlightBookingView extends GetView<FlightBookingController> {
           } else {
             if (controller.departureDate.value != null &&
                 picked.isBefore(controller.departureDate.value!)) {
-              Get.snackbar(
-                'Invalid Date',
-                'Return date cannot be before departure date',
-                backgroundColor: Colors.red[100],
-                colorText: Colors.red[800],
+              SnackbarHelper.showWarning(
+                  'Return date cannot be before departure date',
+                  title: 'Invalid Date'
               );
               return;
             }

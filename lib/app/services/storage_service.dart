@@ -3,6 +3,8 @@ import 'package:get_storage/get_storage.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 
+import '../widgets/snackbar_helper.dart';
+
 class StorageService extends GetxService {
   late GetStorage _box;
 
@@ -26,9 +28,9 @@ class StorageService extends GetxService {
   Future<void> saveToken(String token) async {
     try {
       await _secureStorage.write(key: 'auth_token', value: token);
-      if (kDebugMode) debugPrint(' Token saved successfully');
     } catch (e) {
       if (kDebugMode) debugPrint(' Error saving token: $e');
+      SnackbarHelper.showError('Security Storage failed. Please try again.');
       rethrow;
     }
   }
@@ -47,9 +49,8 @@ class StorageService extends GetxService {
   Future<void> removeToken() async {
     try {
       await _secureStorage.delete(key: 'auth_token');
-      if (kDebugMode) debugPrint(' Token removed');
     } catch (e) {
-      if (kDebugMode) debugPrint(' Error removing token: $e');
+      SnackbarHelper.showError('Failed to clear session.');
     }
   }
 
@@ -72,9 +73,8 @@ class StorageService extends GetxService {
       userCopy.remove('credit_card');
       userCopy.remove('token');
       await _box.write('user', userCopy);
-      if (kDebugMode) debugPrint(' User data saved');
     } catch (e) {
-      if (kDebugMode) debugPrint('Error saving user: $e');
+      SnackbarHelper.showError('Failed to save user profile locally.');
       rethrow;
     }
   }
@@ -199,7 +199,7 @@ class StorageService extends GetxService {
       await _box.remove('favorite_places');
       if (kDebugMode) debugPrint(' All favorites cleared');
     } catch (e) {
-      if (kDebugMode) debugPrint('Error clearing favorites: $e');
+      SnackbarHelper.showError('Could not clear favorite list.');
     }
   }
 
@@ -270,9 +270,9 @@ class StorageService extends GetxService {
     try {
       await _secureStorage.deleteAll();
       await _box.erase();
-      if (kDebugMode) debugPrint('All storage cleared successfully');
+      SnackbarHelper.showSuccess('All local data has been cleared.');
     } catch (e) {
-      if (kDebugMode) debugPrint('Error clearing storage: $e');
+      SnackbarHelper.showError('Failed to clear storage completely.');
     }
   }
 }

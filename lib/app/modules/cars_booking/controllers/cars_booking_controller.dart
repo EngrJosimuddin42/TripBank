@@ -2,6 +2,8 @@ import 'package:get/get.dart';
 import '../../../models/booking_model.dart';
 import '../../../models/car_model.dart';
 import '../../../services/favorites_service.dart';
+import '../../../widgets/snackbar_helper.dart';
+import '../../my_bookings/controllers/my_bookings_controller.dart';
 
 class CarTypeFilter {
   final String name;
@@ -251,7 +253,10 @@ class CarsBookingController extends GetxController {
   void selectCar(Car car) {
     selectedCar.value = car;
     if (ArrivingDate.value == null) {
-      Get.snackbar("Error", "Please select a pickup date");
+      SnackbarHelper.showWarning(
+        "Please select a pickup date before proceeding.",
+        title: "Date Required",
+      );
       return;
     }
     Get.toNamed(
@@ -448,10 +453,18 @@ class CarsBookingController extends GetxController {
     return true;
   }
 
+
+  @override
+  void onClose() {
+    isFromSaved.value = false;
+    selectedCar.value = null;
+    super.onClose();
+  }
+
   // SEARCH CARS
 
   Future<void> searchCars() async {
-    // If coming from saved page with a selected car
+
     if (isFromSaved.value && selectedCar.value != null) {
       isFromSaved.value = false;
       Get.toNamed('/car-details', arguments: selectedCar.value);
@@ -461,16 +474,23 @@ class CarsBookingController extends GetxController {
     // Validation
 
     if (ArrivingFromCode.value == ArrivingToCode.value) {
-      Get.snackbar('Invalid Location', 'Pickup and Dropoff cannot be the same');
-      return;
+      SnackbarHelper.showError(
+          'Pickup and Drop-off locations cannot be the same. Please change one.',
+          title: 'Invalid Location'
+      );      return;
     }
     if (ArrivingDate.value == null) {
-      Get.snackbar('Date Required', 'Please select pickup date');
-      return;
+      SnackbarHelper.showWarning(
+          'Please select a pickup date to proceed.',
+          title: 'Date Required'
+      );      return;
     }
     if (selectedTripType.value == 'Round Way' &&
         (returnDate.value == null || returnDate.value!.isBefore(ArrivingDate.value!))) {
-      Get.snackbar('Invalid Return Date', 'Return date must be after pickup');
+      SnackbarHelper.showWarning(
+          'Return date must be after pickup',
+          title: 'Invalid Return Date'
+      );
       return;
     }
 
@@ -575,8 +595,10 @@ class CarsBookingController extends GetxController {
 
   void bookCar() {
     if (selectedCar.value == null) {
-      Get.snackbar('Error', 'No car selected');
-      return;
+      SnackbarHelper.showError(
+          'Please select a car before proceeding to booking.',
+          title: 'Selection Required'
+      );      return;
     }
     _saveCarBookingToMyBookings();
   }
@@ -600,7 +622,7 @@ class CarsBookingController extends GetxController {
       imageUrl: dynamicImageUrl,
       bookingId: 'CB-${DateTime.now().millisecondsSinceEpoch}',
       status: 'Confirmed',
-      totalAmount: '\${total.toStringAsFixed(0)}',
+      totalAmount: '\$${total.toStringAsFixed(0)}',
       ticketData: {
         'car': car.toJson(),
         'days': days,
@@ -622,7 +644,7 @@ class CarsBookingController extends GetxController {
         'paymentMethod': selectedPaymentMethod.value,
       },
     );
-    print('Car booking saved: ${summary.bookingId}');
+    Get.find<MyBookingsController>().addBooking(summary);
   }
 
   String _formatDate(DateTime date) {

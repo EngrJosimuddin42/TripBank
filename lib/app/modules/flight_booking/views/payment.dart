@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../widgets/snackbar_helper.dart';
 import '../controllers/flight_booking_controller.dart';
 import '../../../models/flight_model.dart';
 
@@ -11,12 +12,9 @@ class PaymentView extends GetView<FlightBookingController> {
 
     // Validate payment method
     if (controller.selectedPaymentMethod.value.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please select a payment method',
-        backgroundColor: Colors.red[100],
-        colorText: Colors.red[800],
-        snackPosition: SnackPosition.BOTTOM,
+      SnackbarHelper.showWarning(
+          'Please select a payment method to proceed with your booking.',
+          title: 'Payment Method Required'
       );
       return;
     }
@@ -456,12 +454,9 @@ class PaymentView extends GetView<FlightBookingController> {
             // Apply Button
             ElevatedButton(
               onPressed: () {
-                Get.snackbar(
-                  'Coupon',
-                  'Coupon code applied successfully!',
-                  snackPosition: SnackPosition.BOTTOM,
-                  backgroundColor: Colors.green[100],
-                  colorText: Colors.green[800],
+                SnackbarHelper.showSuccess(
+                    'Coupon code applied successfully! Enjoy your discount.',
+                    title: 'Coupon Applied'
                 );
               },
               style: ElevatedButton.styleFrom(

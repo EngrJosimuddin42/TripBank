@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:tripbank/app/modules/my_bookings/views/my_bookings_details%20.dart';
 import '../modules/cars_booking/bindings/cars_booking_binding.dart';
 import '../modules/cars_booking/controllers/car_details_controller.dart';
 import '../modules/cars_booking/views/car_details.dart';
@@ -36,9 +37,6 @@ import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
 import '../modules/my_bookings/bindings/my_bookings_binding.dart';
 import '../modules/my_bookings/views/my_bookings_view.dart';
-import '../modules/my_trips/bindings/my_trips_binding.dart';
-import '../modules/my_trips/views/my_trip_details.dart';
-import '../modules/my_trips/views/my_trips_view.dart';
 import '../modules/onboarding/bindings/onboarding_binding.dart';
 import '../modules/onboarding/views/onboarding_view.dart';
 import '../modules/password/bindings/password_binding.dart';
@@ -116,16 +114,6 @@ class AppPages {
       name: _Paths.PROFILE,
       page: () => const ProfileView(),
       binding: ProfileBinding(),
-    ),
-    GetPage(
-      name: _Paths.MY_TRIPS,
-      page: () => const MyTripsView(),
-      binding: MyTripsBinding(),
-    ),
-    GetPage(
-      name: _Paths.MY_TRIP_DETAILS,
-      page: () => const MyTripDetailsView(),
-      binding: MyTripsBinding(),
     ),
     GetPage(
       name: _Paths.EXPLORE,
@@ -323,6 +311,11 @@ class AppPages {
     GetPage(
       name: _Paths.MY_BOOKINGS,
       page: () => const MyBookingsView(),
+      binding: MyBookingsBinding(),
+    ),
+    GetPage(
+      name: _Paths.MY_BOOKINGS_DETAILS,
+      page: () => const MyBookingsDetailsView(),
       binding: MyBookingsBinding(),
     ),
   ];

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../models/booking_model.dart';
 import '../../../models/hotel_model.dart';
 import '../../../services/favorites_service.dart';
+import '../../../widgets/snackbar_helper.dart';
 import '../../my_bookings/controllers/my_bookings_controller.dart';
 
 class HotelsBookingController extends GetxController {
@@ -16,6 +17,8 @@ class HotelsBookingController extends GetxController {
   final RxList<Hotel> allHotels = <Hotel>[].obs;
   final RxList<Hotel> searchResults = <Hotel>[].obs;
   final RxBool isLoadingHotels = false.obs;
+  final PageController hotelImageController = PageController();
+  var currentImageIndex = 0.obs;
 
   bool isHotelFavorite(String hotelId) {
     return _favoritesService.isFavorite('hotel', hotelId);
@@ -121,23 +124,54 @@ class HotelsBookingController extends GetxController {
   final RxString couponCode = ''.obs;
   final RxDouble discountPercentage = 0.0.obs;
 
-  // User Information Controllers
 
-  final firstNameController = TextEditingController();
-  final lastNameController = TextEditingController();
-  final phoneController = TextEditingController();
-  final emailController = TextEditingController();
-  final specialRequestsController = TextEditingController();
+  // User Information Controllers - declare as late
+  late TextEditingController firstNameController;
+  late TextEditingController lastNameController;
+  late TextEditingController phoneController;
+  late TextEditingController emailController;
+  late TextEditingController specialRequestsController;
 
-  // Billing Address Controllers
+  // Billing Address Controllers - declare as late
+  late TextEditingController billingFirstNameController;
+  late TextEditingController billingLastNameController;
+  late TextEditingController billingPhoneController;
+  late TextEditingController billingEmailController;
+  late TextEditingController billingCountryController;
+  late TextEditingController billingStateController;
+  late TextEditingController billingZipController;
 
-  final billingFirstNameController = TextEditingController();
-  final billingLastNameController = TextEditingController();
-  final billingPhoneController = TextEditingController();
-  final billingEmailController = TextEditingController();
-  final billingCountryController = TextEditingController();
-  final billingStateController = TextEditingController();
-  final billingZipController = TextEditingController();
+  @override
+  void onInit() {
+    super.onInit();
+
+    // Initialize all controllers here
+    _initializeControllers();
+
+    if (!isFromSaved.value) {
+      location.value = 'Paris, France';
+    }
+    _loadDummyData();
+    allHotels.assignAll(_getDummyHotels());
+  }
+
+  void _initializeControllers() {
+    // User Information Controllers
+    firstNameController = TextEditingController();
+    lastNameController = TextEditingController();
+    phoneController = TextEditingController();
+    emailController = TextEditingController();
+    specialRequestsController = TextEditingController();
+
+    // Billing Address Controllers
+    billingFirstNameController = TextEditingController();
+    billingLastNameController = TextEditingController();
+    billingPhoneController = TextEditingController();
+    billingEmailController = TextEditingController();
+    billingCountryController = TextEditingController();
+    billingStateController = TextEditingController();
+    billingZipController = TextEditingController();
+  }
 
   void _loadDummyData() {
     isLoadingHotels.value = true;
@@ -173,42 +207,10 @@ class HotelsBookingController extends GetxController {
     destinations.assignAll(destinationsMap.values.toList());
   }
 
-
-  @override
-  void onInit() {
-    super.onInit();
-    if (!isFromSaved.value) {
-      location.value = 'Paris, France';
-    }
-    _loadDummyData();
-    allHotels.assignAll(_getDummyHotels());
-  }
-
-  @override
-  void onReady() {
-    super.onReady();
-  }
-
-
   @override
   void onClose() {
     _disposeControllers();
     super.onClose();
-  }
-
-  void resetToInitialState() {
-    //  Reset location to default
-    location.value = 'Paris, France';
-    isFromSaved.value = false;
-    selectedHotel.value = null;
-    //  Reset Room & Guest to default
-    roomCount.value = 1;
-    guestCount.value = 1;
-    //  Reset Class to default
-    preferredClass.value = 'Economy';
-    //  Reset dates to default
-    checkInDate.value = DateTime.now().add(const Duration(days: 1));
-    checkOutDate.value = DateTime.now().add(const Duration(days: 2));
   }
 
   void _disposeControllers() {
@@ -224,6 +226,21 @@ class HotelsBookingController extends GetxController {
     billingCountryController.dispose();
     billingStateController.dispose();
     billingZipController.dispose();
+  }
+
+  void resetToInitialState() {
+    //  Reset location to default
+    location.value = 'Paris, France';
+    isFromSaved.value = false;
+    selectedHotel.value = null;
+    //  Reset Room & Guest to default
+    roomCount.value = 1;
+    guestCount.value = 1;
+    //  Reset Class to default
+    preferredClass.value = 'Economy';
+    //  Reset dates to default
+    checkInDate.value = DateTime.now().add(const Duration(days: 1));
+    checkOutDate.value = DateTime.now().add(const Duration(days: 2));
   }
 
   // Dummy data for Development
@@ -270,16 +287,11 @@ class HotelsBookingController extends GetxController {
           RoomDetail(label: 'Shower', value: '1'),
           RoomDetail(label: 'Room Size', value: '40 sqm'),
           RoomDetail(label: 'Cancellation policy', value: 'See details'),
-          RoomDetail(
-              label: 'Fully refundable before 13 Dec',
-              value: '+\$0.00',
-              isPrice: true),
-          RoomDetail(
-              label: 'Pay nothing until 13 Dec',
-              value: '+\$0.00',
-              isPrice: true),
+          RoomDetail(label: 'Fully refundable before 13 Dec', value: '+\$0.00',isPrice: true),
+          RoomDetail(label: 'Pay nothing until 13 Dec', value: '+\$0.00', isPrice: true),
         ],
       ),
+
       Hotel(
         id: '2',
         name: 'Marina Bay Sands Hotel',
@@ -546,14 +558,8 @@ class HotelsBookingController extends GetxController {
           RoomDetail(label: 'Shower', value: '1'),
           RoomDetail(label: 'Room Size', value: '50 sqm'),
           RoomDetail(label: 'Cancellation policy', value: 'See details'),
-          RoomDetail(
-              label: 'Fully refundable before 13 Dec',
-              value: '+\$0.00',
-              isPrice: true),
-          RoomDetail(
-              label: 'Pay nothing until 25 Dec',
-              value: '+\$0.00',
-              isPrice: true),
+          RoomDetail(label: 'Fully refundable before 13 Dec', value: '+\$0.00', isPrice: true),
+          RoomDetail(label: 'Pay nothing until 25 Dec', value: '+\$0.00', isPrice: true),
         ],
       ),
       Hotel(
@@ -651,7 +657,7 @@ class HotelsBookingController extends GetxController {
         images: [
           'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=400',
         ],
-        rating: 4.7,
+        rating: 5.7,
         reviews: 1800,
         description: 'Find peace and serenity in the lush gardens of Bali.',
         address: 'Ubud, Bali',
@@ -875,7 +881,10 @@ class HotelsBookingController extends GetxController {
 
   void applyCoupon(String code) {
     if (code.isEmpty) {
-      _showError('Please enter a coupon code');
+      SnackbarHelper.showWarning(
+          'Please enter a coupon code to get a discount.',
+          title: 'Empty Code'
+      );
       return;
     }
 
@@ -889,16 +898,25 @@ class HotelsBookingController extends GetxController {
     if (validCoupons.containsKey(code.toUpperCase())) {
       discountPercentage.value = validCoupons[code.toUpperCase()]!;
       couponCode.value = code.toUpperCase();
-      _showSuccess('Coupon applied! You saved ${discountPercentage.value}%');
+      SnackbarHelper.showSuccess(
+          'Congratulations! You saved ${discountPercentage.value}% on your booking.',
+          title: 'Coupon Applied'
+      );
     } else {
-      _showError('Invalid coupon code');
+      SnackbarHelper.showError(
+          'The coupon code you entered is invalid.',
+          title: 'Invalid Coupon'
+      );
     }
   }
 
   void removeCoupon() {
     couponCode.value = '';
     discountPercentage.value = 0.0;
-    _showSuccess('Coupon removed');
+    SnackbarHelper.showInfo(
+        'Coupon has been removed. The original price is now restored.',
+        title: 'Coupon Removed'
+    );
   }
 
   void navigateToHotelDetails(Hotel hotel) {
@@ -911,22 +929,34 @@ class HotelsBookingController extends GetxController {
   bool validateBookingForm() {
     if (firstNameController.text.trim().isEmpty ||
         lastNameController.text.trim().isEmpty) {
-      _showError('Please enter your name');
+      SnackbarHelper.showWarning(
+          'Please enter your name',
+          title: 'Name Required'
+      );
       return false;
     }
 
     if (phoneController.text.trim().isEmpty) {
-      _showError('Please enter your phone number');
+      SnackbarHelper.showWarning(
+          'Please enter your phone number.',
+          title: 'Phone Number Required'
+      );
       return false;
     }
 
     if (!_isValidEmail(emailController.text.trim())) {
-      _showError('Please enter a valid email');
+      SnackbarHelper.showError(
+          'Please enter a valid email',
+          title: 'Invalid Email'
+      );
       return false;
     }
 
     if (selectedPaymentMethod.value.isEmpty) {
-      _showError('Please select a payment method');
+      SnackbarHelper.showWarning(
+          'Please choose a payment method to complete your transaction.',
+          title: 'Payment Method Missing'
+      );
       return false;
     }
 
@@ -945,7 +975,10 @@ class HotelsBookingController extends GetxController {
   void confirmBooking() {
     if (!validateBookingForm()) return;
 
-    _showSuccess('Booking confirmed successfully!');
+    SnackbarHelper.showSuccess(
+        'Your hotel booking has been confirmed successfully!',
+        title: 'Booking Confirmed'
+    );
     _saveHotelBookingToMyBookings();
 
     Future.delayed(const Duration(milliseconds: 800), () {
@@ -1039,19 +1072,27 @@ class HotelsBookingController extends GetxController {
   }
 
   //  SEARCH & SELECT
-
   Future<void> searchHotels() async {
+    // Check if coming from explore/saved view
     if (isFromSaved.value) {
       isFromSaved.value = false;
       if (selectedHotel.value != null) {
-        Get.toNamed('/hotel-details', arguments: selectedHotel.value);
+        Get.toNamed('/hotel-details');
       } else {
-        Get.snackbar('Error', 'No hotel selected to view details');
+        SnackbarHelper.showError(
+            'No hotel selected to view details',
+            title: 'Selection Missing'
+        );
       }
       return;
     }
+
+    // Normal search flow validation
     if (nights.value < 1) {
-      Get.snackbar('Error', 'Check-out must be after check-in');
+      SnackbarHelper.showWarning(
+          'Check-out must be after check-in',
+          title: 'Invalid Dates'
+      );
       return;
     }
 
@@ -1068,17 +1109,22 @@ class HotelsBookingController extends GetxController {
       searchResults.value = hotels;
 
       if (hotels.isEmpty) {
-        Get.snackbar('Info', 'No hotels found for your search');
+        SnackbarHelper.showInfo(
+            'No hotels found for your search',
+            title: 'No Hotels Found'
+        );
       } else {
         Get.toNamed('/all-hotels');
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load hotels: $e');
+      SnackbarHelper.showError(
+          'Something went wrong! Failed to load hotels.',
+          title: 'Loading Failed'
+      );
     } finally {
       isLoadingHotels.value = false;
     }
   }
-
 
 
   void searchHotelsByLocation(String locationName) {
@@ -1093,42 +1139,6 @@ class HotelsBookingController extends GetxController {
     }
   }
 
-
-  //  SNACKBAR HELPERS
-
-  void _showSuccess(String message) {
-    Get.snackbar(
-      'Success',
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.green[100],
-      colorText: Colors.green[800],
-      duration: const Duration(seconds: 2),
-    );
-  }
-
-  void _showError(String message) {
-    Get.snackbar(
-      'Error',
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.red[100],
-      colorText: Colors.red[800],
-      duration: const Duration(seconds: 3),
-    );
-  }
-
-  void _showInfo(String message) {
-    Get.snackbar(
-      'Info',
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.blue[100],
-      colorText: Colors.blue[800],
-      duration: const Duration(seconds: 2),
-    );
-  }
-
   void toggleFilter(String filter) {
     if (selectedFilters.contains(filter)) {
       selectedFilters.remove(filter);
@@ -1138,11 +1148,12 @@ class HotelsBookingController extends GetxController {
   }
 
 
-  //  NAVIGATION HELPERS
-
   void goToPayment() {
     if (selectedHotel.value == null) {
-      _showError('Please select a hotel first');
+      SnackbarHelper.showWarning(
+          'Please select a hotel room before proceeding to payment.',
+          title: 'No Hotel Selected'
+      );
       return;
     }
     Get.toNamed('/payment-hotel');
@@ -1150,7 +1161,10 @@ class HotelsBookingController extends GetxController {
 
   void goToTicket() {
     if (selectedHotel.value == null) {
-      _showError('No booking found');
+      SnackbarHelper.showError(
+          'We couldn\'t find your booking details. Please try again.',
+          title: 'Data Missing'
+      );
       return;
     }
     Get.toNamed('/hotel-ticket');

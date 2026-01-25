@@ -125,7 +125,7 @@ class ForgotPasswordEmailView extends GetView<PasswordController> {
                   color: Color(0xFF0D0D12),
                 ),
                 decoration: InputDecoration(
-                  hintText: 'johndoe@example.com',
+                  hintText: 'josimcse@example.com',
                   hintStyle: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w400,

@@ -388,7 +388,6 @@ class LoginView extends GetView<LoginController> {
             height: 48,
             fit: BoxFit.contain,
             errorBuilder: (context, error, stackTrace) {
-              print('Image load error: $imagePath');
               return Icon(
                 _getIconForPath(imagePath),
                 size: 48,
