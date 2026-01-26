@@ -3,6 +3,7 @@ import '../../../constants/app_strings.dart';
 import '../../../models/booking_model.dart';
 import '../../../models/tour_model.dart';
 import '../../../services/favorites_service.dart';
+import '../../../utils/booking_helper.dart';
 import '../../../widgets/snackbar_helper.dart';
 import '../../my_bookings/controllers/my_bookings_controller.dart';
 
@@ -686,45 +687,130 @@ class ToursBookingController extends GetxController {
 
     final dynamicImageUrl = tour.imageUrl.isNotEmpty
         ? tour.imageUrl
-        : 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400';
+        : 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400';
 
-    final summary = BookingSummary(
-      type: AppStrings.tourType,
-      title: tour.title,
-      subtitle: '${adultsCount.value} Adults • ${childrenCount.value} Children • ${tour.duration}',
-      dates: selectedDate.value != null
-          ? 'Date: ${selectedDate.value!.day}/${selectedDate.value!.month}/${selectedDate.value!.year}'
-          : 'Date not selected',
+
+    // ========== USE BookingHelper ==========
+    final bookingToSave = BookingHelper.createTourBooking(
+      tourName: tour.title,
+      destination: tour.location,
+      country: _extractCountryFromLocation(tour.location),
+      startDate: selectedDate.value ?? DateTime.now(),
+      endDate: _calculateEndDate(),
+      totalPrice: total,
+      travelers: adultsCount.value + childrenCount.value,
       imageUrl: dynamicImageUrl,
-      bookingId: bookingReference.value,
-      status: AppStrings.confirmed,
-      totalAmount: '\$${total.toStringAsFixed(0)}',
-      ticketData: {
-        'tour': {
-          'id': tour.id,
-          'title': tour.title,
-          'location': tour.location,
-          'imageUrl': tour.imageUrl,
-          'category': tour.category,
-          'duration': tour.duration,
-          'maxPeople': tour.maxPeople,
-          'price': tour.price,
-          'rating': tour.rating,
-          'description': tour.description,
-          'startTime': tour.startTime,
-          'destination': tour.destination,
-        },
+      tourDetails: {
+        'tourId': tour.id,
+        'category': tour.category,
+        'duration': tour.duration,
+        'maxPeople': tour.maxPeople,
+        'price': tour.price,
+        'rating': tour.rating,
+        'reviewsCount': tour.reviewsCount,
+        'description': tour.description,
+        'startTime': tour.startTime,
+        'destination': tour.destination,
+
+        // Booking details
         'adults': adultsCount.value,
         'children': childrenCount.value,
         'selectedDate': selectedDate.value?.toIso8601String(),
         'subtotal': calculateTotalAmount(),
         'tax': calculateTax(),
-        'totalPrice': total,
+        'taxRate': tour.taxRate,
         'paymentMethod': selectedPaymentMethod.value,
         'bookingReference': bookingReference.value,
+
+        // Tour specifics
+        'visitingPlaces': tour.visitingPlaces,
+        'keyHighlights': tour.keyHighlights,
+        'included': tour.included,
+        'notIncluded': tour.notIncluded,
+        'whatToBring': tour.whatToBring,
+
+        if (tour.itinerary != null)
+          'itinerary': tour.itinerary!.map((day) => {
+            'day': day.day,
+            'title': day.title,
+            'activities': day.activities,
+          }).toList(),
+
+        if (tour.meetingPoint != null)
+          'meetingPoint': {
+            'address': tour.meetingPoint!.address,
+            'description': tour.meetingPoint!.description,
+            'mapImageUrl': tour.meetingPoint!.mapImageUrl,
+          },
       },
     );
-    Get.find<MyBookingsController>().addBooking(summary);
+
+    Get.find<MyBookingsController>().addBooking(bookingToSave);
+
+    SnackbarHelper.showSuccess(
+      'Your tour has been booked successfully!',
+      title: 'Booking Confirmed',
+    );
+  }
+
+// Helper method to extract country from location
+  String _extractCountryFromLocation(String location) {
+    // Location format: "City, Country"
+    final parts = location.split(',');
+    if (parts.length > 1) {
+      return parts.last.trim();
+    }
+
+    // Fallback mapping
+    final locationCountryMap = {
+      'Paris': 'France',
+      'Bali': 'Indonesia',
+      'Uluwatu': 'Indonesia',
+      'Ubud': 'Indonesia',
+      'Nusa Penida': 'Indonesia',
+    };
+
+    for (var key in locationCountryMap.keys) {
+      if (location.contains(key)) {
+        return locationCountryMap[key]!;
+      }
+    }
+
+    return 'International';
+  }
+
+// Helper method to calculate end date based on tour duration
+  DateTime _calculateEndDate() {
+    if (selectedDate.value == null) return DateTime.now();
+
+    final tour = selectedTour.value;
+    if (tour == null) return selectedDate.value!;
+
+    // Parse duration string (e.g., "3 Days", "8 Hours", "Full Day")
+    final duration = tour.duration.toLowerCase();
+
+    if (duration.contains('day')) {
+      final daysMatch = RegExp(r'(\d+)').firstMatch(duration);
+      if (daysMatch != null) {
+        final days = int.parse(daysMatch.group(1)!);
+        return selectedDate.value!.add(Duration(days: days));
+      }
+    }
+
+    if (duration.contains('full day')) {
+      return selectedDate.value!.add(Duration(days: 1));
+    }
+
+    if (duration.contains('hour')) {
+      final hoursMatch = RegExp(r'(\d+)').firstMatch(duration);
+      if (hoursMatch != null) {
+        final hours = int.parse(hoursMatch.group(1)!);
+        return selectedDate.value!.add(Duration(hours: hours));
+      }
+    }
+
+    // Default: same day
+    return selectedDate.value!;
   }
 
   void resetBooking() {

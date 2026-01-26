@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
-import '../../../models/booking_model.dart';
 import '../../../models/car_model.dart';
 import '../../../services/favorites_service.dart';
+import '../../../utils/booking_helper.dart';
 import '../../../widgets/snackbar_helper.dart';
 import '../../my_bookings/controllers/my_bookings_controller.dart';
 
@@ -612,21 +612,38 @@ class CarsBookingController extends GetxController {
 
     final dynamicImageUrl = car.imageUrl.isNotEmpty
         ? car.imageUrl
-        : 'https://via.placeholder.com/400x300';
+        : 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=400';
 
-    final summary = BookingSummary(
-      type: 'Car',
-      title: '${car.brand} ${car.model} Rental',
-      subtitle: '${car.types} • ${car.transmission} • ${car.seats} Seats',
-      dates: '${_formatDate(ArrivingDate.value ?? DateTime.now())} • $days days',
+
+    // USE BookingHelper
+    final bookingToSave = BookingHelper.createCarBooking(
+      carModel: '${car.brand} ${car.model}',
+      pickupLocation: ArrivingFromLocation.value.isNotEmpty
+          ? ArrivingFromLocation.value
+          : 'Airport',
+      country: ArrivingFromCountry.value.isNotEmpty
+          ? ArrivingFromCountry.value
+          : 'UAE',
+      pickupDate: ArrivingDate.value ?? DateTime.now(),
+      returnDate: returnDate.value ?? ArrivingDate.value?.add(Duration(days: days)) ?? DateTime.now(),
+      totalPrice: total,
+      passengers: totalPassengers,
       imageUrl: dynamicImageUrl,
-      bookingId: 'CB-${DateTime.now().millisecondsSinceEpoch}',
-      status: 'Confirmed',
-      totalAmount: '\$${total.toStringAsFixed(0)}',
-      ticketData: {
-        'car': car.toJson(),
+      carDetails: {
+        'carId': car.id,
+        'brand': car.brand,
+        'model': car.model,
+        'year': car.year,
+        'types': car.types,
+        'seats': car.seats,
+        'bags': car.bags,
+        'doors': car.doors,
+        'transmission': car.transmission,
+        'rating': car.rating,
+        'reviews': car.reviews,
+        'pricePerDay': car.pricePerDay,
+        'extras': car.extras,
         'days': days,
-        'totalPrice': total,
         'pickup': {
           'location': ArrivingFromLocation.value,
           'code': ArrivingFromCode.value,
@@ -644,7 +661,13 @@ class CarsBookingController extends GetxController {
         'paymentMethod': selectedPaymentMethod.value,
       },
     );
-    Get.find<MyBookingsController>().addBooking(summary);
+
+    Get.find<MyBookingsController>().addBooking(bookingToSave);
+
+    SnackbarHelper.showSuccess(
+      'Your car rental has been booked successfully!',
+      title: 'Booking Confirmed',
+    );
   }
 
   String _formatDate(DateTime date) {

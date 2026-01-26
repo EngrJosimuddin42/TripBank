@@ -70,6 +70,9 @@ class MyBookingsController extends GetxController {
           'services': ['Flight', 'Hotel', 'Tour'],
           'travelers': 2,
           'tag': 'Next Adventure',
+          'itinerary': [
+            {'time': '10:00 AM', 'event': 'Departure', 'day': 'Day 1'},
+          ],
         },
       ),
 
@@ -119,6 +122,7 @@ class MyBookingsController extends GetxController {
         ticketData: {
           'services': ['Tour'],
           'travelers': 5,
+          'itinerary': [],
         },
       ),
 
@@ -227,38 +231,6 @@ class MyBookingsController extends GetxController {
     }
   }
 
-  // Delete booking
-  Future<void> deleteBooking(String bookingId) async {
-    final confirmed = await Get.dialog<bool>(
-      AlertDialog(
-        title: const Text('Delete Booking'),
-        content: const Text('Are you sure you want to delete this booking?'),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(result: false),
-            child: const Text('No'),
-          ),
-          ElevatedButton(
-            onPressed: () => Get.back(result: true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Yes, Delete'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      bookings.removeWhere((b) => b.bookingId == bookingId);
-      _saveBookings();
-
-      Get.snackbar(
-        'Deleted',
-        'Booking removed successfully',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
-  }
-
   // View booking details - Navigate to booking details page
   void viewBookingDetails(BookingSummary booking) {
     Get.toNamed('/my-bookings-details', arguments: {'booking': booking});
@@ -313,21 +285,6 @@ class MyBookingsController extends GetxController {
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.green[100],
       colorText: Colors.green[900],
-    );
-  }
-
-  // Share ticket
-  Future<void> shareTicket(String bookingId) async {
-    final booking = getBookingById(bookingId);
-    if (booking == null) {
-      Get.snackbar('Error', 'Booking not found');
-      return;
-    }
-
-    Get.snackbar(
-      'Share Ticket',
-      'Sharing ${booking.type} ticket...',
-      snackPosition: SnackPosition.BOTTOM,
     );
   }
 

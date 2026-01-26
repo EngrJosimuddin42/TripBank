@@ -1,11 +1,10 @@
-import 'dart:ui';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:math';
 import 'package:intl/intl.dart';
 import '../../../constants/app_strings.dart';
 import '../../../models/booking_model.dart';
 import '../../../models/flight_model.dart';
+import '../../../utils/booking_helper.dart';
 import '../../../widgets/airport_search_dialog.dart';
 import '../../../widgets/snackbar_helper.dart';
 import '../../my_bookings/controllers/my_bookings_controller.dart';
@@ -335,6 +334,7 @@ class FlightBookingController extends GetxController {
   }
 
 
+
   Future<void> makePayment() async {
     if (selectedPaymentMethod.value.isEmpty) {
       if (Get.isDialogOpen ?? false) Get.back();
@@ -344,6 +344,7 @@ class FlightBookingController extends GetxController {
       );
       return;
     }
+
     if (selectedFlight.value == null && Get.arguments != null) {
       if (Get.arguments is Map) {
         final args = Get.arguments as Map;
@@ -355,6 +356,7 @@ class FlightBookingController extends GetxController {
         }
       }
     }
+
     final flight = selectedFlight.value;
     if (flight == null) {
       if (Get.isDialogOpen ?? false) Get.back();
@@ -372,9 +374,7 @@ class FlightBookingController extends GetxController {
       final totalPrice = calculateTotalPrice();
       final pnr = _generatePNR();
 
-
       // Create Booking object
-
       currentBooking.value = Booking(
         bookingId: 'BK${DateTime.now().millisecondsSinceEpoch}',
         flight: flight,
@@ -390,8 +390,9 @@ class FlightBookingController extends GetxController {
       );
 
       // Dynamic imageUrl
-      String dynamicImageUrl = flight.imageUrl ??
-          'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400';
+      String dynamicImageUrl = (flight.imageUrl != null && flight.imageUrl!.isNotEmpty)
+          ? flight.imageUrl!
+          : 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400';
 
       // MyBookingsController check
       MyBookingsController myBookingsController;
@@ -404,26 +405,51 @@ class FlightBookingController extends GetxController {
         );
       }
 
-      // Save My Booking
-      myBookingsController.addBooking(
-        BookingSummary(
-          type: 'Flight',
-          title: '${flight.from} → ${flight.to}',
-          subtitle: '${flight.airline} • ${flight.cabinClass} • ${flight.flightNumber}',
-          dates: DateFormat('dd MMM yyyy').format(flight.departureTime),
-          imageUrl: dynamicImageUrl,
-          bookingId: currentBooking.value!.bookingId,
-          status: 'Confirmed',
-          totalAmount: '${flight.currencySymbol}${totalPrice.toStringAsFixed(0)}',
-          ticketData: {
-            'flight': flight.toJson(),
-            'passengers': passengers.map((p) => p.toJson()).toList(),
-            'totalPrice': totalPrice,
-            'pnr': pnr,
-            'paymentMethod': selectedPaymentMethod.value,
-          },
-        ),
+      // Use BookingHelper
+      final bookingToSave = BookingHelper.createFlightBooking(
+        destination: flight.to,
+        country: _extractCountry(flight.to),
+        startDate: flight.departureTime,
+        endDate: flight.arrivalTime,
+        totalPrice: totalPrice,
+        travelers: totalPassengers,
+        airline: flight.airline,
+        flightClass: flight.cabinClass,
+        imageUrl: dynamicImageUrl,
+        flightDetails: {
+          'flightNumber': flight.flightNumber,
+          'from': flight.from,
+          'fromCode': flight.fromCode,
+          'to': flight.to,
+          'toCode': flight.toCode,
+          'departureTime': formatTime(flight.departureTime),
+          'arrivalTime': formatTime(flight.arrivalTime),
+          'duration': flight.duration,
+          'stops': flight.stops,
+          'stopDetails': flight.stopDetails,
+          'baggageAllowance': flight.baggageAllowance,
+          'isRefundable': flight.isRefundable,
+          'availableSeats': flight.availableSeats,
+          'facilities': flight.facilities,
+          'pnr': pnr,
+          'paymentMethod': selectedPaymentMethod.value,
+          'passengers': passengers.map((p) => p.toJson()).toList(),
+          'bookingId': currentBooking.value!.bookingId,
+          'currencySymbol': flight.currencySymbol,
+
+          // Round trip data
+          if (flight.returnDepartureTime != null)
+            'returnDepartureTime': formatTime(flight.returnDepartureTime!),
+          if (flight.returnArrivalTime != null)
+            'returnArrivalTime': formatTime(flight.returnArrivalTime!),
+          if (flight.returnDuration != null)
+            'returnDuration': flight.returnDuration,
+          if (flight.returnStops != null)
+            'returnStops': flight.returnStops,
+        },
       );
+
+      myBookingsController.addBooking(bookingToSave);
       if (Get.isDialogOpen ?? false) {
         Get.back();
       }
@@ -567,4 +593,28 @@ class FlightBookingController extends GetxController {
       }
     }
   }
+
+  String _extractCountry(String location) {
+    // Common city to country mapping
+    final cityCountryMap = {
+      'Dubai': 'UAE',
+      'London': 'UK',
+      'New York': 'USA',
+      'Paris': 'France',
+      'Tokyo': 'Japan',
+      'Singapore': 'Singapore',
+      'Bangkok': 'Thailand',
+      'Istanbul': 'Turkey',
+      'Doha': 'Qatar',
+      'Abuja': 'Nigeria',
+      'Lagos': 'Nigeria',
+      'Dhaka': 'Bangladesh',
+      'Delhi': 'India',
+      'Mumbai': 'India',
+    };
+
+    return cityCountryMap[location] ?? 'International';
+  }
+
 }
+

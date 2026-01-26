@@ -355,52 +355,27 @@ class MyBookingsView extends GetView<MyBookingsController> {
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
-              PopupMenuButton(
-                icon: const Icon(Icons.more_vert),
-                itemBuilder: (context) => [
-                  if (!isCanceled)
-                    PopupMenuItem(
-                      child: const Row(
-                        children: [
-                          Icon(Icons.cancel, size: 18, color: Colors.red),
-                          SizedBox(width: 8),
-                          Text('Cancel Trip'),
-                        ],
+              const Spacer(),
+              GestureDetector(
+                onTap: () => controller.viewBookingDetails(booking),
+                child: Row(
+                  children: [
+                    Text(
+                      'View',
+                      style: TextStyle(
+                        color: isCanceled ? Colors.grey[600] : Colors.orange,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
                       ),
-                      onTap: () => controller.cancelBooking(booking.bookingId),
                     ),
-                  PopupMenuItem(
-                    child: const Row(
-                      children: [
-                        Icon(Icons.download, size: 18),
-                        SizedBox(width: 8),
-                        Text('Download'),
-                      ],
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.arrow_forward,
+                      color: isCanceled ? Colors.grey[600] : Colors.orange,
+                      size: 16,
                     ),
-                    onTap: () => controller.downloadTicket(booking.bookingId),
-                  ),
-                  PopupMenuItem(
-                    child: const Row(
-                      children: [
-                        Icon(Icons.share, size: 18),
-                        SizedBox(width: 8),
-                        Text('Share'),
-                      ],
-                    ),
-                    onTap: () => controller.shareTicket(booking.bookingId),
-                  ),
-                  PopupMenuItem(
-                    child: const Row(
-                      children: [
-                        Icon(Icons.delete, size: 18, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text('Delete'),
-                      ],
-                    ),
-                    onTap: () => controller.deleteBooking(booking.bookingId),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
@@ -542,6 +517,7 @@ class MyBookingsView extends GetView<MyBookingsController> {
                   ),
                 );
               }).toList(),
+
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(

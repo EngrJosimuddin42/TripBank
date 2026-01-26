@@ -68,6 +68,23 @@ class MyBookingsDetailsView extends GetView<MyBookingsController> {
             _buildBookingOverview(booking),
             const SizedBox(height: 24),
             _buildServiceDetails(booking),
+            const SizedBox(height: 24),
+            if (booking.type == 'Tour' || booking.ticketData.containsKey('itinerary')) ...[
+              const SizedBox(height: 24),
+              _buildTourPlan(),
+            ],
+            const SizedBox(height: 24),
+            _buildMeetingPoint(booking),
+
+            const SizedBox(height: 24),
+            _buildTourDetails(),
+
+            const SizedBox(height: 24),
+            _buildPaymentAndDocuments(booking),
+
+            const SizedBox(height: 24),
+            _buildNeedHelpSection(booking),
+
             const SizedBox(height: 40),
           ],
         ),
@@ -199,10 +216,13 @@ class MyBookingsDetailsView extends GetView<MyBookingsController> {
             controller.downloadTicket(booking.bookingId);
           }),
           const SizedBox(width: 8),
-          _buildTab(Icons.share_outlined, 'Share', () {
-            // Share ticket
-            controller.shareTicket(booking.bookingId);
+          _buildTab(Icons.assignment_outlined, 'Itinerary', () {
+            Get.snackbar('Itinerary','Showing your trip timeline below',
+              snackPosition: SnackPosition.BOTTOM,
+              duration: const Duration(seconds: 1),
+            );
           }),
+
           const SizedBox(width: 8),
           _buildTab(Icons.location_on_outlined, 'Location', () {
             // Show location
@@ -597,6 +617,569 @@ class MyBookingsDetailsView extends GetView<MyBookingsController> {
         border: Border.all(color: Colors.grey.shade200),
       ),
       child: Text(text, style: const TextStyle(fontSize: 11)),
+    );
+  }
+
+
+  // Tour Plan (Timeline) Widget
+  Widget _buildTourPlan() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Tour plan',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: Column(
+              children: [
+                _buildDaySection('Day 1 – Arrival', [
+                  _buildTimelineItem('10:30', 'Flight: Lagos → Tokyo', null),
+                  _buildTimelineItem('21:45', 'Arrive at Narita Airport', null),
+                  _buildTimelineItem('23:00', 'Hotel check-in', 'Shinjuku Sakura Hotel'),
+                ]),
+                _buildDaySection('Day 2 – Tokyo Cherry Blossom Tour', [
+                  _buildTimelineItem('09:00', 'Meet at Shinjuku Station', 'East Exit, look for Tripbank flag'),
+                  _buildTimelineItem('10:00', 'Ueno Park visit', 'Enjoy cherry blossoms in full bloom'),
+                  _buildTimelineItem('13:00', 'Lunch break', 'Traditional Japanese cuisine'),
+                  _buildTimelineItem('15:00', 'River cruise', 'Sumida River cherry blossom viewing'),
+                  _buildTimelineItem('18:00', 'Drop-off at hotel', null),
+                ]),
+                _buildDaySection('Day 3 – Free day', [
+                  _buildTimelineItem(null, 'Explore Tokyo at your own pace', null),
+                  _buildTimelineItem(null, 'Optional activities available', null),
+                ], isLast: false),
+                _buildDaySection('Day 4 – Departure', [
+                  _buildTimelineItem('10:00', 'Hotel check-out', null),
+                  _buildTimelineItem('14:30', 'Departure flight to Lagos', null),
+                ], isLast: true),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDaySection(String title, List<Widget> items, {bool isLast = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF333333)),
+        ),
+        const SizedBox(height: 20),
+        ...items,
+        if (!isLast) const SizedBox(height: 10),
+      ],
+    );
+  }
+
+  Widget _buildTimelineItem(String? time, String activity, String? subtitle) {
+    return IntrinsicHeight(
+      child: Row(
+        children: [
+          Column(
+            children: [
+              Container(
+                width: 14,
+                height: 14,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFFC107),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  width: 2,
+                  color: Colors.grey.shade200,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    if (time != null) ...[
+                      Text(
+                        time,
+                        style: TextStyle(color: Colors.grey[400], fontSize: 13, fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(width: 10),
+                    ],
+                    Expanded(
+                      child: Text(
+                        activity,
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF444444)),
+                      ),
+                    ),
+                  ],
+                ),
+                if (subtitle != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4, bottom: 15),
+                    child: Text(
+                      subtitle,
+                      style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                    ),
+                  )
+                else
+                  const SizedBox(height: 20),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+// Meeting point & map Widget
+  Widget _buildMeetingPoint(BookingSummary booking) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Meeting point & map',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  child: Image.network(
+                    'https://images.unsplash.com/photo-1526772662000-3f88f10405ff?w=600',
+                    height: 180,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      height: 180,
+                      color: Colors.grey[200],
+                      child: const Icon(Icons.map_outlined, size: 40, color: Colors.grey),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Meeting point: Shinjuku Station, East Exit',
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Look for Tripbank flag near the main entrance.',
+                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                Get.snackbar('Maps', 'Opening Google Maps...');
+                              },
+                              icon: const Icon(Icons.open_in_new, size: 18),
+                              label: const Text('Open in Maps'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFFEDE5A),
+                                foregroundColor: Colors.black,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () {
+                                Get.snackbar('Route', 'Calculating route...');
+                              },
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(color: Color(0xFFFEDE5A)),
+                                foregroundColor: Colors.black,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                              ),
+                              child: const Text('View route'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTourDetails() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Tour details',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Enjoy a full-day guided tour of Tokyo during cherry blossom season. Experience the beauty of sakura in bloom at carefully selected locations including Ueno Park, the Imperial Palace, and a scenic river cruise along the Sumida River.',
+                  style: TextStyle(color: Colors.grey[700], fontSize: 14, height: 1.5),
+                ),
+                const SizedBox(height: 24),
+                _buildDetailDropdown('Highlights', [
+                  'Visit iconic cherry blossom viewing spots in Tokyo',
+                  'Scenic Sumida River cruise with cherry blossom views',
+                  'Traditional Japanese lunch included',
+                  'Professional English-speaking guide',
+                ], isBullet: true),
+                const Divider(height: 32),
+                _buildDetailDropdown('What\'s included', [
+                  'Professional tour guide',
+                  'Traditional Japanese lunch',
+                  'River cruise tickets',
+                  'All entrance fees',
+                ], isCheck: true),
+                const Divider(height: 32),
+                _buildDetailDropdown('What\'s not included', [
+                  'Personal expenses',
+                  'Hotel pickup and drop-off',
+                  'Travel insurance',
+                ], isCross: true),
+                const Divider(height: 32),
+                _buildDetailDropdown('What to bring', [
+                  'Comfortable walking shoes',
+                  'Light jacket or sweater',
+                  'Camera for photos',
+                  'Water bottle',
+                ], isArrow: true),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailDropdown(String title, List<String> items, {bool isBullet = false, bool isCheck = false, bool isCross = false, bool isArrow = false}) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+            const Icon(Icons.keyboard_arrow_up, size: 20, color: Colors.grey),
+          ],
+        ),
+        const SizedBox(height: 12),
+        ...items.map((item) => Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (isBullet) Text('• ', style: TextStyle(color: Colors.orange[400], fontWeight: FontWeight.bold)),
+              if (isCheck) const Icon(Icons.check_circle_outline, color: Colors.green, size: 16),
+              if (isCross) const Icon(Icons.close, color: Colors.grey, size: 16),
+              if (isArrow) Icon(Icons.arrow_right_alt, color: Colors.orange[300], size: 18),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  item,
+                  style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                ),
+              ),
+            ],
+          ),
+        )).toList(),
+      ],
+    );
+  }
+// Payment & documents Widget
+  Widget _buildPaymentAndDocuments(BookingSummary booking) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Payment & documents',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: Column(
+              children: [
+                _buildPaymentRow(
+                  'Payment method:',
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.credit_card, size: 20, color: Color(0xFF546E7A)),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Visa •••• 2931',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _buildPaymentRow(
+                  'Total:',
+                  Text(
+                    booking.totalAmount,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                _buildPaymentRow(
+                  'Status:',
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE8F5E9),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.check_circle_outline, size: 16, color: Color(0xFF2E7D32)),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Paid in full',
+                          style: TextStyle(
+                            color: Color(0xFF2E7D32),
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+                const Divider(height: 1, color: Color(0xFFEEEEEE)),
+                const SizedBox(height: 24),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildDownloadButton(
+                        Icons.file_download_outlined,
+                        'Invoice',
+                            () => controller.downloadTicket(booking.bookingId),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildDownloadButton(
+                        Icons.file_download_outlined,
+                        'Itinerary PDF',
+                            () => controller.downloadTicket(booking.bookingId),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPaymentRow(String label, Widget value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(color: Colors.grey[600], fontSize: 14),
+        ),
+        value,
+      ],
+    );
+  }
+
+  Widget _buildDownloadButton(IconData icon, String label, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F7F9),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 18, color: const Color(0xFF455A64)),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF455A64),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Need help? Section Widget
+  Widget _buildNeedHelpSection(BookingSummary booking) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Need help?',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: Column(
+              children: [
+                // Chat with provider button
+                _buildLargeButton(
+                  icon: Icons.chat_bubble_outline,
+                  label: 'Chat with provider',
+                  onTap: () => Get.snackbar('Chat', 'Connecting to provider...'),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF448AFF), Color(0xFF693AF1)],
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Cancel button
+                if (booking.status != 'Canceled')
+                  _buildLargeButton(
+                    label: 'cancel',
+                    onTap: () => controller.cancelBooking(booking.bookingId),
+                    color: const Color(0xFFF1F3F4),
+                    textColor: const Color(0xFF5F6368),
+                  ),
+                const SizedBox(height: 12),
+
+                // Ask AI button
+                _buildLargeButton(
+                  icon: Icons.smart_toy_outlined,
+                  label: 'Ask AI about this trip',
+                  onTap: () => Get.snackbar('AI Assistant', 'How can I help you today?'),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFFBC02D), Color(0xFFF9A825)],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+// Large Button Helper for Help Section
+  Widget _buildLargeButton({
+    IconData? icon,
+    required String label,
+    required VoidCallback onTap,
+    Gradient? gradient,
+    Color? color,
+    Color textColor = Colors.white,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: color,
+          gradient: gradient,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: gradient != null
+              ? [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))]
+              : null,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (icon != null) ...[
+              Icon(icon, color: textColor, size: 20),
+              const SizedBox(width: 10),
+            ],
+            Text(
+              label,
+              style: TextStyle(
+                color: textColor,
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
