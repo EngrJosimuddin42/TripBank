@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:tripbank/app/modules/my_bookings/views/my_bookings_details%20.dart';
+import 'package:tripbank/app/modules/my_bookings/views/my_bookings_details.dart';
 import '../modules/cars_booking/bindings/cars_booking_binding.dart';
 import '../modules/cars_booking/controllers/car_details_controller.dart';
 import '../modules/cars_booking/views/car_details.dart';
@@ -71,180 +71,190 @@ class AppPages {
   AppPages._();
   static final routes = [
     GetPage(
-      name: _Paths.HOME,
+      name: _Paths.home,
       page: () => const HomeView(),
       binding: HomeBinding(),
     ),
     GetPage(
-      name: _Paths.LOGIN,
+      name: _Paths.login,
       page: () => const LoginView(),
       binding: LoginBinding(),
     ),
     GetPage(
-      name: _Paths.SPLASH,
+      name: _Paths.splash,
       page: () => const SplashView(),
       binding: SplashBinding(),
     ),
     GetPage(
-      name: _Paths.REGISTER,
+      name: _Paths.register,
       page: () => const RegisterView(),
       binding: RegisterBinding(),
     ),
     GetPage(
-      name: _Paths.ONBOARDING,
+      name: _Paths.onboarding,
       page: () => const OnboardingView(),
       binding: OnboardingBinding(),
     ),
     GetPage(
-      name: _Paths.FORGOT_PASSWORD_EMAIL,
+      name: _Paths.forgotPasswordEmail,
       page: () => const ForgotPasswordEmailView(),
       binding: PasswordBinding(),
     ),
     GetPage(
-      name: _Paths.FORGOT_PASSWORD_OTP,
+      name: _Paths.forgotPasswordOtp,
       page: () => const ForgotPasswordOTPView(),
       binding: PasswordBinding(),
     ),
     GetPage(
-      name: _Paths.CREATE_NEW_PASSWORD,
+      name: _Paths.createNewPassword,
       page: () => const CreateNewPasswordView(),
       binding: PasswordBinding(),
     ),
     GetPage(
-      name: _Paths.PROFILE,
+      name: _Paths.profile,
       page: () => const ProfileView(),
       binding: ProfileBinding(),
     ),
     GetPage(
-      name: _Paths.EXPLORE,
+      name: _Paths.explore,
       page: () => const ExploreView(),
       binding: ExploreBinding(),
     ),
 
     GetPage(
-      name: _Paths.LOYALTY_PROGRAM,
+      name: _Paths.loyaltyProgram,
       page: () => const LoyaltyProgramView(),
       binding: PointLoyaltyBinding(),
     ),
     GetPage(
-      name: _Paths.DRAWER,
+      name: _Paths.drawer,
       page: () => const DrawerView(),
       binding: DrawerBinding(),
     ),
     GetPage(
-      name: _Paths.SAVED,
+      name: _Paths.saved,
       page: () => const SavedView(),
       binding: SavedBinding(),
     ),
     GetPage(
-      name: _Paths.DESTINATIONS,
+      name: _Paths.destinations,
       page: () => const DestinationsView(),
       binding: DestinationsBinding(),
     ),
     GetPage(
-      name: _Paths.CHATBOT,
+      name: _Paths.chatbot,
       page: () => const ChatbotView(),
       binding: ChatbotBinding(),
     ),
 
     GetPage(
-      name: _Paths.FLIGHT_BOOKING,
+      name: _Paths.flightBooking,
       page: () => const FlightBookingView(),
       binding: FlightBookingBinding(),
     ),
     GetPage(
-      name: _Paths.HOTELS_BOOKING,
+      name: _Paths.hotelsBooking,
       page: () => const HotelsBookingView(),
       binding: HotelsBookingBinding(),
     ),
     GetPage(
-      name: _Paths.CARS_BOOKING,
+      name: _Paths.carsBooking,
       page: () => const CarsBookingView(),
       binding: CarsBookingBinding(),
     ),
     GetPage(
-      name: _Paths.TOURS_BOOKING,
+      name: _Paths.toursBooking,
       page: () => const ToursBookingView(),
       binding: ToursBookingBinding(),
+    ),
+    GetPage(
+      name: _Paths.myBookings,
+      page: () => const MyBookingsView(),
+      binding: MyBookingsBinding(),
+    ),
+    GetPage(
+      name: _Paths.myBookingsDetails,
+      page: () =>const MyBookingsDetailsView(),
+      binding: MyBookingsBinding(),
     ),
 
     // Flight Booking Related Pages
     GetPage(
-      name: _Paths.SEARCH_ALL_FLIGHT,
+      name: _Paths.searchAllFlight,
       page: () => const SearchAllFlightView(),
       binding: FlightSearchBinding(),
     ),
     GetPage(
-      name: _Paths.FLIGHT_DETAILS,
+      name: _Paths.flightDetails,
       page: () => const FlightDetailsView(),
       binding: FlightDetailsBinding(),
     ),
 
     GetPage(
-      name: _Paths.PASSENGER_DETAILS,
+      name: _Paths.passengerDetails,
       page: () => PassengerDetailsView(),
       binding: FlightBookingBinding(),
     ),
     GetPage(
-      name: _Paths.PAYMENT,
+      name: _Paths.payment,
       page: () => const PaymentView(),
       binding: FlightBookingBinding(),
     ),
     GetPage(
-      name: _Paths.PAYMENT_CONFIRM,
+      name: _Paths.paymentConfirm,
       page: () => const PaymentConfirmView(),
       binding: FlightBookingBinding(),
     ),
     GetPage(
-      name: _Paths.TICKET,
+      name: _Paths.ticket,
       page: () => TicketView(),
       binding: FlightBookingBinding(),
     ),
 
     // Hotel Booking Related Pages
     GetPage(
-      name: _Paths.ALL_HOTELS,
+      name: _Paths.allHotels,
       page: () => AllHotelsView(),
       binding: HotelsBookingBinding(),
     ),
     GetPage(
-      name: _Paths.HOTEL_DETAILS,
+      name: _Paths.hotelDetails,
       page: () => const HotelDetailsView(),
       binding: HotelsBookingBinding(),
     ),
 
     GetPage(
-      name: _Paths.PAYMENT_HOTEL,
+      name: _Paths.paymentHotel,
       page: () => const PaymentHotelView(),
       binding: HotelsBookingBinding(),
     ),
 
     GetPage(
-      name: _Paths.HOTEL_TICKET,
+      name: _Paths.hotelTicket,
       page: () => const HotelTicketView(),
       binding: HotelsBookingBinding(),
     ),
 
     //  Car Booking Related Pages
     GetPage(
-      name: _Paths.SEARCH_ALL_CARS,
+      name: _Paths.searchAllCars,
       page: () => SearchAllCarsView(),
       binding: CarsBookingBinding(),
     ),
     GetPage(
-      name: _Paths.CAR_DETAILS,
+      name: _Paths.carDetails,
       page: () => const CarDetailsView(),
       binding: CarsBookingBinding(),
     ),
 
     GetPage(
-      name: _Paths.MAKE_PAYMENT,
+      name: _Paths.makePayment,
       page: () =>  MakePaymentView(),
       binding: CarsBookingBinding(),
     ),
 
     GetPage(
-      name: _Paths.CAR_TICKET,
+      name: _Paths.carTicket,
       page: () => const CarTicketView(),
       binding: CarsBookingBinding(),
     ),
@@ -259,64 +269,54 @@ class AppPages {
 
     // Tour Booking Related Pages
     GetPage(
-      name: _Paths.TOUR_DETAILS,
+      name: _Paths.tourDetails,
       page: () => const TourDetailsView(),
       binding: ToursBookingBinding(),
     ),
 
     GetPage(
-      name: _Paths.PAYMENT_TOUR,
+      name: _Paths.paymentTour,
       page: () => const PaymentTourView(),
       binding: ToursBookingBinding(),
     ),
 
     GetPage(
-      name: _Paths.TOUR_TICKET,
+      name: _Paths.tourTicket,
       page: () => const TourTicketView(),
       binding: ToursBookingBinding(),
     ),
 
     GetPage(
-      name: _Paths.ALL_RELATED_TOURS,
+      name: _Paths.allRelatedTours,
       page: () => const AllRelatedToursView(),
       binding: ToursBookingBinding(),
     ),
 
     // Gift Card & Loyalty Pages
     GetPage(
-      name: _Paths.BUY_GIFT_CARD,
+      name: _Paths.buyGiftCard,
       page: () => const BuyGiftCardView(),
       binding: PointLoyaltyBinding(),
     ),
     GetPage(
-      name: _Paths.SEND_GIFT_CARD,
+      name: _Paths.sendGiftCard,
       page: () => const SendGiftCardView(),
       binding: PointLoyaltyBinding(),
     ),
     GetPage(
-      name: _Paths.REDEEM_GIFT_CARD,
+      name: _Paths.redeemGiftCard,
       page: () => const RedeemGiftCardView(),
       binding: PointLoyaltyBinding(),
     ),
     GetPage(
-      name: _Paths.MY_GIFT_CARDS,
+      name: _Paths.myGiftCards,
       page: () => const MyGiftCardsView(),
       binding: PointLoyaltyBinding(),
     ),
     GetPage(
-      name: _Paths.REFER_FRIENDS,
+      name: _Paths.referFriends,
       page: () => const ReferFriendsView(),
       binding: PointLoyaltyBinding(),
-    ),
-    GetPage(
-      name: _Paths.MY_BOOKINGS,
-      page: () => const MyBookingsView(),
-      binding: MyBookingsBinding(),
-    ),
-    GetPage(
-      name: _Paths.MY_BOOKINGS_DETAILS,
-      page: () => const MyBookingsDetailsView(),
-      binding: MyBookingsBinding(),
     ),
   ];
 }

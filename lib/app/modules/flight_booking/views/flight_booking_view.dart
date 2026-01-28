@@ -291,7 +291,7 @@ class FlightBookingView extends GetView<FlightBookingController> {
                             ],
                           ),
                         );
-                      }).toList(),
+                      }),
 
                       const SizedBox(height: 20),
 

@@ -121,9 +121,6 @@ class SearchAllFlightView extends GetView<FlightSearchController> {
   }
 
   Widget _buildFlightCard(Flight flight) {
-    final bookingController = Get.find<FlightBookingController>();
-    final isRoundTrip = bookingController.selectedTripType.value == 'Round Way';
-
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(20),
@@ -131,12 +128,12 @@ class SearchAllFlightView extends GetView<FlightSearchController> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFFFFF0B2).withOpacity(0.1),
+          color: const Color(0xFFFFF0B2).withValues(alpha: 0.1),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -685,7 +682,7 @@ class SearchAllFlightView extends GetView<FlightSearchController> {
             activeTrackColor: const Color(0xFFFECD08),
             inactiveTrackColor: Colors.grey[300],
             thumbColor: const Color(0xFFFECD08),
-            overlayColor: const Color(0xFFFECD08).withOpacity(0.2),
+            overlayColor: const Color(0xFFFECD08).withValues(alpha: 0.2),
             trackHeight: 4,
           ),
           child: RangeSlider(
@@ -911,7 +908,7 @@ class SearchAllFlightView extends GetView<FlightSearchController> {
             activeTrackColor: const Color(0xFFFECD08),
             inactiveTrackColor: Colors.grey[300],
             thumbColor: const Color(0xFFFECD08),
-            overlayColor: const Color(0xFFFECD08).withOpacity(0.2),
+            overlayColor: const Color(0xFFFECD08).withValues(alpha: 0.2),
             trackHeight: 4,
           ),
           child: Slider(

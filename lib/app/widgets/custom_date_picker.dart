@@ -8,12 +8,12 @@ class CustomDatePicker extends StatefulWidget {
   final Function(DateTime) onDateSelected;
 
   const CustomDatePicker({
-    Key? key,
+    super.key,
     this.initialDate,
     required this.firstDate,
     required this.lastDate,
     required this.onDateSelected,
-  }) : super(key: key);
+  });
 
   @override
   State<CustomDatePicker> createState() => _CustomDatePickerState();

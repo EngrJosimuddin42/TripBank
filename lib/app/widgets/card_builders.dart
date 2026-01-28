@@ -347,7 +347,7 @@ class CardBuilders {
                   height: 140,
                   width: double.infinity,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorBuilder: (context, error, stackTrace) => Container(
                     height: 140,
                     color: Colors.grey[200],
                     child: const Icon(Icons.image_not_supported),
@@ -468,7 +468,7 @@ class CardBuilders {
               width: 90,
               height: 80,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
+              errorBuilder: (context, error, stackTrace) => Container(
                 width: 90,
                 height: 80,
                 color: Colors.grey[200],
@@ -606,7 +606,7 @@ class CardBuilders {
                   height: 110,
                   width: double.infinity,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorBuilder: (context, error, stackTrace) => Container(
                     height: 110,
                     color: Colors.grey[200],
                     child: const Icon(Icons.image_not_supported, color: Colors.grey),

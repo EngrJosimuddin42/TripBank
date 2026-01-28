@@ -10,9 +10,9 @@ class OnboardingController extends GetxController {
   Future<void> completeOnboarding() async {
     try {
       await _storage.markAsOpened();
-      Get.offAllNamed(Routes.LOGIN);
+      Get.offAllNamed(Routes.login);
     } catch (e) {
-      Get.offAllNamed(Routes.LOGIN);
+      Get.offAllNamed(Routes.login);
     }
   }
 

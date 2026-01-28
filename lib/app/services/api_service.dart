@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import '../services/auth_service.dart';
@@ -165,7 +166,12 @@ class ApiService {
           ),
         );
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        debugPrint('Validation errors parsing failed: $e');
+        debugPrint('Stack: $stackTrace');
+      }
+
     }
     return {};
   }

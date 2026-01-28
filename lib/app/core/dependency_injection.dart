@@ -22,7 +22,5 @@ class DependencyInjection {
     // Register repositories
     Get.lazyPut(() => UserRepository(Get.find<ApiService>()));
     Get.lazyPut(() => AuthRepository(Get.find<ApiService>()));
-
-    print(' All dependencies initialized');
   }
 }

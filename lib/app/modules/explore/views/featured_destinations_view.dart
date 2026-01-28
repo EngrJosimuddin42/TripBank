@@ -5,7 +5,7 @@ import '../../../widgets/card_builders.dart';
 import '../controllers/explore_controller.dart';
 
 class FeaturedDestinationsView extends GetView<ExploreController> {
-  const FeaturedDestinationsView({Key? key}) : super(key: key);
+  const FeaturedDestinationsView({super.key});
 
   @override
   Widget build(BuildContext context) {

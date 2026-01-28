@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../models/flight_model.dart';
 import '../controllers/flight_booking_controller.dart';
 
 class PaymentConfirmView extends GetView<FlightBookingController> {
@@ -338,7 +339,7 @@ class PaymentConfirmView extends GetView<FlightBookingController> {
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
+                    color: Colors.grey.withValues(alpha: 0.2),
                     blurRadius: 10,
                     offset: const Offset(0, -2),
                   ),
@@ -377,7 +378,7 @@ class PaymentConfirmView extends GetView<FlightBookingController> {
     );
   }
 
-  Widget _buildExpandablePassengerCard(passenger, int number) {
+  Widget _buildExpandablePassengerCard(Passenger passenger, int number) {
     final isExpanded = false.obs;
 
     return Container(
@@ -425,40 +426,6 @@ class PaymentConfirmView extends GetView<FlightBookingController> {
               ],
             );
           }),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPassengerCard(passenger, int number) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Adult $number',
-                style: GoogleFonts.inter(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const Icon(Icons.keyboard_arrow_down, size: 20),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _buildInfoRow('Name', '${passenger.title} ${passenger.firstName} ${passenger.lastName}'),
-          _buildInfoRow('Date of Birth', '${passenger.dateOfBirth.day.toString().padLeft(2, '0')}-${passenger.dateOfBirth.month.toString().padLeft(2, '0')}-${passenger.dateOfBirth.year}'),
-          _buildInfoRow('Passport Number', passenger.passportNumber),
-          _buildInfoRow('NID Number', passenger.nin ?? '5445645645464'),
         ],
       ),
     );

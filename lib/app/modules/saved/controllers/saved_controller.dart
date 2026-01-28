@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../../models/hotel_model.dart';
 import '../../../services/favorites_service.dart';
@@ -58,7 +59,13 @@ class SavedController extends GetxController {
       hotelsController.selectedHotel.value = hotel;
       hotelsController.location.value = hotel.location;
       Get.toNamed('/hotel-details', arguments: hotel);
-    } catch (e) {}
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        debugPrint('Error parsing saved hotel: $e');
+        debugPrint('Stack trace: $stackTrace');
+        debugPrint('Hotel map: $hotelMap');
+      }
+    }
   }
 
 

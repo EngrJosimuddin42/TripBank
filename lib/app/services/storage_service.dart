@@ -89,6 +89,93 @@ class StorageService extends GetxService {
     }
   }
 
+  //  User Profile Methods
+
+  void saveUserName(String name) {
+    try {
+      _box.write('user_name', name);
+      if (kDebugMode) debugPrint(' User name saved: $name');
+    } catch (e) {
+      if (kDebugMode) debugPrint(' Error saving user name: $e');
+    }
+  }
+
+  String? getUserName() {
+    try {
+      return _box.read<String>('user_name');
+    } catch (e) {
+      if (kDebugMode) debugPrint(' Error reading user name: $e');
+      return null;
+    }
+  }
+
+  void saveUserEmail(String email) {
+    try {
+      _box.write('user_email', email);
+      if (kDebugMode) debugPrint(' User email saved: $email');
+    } catch (e) {
+      if (kDebugMode) debugPrint(' Error saving user email: $e');
+    }
+  }
+
+  String? getUserEmail() {
+    try {
+      return _box.read<String>('user_email');
+    } catch (e) {
+      if (kDebugMode) debugPrint(' Error reading user email: $e');
+      return null;
+    }
+  }
+
+  void saveUserPhone(String phone) {
+    try {
+      _box.write('user_phone', phone);
+      if (kDebugMode) debugPrint('User phone saved: $phone');
+    } catch (e) {
+      if (kDebugMode) debugPrint(' Error saving user phone: $e');
+    }
+  }
+
+  String? getUserPhone() {
+    try {
+      return _box.read<String>('user_phone');
+    } catch (e) {
+      if (kDebugMode) debugPrint(' Error reading user phone: $e');
+      return null;
+    }
+  }
+
+  void saveUserAvatar(String avatarUrl) {
+    try {
+      _box.write('user_avatar', avatarUrl);
+      if (kDebugMode) debugPrint(' User avatar saved');
+    } catch (e) {
+      if (kDebugMode) debugPrint(' Error saving user avatar: $e');
+    }
+  }
+
+  String? getUserAvatar() {
+    try {
+      return _box.read<String>('user_avatar');
+    } catch (e) {
+      if (kDebugMode) debugPrint('Error reading user avatar: $e');
+      return null;
+    }
+  }
+
+  Future<void> clearUserProfile() async {
+    try {
+      await _box.remove('user_name');
+      await _box.remove('user_email');
+      await _box.remove('user_phone');
+      await _box.remove('user_avatar');
+      if (kDebugMode) debugPrint(' User profile cleared');
+    } catch (e) {
+      if (kDebugMode) debugPrint(' Error clearing user profile: $e');
+    }
+  }
+
+
   // Save favorite hotels
 
   Future<void> saveFavoriteHotels(List<Map<String, dynamic>> hotels) async {

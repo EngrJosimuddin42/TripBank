@@ -246,27 +246,6 @@ class ExploreController extends GetxController {
     return '$hour:$minute $period';
   }
 
-  String _getTimeCategory(String timeSlot) {
-    final parts = timeSlot.split(' ');
-    final timePart = parts[0];
-    final period = parts[1];
-
-    final hourMinute = timePart.split(':');
-    int hour = int.parse(hourMinute[0]);
-
-    if (period == 'pm' && hour != 12) hour += 12;
-    if (period == 'am' && hour == 12) hour = 0;
-
-    if (hour >= 0 && hour < 6) {
-      return 'Early morning';
-    } else if (hour >= 6 && hour < 12) {
-      return 'Morning';
-    } else if (hour >= 12 && hour < 18) {
-      return 'Afternoon';
-    } else {
-      return 'Evening';
-    }
-  }
 
   void resetToAllTab() {
     selectedTab.value = 0;

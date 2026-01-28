@@ -9,7 +9,20 @@ class MyBookingsDetailsView extends GetView<MyBookingsController> {
 
   @override
   Widget build(BuildContext context) {
-    // Get booking from arguments
+
+    // Keys for sections
+    final tourPlanKey = GlobalKey();
+    final meetingPointKey = GlobalKey();
+    final tourDetailsKey = GlobalKey();
+
+    // State variables for dropdown
+    final RxMap<String, bool> expandedSections = <String, bool>{
+      'highlights': true,
+      'included': false,
+      'notIncluded': false,
+      'toBring': false,
+    }.obs;
+
     final BookingSummary? booking = Get.arguments?['booking'];
 
     if (booking == null) {
@@ -17,6 +30,18 @@ class MyBookingsDetailsView extends GetView<MyBookingsController> {
         appBar: AppBar(title: const Text('Booking Details')),
         body: const Center(child: Text('No booking selected')),
       );
+    }
+    // Helper function to scroll to section
+    void scrollToSection(GlobalKey key) {
+      final context = key.currentContext;
+      if (context != null) {
+        Scrollable.ensureVisible(
+          context,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+          alignment: 0.1,
+        );
+      }
     }
 
     return Scaffold(
@@ -63,21 +88,29 @@ class MyBookingsDetailsView extends GetView<MyBookingsController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildMainCard(booking),
-            _buildActionTabs(booking),
+            _buildActionTabs(booking, scrollToSection, tourPlanKey, meetingPointKey),
             const SizedBox(height: 24),
             _buildBookingOverview(booking),
             const SizedBox(height: 24),
             _buildServiceDetails(booking),
             const SizedBox(height: 24),
             if (booking.type == 'Tour' || booking.ticketData.containsKey('itinerary')) ...[
+              Container(
+                key: tourPlanKey,
+                child: _buildTourPlan(),
+              ),
               const SizedBox(height: 24),
-              _buildTourPlan(),
             ],
-            const SizedBox(height: 24),
-            _buildMeetingPoint(booking),
+            Container(
+              key: meetingPointKey,
+              child: _buildMeetingPoint(booking),
+            ),
 
             const SizedBox(height: 24),
-            _buildTourDetails(),
+            Container(
+              key: tourDetailsKey,
+              child: _buildTourDetailsWithDropdown(expandedSections),
+            ),
 
             const SizedBox(height: 24),
             _buildPaymentAndDocuments(booking),
@@ -104,7 +137,7 @@ class MyBookingsDetailsView extends GetView<MyBookingsController> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10),
         ],
       ),
       child: Column(
@@ -118,7 +151,7 @@ class MyBookingsDetailsView extends GetView<MyBookingsController> {
                   width: 80,
                   height: 80,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorBuilder: (context, error, stackTrace) => Container(
                     width: 80,
                     height: 80,
                     color: Colors.grey[200],
@@ -154,7 +187,7 @@ class MyBookingsDetailsView extends GetView<MyBookingsController> {
                     padding: const EdgeInsets.only(right: 5),
                     child: _buildSmallChip(_getServiceIcon(service), service),
                   );
-                }).toList(),
+                }),
                 _buildSmallChip(Icons.people, '$travelers Travelers', isBlue: true),
               ],
             ),
@@ -206,27 +239,55 @@ class MyBookingsDetailsView extends GetView<MyBookingsController> {
   }
 
   // Action Tabs
-  Widget _buildActionTabs(BookingSummary booking) {
+// Action Tabs - Updated
+  Widget _buildActionTabs(
+      BookingSummary booking,
+      Function(GlobalKey) scrollToSection,
+      GlobalKey tourPlanKey,
+      GlobalKey meetingPointKey,
+      ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
           _buildTab(Icons.confirmation_num_outlined, 'Tickets', () {
-            // Download ticket
             controller.downloadTicket(booking.bookingId);
           }),
           const SizedBox(width: 8),
           _buildTab(Icons.assignment_outlined, 'Itinerary', () {
-            Get.snackbar('Itinerary','Showing your trip timeline below',
-              snackPosition: SnackPosition.BOTTOM,
-              duration: const Duration(seconds: 1),
-            );
+            // Scroll to tour plan section
+            if (booking.type == 'Tour' || booking.ticketData.containsKey('itinerary')) {
+              scrollToSection(tourPlanKey);
+              Get.snackbar(
+                'Itinerary',
+                'Showing your trip timeline',
+                snackPosition: SnackPosition.BOTTOM,
+                duration: const Duration(seconds: 1),
+                backgroundColor: const Color(0xFFFEDE5A),
+                colorText: Colors.black,
+              );
+            } else {
+              Get.snackbar(
+                'Itinerary',
+                'No itinerary available for this booking',
+                snackPosition: SnackPosition.BOTTOM,
+                duration: const Duration(seconds: 2),
+              );
+            }
           }),
 
           const SizedBox(width: 8),
           _buildTab(Icons.location_on_outlined, 'Location', () {
-            // Show location
-            Get.snackbar('Location', 'Opening map for ${booking.subtitle}');
+            // Scroll to meeting point section
+            scrollToSection(meetingPointKey);
+            Get.snackbar(
+              'Location',
+              'Showing meeting point details',
+              snackPosition: SnackPosition.BOTTOM,
+              duration: const Duration(seconds: 1),
+              backgroundColor: const Color(0xFFFEDE5A),
+              colorText: Colors.black,
+            );
           }),
         ],
       ),
@@ -240,7 +301,7 @@ class MyBookingsDetailsView extends GetView<MyBookingsController> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFF8E95A1).withOpacity(0.9),
+            color: const Color(0xFF8E95A1).withValues(alpha: 0.9),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
@@ -263,6 +324,7 @@ class MyBookingsDetailsView extends GetView<MyBookingsController> {
     final isCanceled = booking.status == 'Canceled';
     final canceledOn = booking.ticketData['canceledOn'];
     final refundAmount = booking.ticketData['refundAmount'];
+    final leadTraveler = booking.ticketData['leadTraveler'] ?? 'Mahfujul Hoque';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -290,39 +352,56 @@ class MyBookingsDetailsView extends GetView<MyBookingsController> {
                   '${booking.bookingDate.day} ${_getMonth(booking.bookingDate.month)} ${booking.bookingDate.year}',
                 ),
                 const SizedBox(height: 12),
-                _buildInfoRow('Booking type:', booking.type),
+                _buildInfoRow('Lead traveler:', leadTraveler),
                 const SizedBox(height: 12),
 
-                // Status Row
+                // Status Row with "View details"
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Status:',
+                      'Payment status:',
                       style: TextStyle(color: Colors.grey[600], fontSize: 14),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: isCanceled
-                            ? const Color(0xFFFFEBEE)
-                            : const Color(0xFFE8F5E9),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        booking.status,
-                        style: TextStyle(
-                          color: isCanceled
-                              ? const Color(0xFFC62828)
-                              : const Color(0xFF2E7D32),
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: isCanceled
+                                ? const Color(0xFFFFEBEE)
+                                : const Color(0xFFE8F5E9),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            booking.status,
+                            style: TextStyle(
+                              color: isCanceled
+                                  ? const Color(0xFFC62828)
+                                  : const Color(0xFF2E7D32),
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 8),
+                        // ADDED: View details button
+                        GestureDetector(
+                          onTap: () {
+                          },
+                          child: const Text(
+                            'View details',
+                            style: TextStyle(
+                              color: Color(0xFFFBC02D),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-
                 if (isCanceled && canceledOn != null) ...[
                   const SizedBox(height: 12),
                   _buildInfoRow('Canceled on:', canceledOn),
@@ -432,7 +511,7 @@ class MyBookingsDetailsView extends GetView<MyBookingsController> {
           ...services.map((service) => Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: _buildServiceItem(service, booking),
-          )).toList(),
+          )),
         ],
       ),
     );
@@ -775,7 +854,7 @@ class MyBookingsDetailsView extends GetView<MyBookingsController> {
                     height: 180,
                     width: double.infinity,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
+                    errorBuilder: (context, error, stackTrace) => Container(
                       height: 180,
                       color: Colors.grey[200],
                       child: const Icon(Icons.map_outlined, size: 40, color: Colors.grey),
@@ -843,7 +922,7 @@ class MyBookingsDetailsView extends GetView<MyBookingsController> {
     );
   }
 
-  Widget _buildTourDetails() {
+  Widget _buildTourDetailsWithDropdown(RxMap<String, bool> expandedSections) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -861,7 +940,7 @@ class MyBookingsDetailsView extends GetView<MyBookingsController> {
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: Colors.grey.shade200),
             ),
-            child: Column(
+            child: Obx(() => Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
@@ -869,73 +948,130 @@ class MyBookingsDetailsView extends GetView<MyBookingsController> {
                   style: TextStyle(color: Colors.grey[700], fontSize: 14, height: 1.5),
                 ),
                 const SizedBox(height: 24),
-                _buildDetailDropdown('Highlights', [
-                  'Visit iconic cherry blossom viewing spots in Tokyo',
-                  'Scenic Sumida River cruise with cherry blossom views',
-                  'Traditional Japanese lunch included',
-                  'Professional English-speaking guide',
-                ], isBullet: true),
+
+                _buildInteractiveDropdown(
+                  'highlights',
+                  'Highlights',
+                  [
+                    'Visit iconic cherry blossom viewing spots in Tokyo',
+                    'Scenic Sumida River cruise with cherry blossom views',
+                    'Traditional Japanese lunch included',
+                    'Professional English-speaking guide',
+                  ],
+                  expandedSections,
+                  isBullet: true,
+                ),
                 const Divider(height: 32),
-                _buildDetailDropdown('What\'s included', [
-                  'Professional tour guide',
-                  'Traditional Japanese lunch',
-                  'River cruise tickets',
-                  'All entrance fees',
-                ], isCheck: true),
+
+                _buildInteractiveDropdown(
+                  'included',
+                  'What\'s included',
+                  [
+                    'Professional tour guide',
+                    'Traditional Japanese lunch',
+                    'River cruise tickets',
+                    'All entrance fees',
+                  ],
+                  expandedSections,
+                  isCheck: true,
+                ),
                 const Divider(height: 32),
-                _buildDetailDropdown('What\'s not included', [
-                  'Personal expenses',
-                  'Hotel pickup and drop-off',
-                  'Travel insurance',
-                ], isCross: true),
+
+                _buildInteractiveDropdown(
+                  'notIncluded',
+                  'What\'s not included',
+                  [
+                    'Personal expenses',
+                    'Hotel pickup and drop-off',
+                    'Travel insurance',
+                  ],
+                  expandedSections,
+                  isCross: true,
+                ),
                 const Divider(height: 32),
-                _buildDetailDropdown('What to bring', [
-                  'Comfortable walking shoes',
-                  'Light jacket or sweater',
-                  'Camera for photos',
-                  'Water bottle',
-                ], isArrow: true),
+
+                _buildInteractiveDropdown(
+                  'toBring',
+                  'What to bring',
+                  [
+                    'Comfortable walking shoes',
+                    'Light jacket or sweater',
+                    'Camera for photos',
+                    'Water bottle',
+                  ],
+                  expandedSections,
+                  isArrow: true,
+                ),
               ],
-            ),
+            )),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildDetailDropdown(String title, List<String> items, {bool isBullet = false, bool isCheck = false, bool isCross = false, bool isArrow = false}) {
+  Widget _buildInteractiveDropdown(
+      String key,
+      String title,
+      List<String> items,
+      RxMap<String, bool> expandedSections,
+      {bool isBullet = false, bool isCheck = false, bool isCross = false, bool isArrow = false}
+      ) {
+    final isExpanded = expandedSections[key] ?? false;
+
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-            const Icon(Icons.keyboard_arrow_up, size: 20, color: Colors.grey),
-          ],
-        ),
-        const SizedBox(height: 12),
-        ...items.map((item) => Padding(
-          padding: const EdgeInsets.only(bottom: 8),
+        GestureDetector(
+          onTap: () {
+            expandedSections[key] = !isExpanded;
+          },
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              if (isBullet) Text('• ', style: TextStyle(color: Colors.orange[400], fontWeight: FontWeight.bold)),
-              if (isCheck) const Icon(Icons.check_circle_outline, color: Colors.green, size: 16),
-              if (isCross) const Icon(Icons.close, color: Colors.grey, size: 16),
-              if (isArrow) Icon(Icons.arrow_right_alt, color: Colors.orange[300], size: 18),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  item,
-                  style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                ),
+              Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+              AnimatedRotation(
+                turns: isExpanded ? 0 : 0.5, // 0 = up, 0.5 = down
+                duration: const Duration(milliseconds: 200),
+                child: const Icon(Icons.keyboard_arrow_up, size: 20, color: Colors.grey),
               ),
             ],
           ),
-        )).toList(),
+        ),
+
+        AnimatedSize(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          child: isExpanded
+              ? Column(
+            children: [
+              const SizedBox(height: 12),
+              ...items.map((item) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (isBullet) Text('• ', style: TextStyle(color: Colors.orange[400], fontWeight: FontWeight.bold)),
+                    if (isCheck) const Icon(Icons.check_circle_outline, color: Colors.green, size: 16),
+                    if (isCross) const Icon(Icons.close, color: Colors.grey, size: 16),
+                    if (isArrow) Icon(Icons.arrow_right_alt, color: Colors.orange[300], size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        item,
+                        style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                      ),
+                    ),
+                  ],
+                ),
+              )),
+            ],
+          )
+              : const SizedBox.shrink(),
+        ),
       ],
     );
   }
+
 // Payment & documents Widget
   Widget _buildPaymentAndDocuments(BookingSummary booking) {
     return Padding(
@@ -993,7 +1129,7 @@ class MyBookingsDetailsView extends GetView<MyBookingsController> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.check_circle_outline, size: 16, color: Color(0xFF2E7D32)),
-                        const SizedBox(width: 4),
+                         SizedBox(width: 4),
                         Text(
                           'Paid in full',
                           style: TextStyle(
@@ -1159,7 +1295,7 @@ class MyBookingsDetailsView extends GetView<MyBookingsController> {
           gradient: gradient,
           borderRadius: BorderRadius.circular(12),
           boxShadow: gradient != null
-              ? [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))]
+              ? [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4, offset: const Offset(0, 2))]
               : null,
         ),
         child: Row(

@@ -18,7 +18,7 @@ class TourDetailsView extends StatelessWidget {
     return Obx(() {
       final tour = controller.selectedTour.value;
 
-      if (tour == null || tour.id == null || tour.id!.isEmpty) {
+      if (tour == null || tour.id.isEmpty) {
         return Scaffold(
           appBar: AppBar(
             leading: IconButton(
@@ -62,9 +62,9 @@ class TourDetailsView extends StatelessWidget {
             SliverToBoxAdapter(
               child: SizedBox(
                 height: 260,
-                child: (tour.imageUrl != null && tour.imageUrl!.isNotEmpty)
+                child: tour.imageUrl.isNotEmpty
                     ? CachedNetworkImage(
-                  imageUrl: tour.imageUrl!,
+                  imageUrl: tour.imageUrl,
                   fit: BoxFit.cover,
                   placeholder: (context, url) => Container(color: Colors.grey.shade300),
                   errorWidget: (context, url, error) => const Icon(Icons.error),
@@ -93,7 +93,7 @@ class TourDetailsView extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            tour.title ?? 'Tour Details',
+                            tour.title,
                             style: GoogleFonts.inter(
                               fontSize: 26,
                               fontWeight: FontWeight.w700,
@@ -106,30 +106,26 @@ class TourDetailsView extends StatelessWidget {
                             children: [
                               const Icon(Icons.star, color: Color(0xFFFECD08), size: 20),
                               const SizedBox(width: 6),
-                              Text(
-                                (tour.rating ?? 0.0).toStringAsFixed(1),
+                              Text( tour.rating.toStringAsFixed(1),
                                 style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 18),
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                '(${tour.reviewsCount ?? 0} ${AppStrings.reviews})',
+                                '(${tour.reviewsCount} ${AppStrings.reviews})',
                                 style: GoogleFonts.inter(fontSize: 16, color: Colors.grey.shade600),
                               ),
                               const Spacer(),
 
                               Obx(() {
-                                final isFavorite = tour.id != null
-                                    ? controller.isTourFavorite(tour.id!)
-                                    : false;
+                                final isFavorite = controller.isTourFavorite(tour.id);
 
                                 return IconButton(
                                   icon: Icon(
                                     isFavorite ? Icons.favorite : Icons.favorite_border,
                                     color: isFavorite ? Colors.red : Colors.black,
                                   ),
-                                  onPressed: tour.id != null
-                                      ? () async {
-                                    await controller.toggleTourFavorite(tour.id!);
+                                  onPressed: () async {
+                                    await controller.toggleTourFavorite(tour.id);
                                     Get.snackbar(
                                       isFavorite ? AppStrings.removedFromFavorites : AppStrings.addToFavorites,
                                       '',
@@ -139,7 +135,6 @@ class TourDetailsView extends StatelessWidget {
                                       colorText: Colors.black,
                                     );
                                   }
-                                      : null,
                                 );
                               }),
                             ],
@@ -152,7 +147,7 @@ class TourDetailsView extends StatelessWidget {
                               Icon(Icons.location_on_outlined, size: 20, color: Colors.grey.shade500),
                               const SizedBox(width: 6),
                               Text(
-                                tour.location ?? 'Unknown',
+                                tour.location,
                                 style: GoogleFonts.inter(fontSize: 16, color: Colors.grey.shade600),
                               ),
                             ],
@@ -162,9 +157,9 @@ class TourDetailsView extends StatelessWidget {
 
                           Row(
                             children: [
-                              _buildQuickInfo(Icons.access_time_outlined, tour.duration ?? 'N/A'),
+                              _buildQuickInfo(Icons.access_time_outlined, tour.duration),
                               const SizedBox(width: 24),
-                              _buildQuickInfo(Icons.people_outline, '${AppStrings.maxPeopleLabel} ${tour.maxPeople ?? 0}'),
+                              _buildQuickInfo(Icons.people_outline, '${AppStrings.maxPeopleLabel} ${tour.maxPeople}'),
                             ],
                           ),
 
@@ -172,14 +167,14 @@ class TourDetailsView extends StatelessWidget {
 
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: _buildPriceCard(tour.price ?? 0.0),
+                            child: _buildPriceCard(tour.price),
                           ),
 
                           const SizedBox(height: 20),
 
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: _buildCategoryChips(tour.category ?? 'Adventure'),
+                            child: _buildCategoryChips(tour.category),
                           ),
 
                           const SizedBox(height: 24),
@@ -190,7 +185,7 @@ class TourDetailsView extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: Text(
-                              tour.description ?? '',
+                              tour.description,
                               style: GoogleFonts.inter(
                                 fontSize: 15,
                                 height: 1.6,
@@ -201,32 +196,30 @@ class TourDetailsView extends StatelessWidget {
 
                       // Key Highlights
 
-                          if (tour.keyHighlights != null && tour.keyHighlights!.isNotEmpty) ...[
+                          if (tour.keyHighlights.isNotEmpty) ...[
                             _sectionTitle(AppStrings.keyHighlights),
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 20),
                               child: Column(
-                                children: tour.keyHighlights!.map((text) => _buildKeyHighlight(text)).toList(),
+                                children: tour.keyHighlights.map((text) => _buildKeyHighlight(text)).toList(),
                               ),
                             ),
                             const SizedBox(height: 24),
                           ],
 
                     // Included / Not Included
-
-                    if ((tour.included != null && tour.included!.isNotEmpty) ||
-                        (tour.notIncluded != null && tour.notIncluded!.isNotEmpty))
+                          if (tour.included.isNotEmpty || tour.notIncluded.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Expanded(
-                              child: _buildIncludedSection(AppStrings.included, true, tour.included ?? []),
+                              child: _buildIncludedSection(AppStrings.included, true, tour.included),
                             ),
                             const SizedBox(width: 24),
                             Expanded(
-                              child: _buildIncludedSection(AppStrings.notIncluded, false, tour.notIncluded ?? []),
+                              child: _buildIncludedSection(AppStrings.notIncluded, false, tour.notIncluded),
                             ),
                           ],
                         ),
@@ -234,7 +227,7 @@ class TourDetailsView extends StatelessWidget {
 
                     // What to Bring
 
-                    if (tour.whatToBring != null && tour.whatToBring!.isNotEmpty) ...[
+                          if (tour.whatToBring.isNotEmpty) ...[
                       _sectionTitle(AppStrings.whatToBring),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -246,7 +239,7 @@ class TourDetailsView extends StatelessWidget {
                             border: Border.all(color: const Color(0xFFFEDE5A), width: 1),
                           ),
                           child: Text(
-                            tour.whatToBring!.join(', '),
+                            tour.whatToBring.join(', '),
                             style: GoogleFonts.inter(
                               fontSize: 15,
                               height: 1.6,
@@ -259,20 +252,20 @@ class TourDetailsView extends StatelessWidget {
 
                     // Itinerary
 
-                    if (tour.itinerary != null && tour.itinerary!.isNotEmpty) ...[
+                          if (tour.itinerary.isNotEmpty) ...[
                       _sectionTitle(AppStrings.itinerary),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Column(
-                          children: tour.itinerary!
+                          children: tour.itinerary
                               .asMap()
                               .entries
                               .map((entry) => Padding(
                             padding: const EdgeInsets.only(bottom: 12),
                             child: _buildExpandableItinerary(
-                              entry.value.day ?? '',
-                              entry.value.title ?? '',
-                              entry.value.activities ?? [],
+                              entry.value.day,
+                              entry.value.title,
+                              entry.value.activities,
                             ),
                           ))
                               .toList(),
@@ -282,7 +275,7 @@ class TourDetailsView extends StatelessWidget {
 
                     // Meeting Point
 
-                    if (tour.meetingPoint != null) ...[
+                          if (tour.meetingPoint != null) ...[
                       _sectionTitle(AppStrings.meetingPoint),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -302,12 +295,12 @@ class TourDetailsView extends StatelessWidget {
                                     ? Image.network(
                                   tour.meetingPoint!.mapImageUrl!,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => const Icon(Icons.map, size: 60),
+                                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.map, size: 60),
                                 )
                                     : Image.asset(
                                   'assets/images/location_1.png',
                                   fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => const Icon(Icons.map, size: 60),
+                                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.map, size: 60),
                                 ),
                               ),
                             ),
@@ -340,7 +333,7 @@ class TourDetailsView extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 12),
                                   Text(
-                                    tour.meetingPoint!.address ?? '',
+                                    tour.meetingPoint!.address,
                                     style: GoogleFonts.inter(fontSize: 14, color: Colors.grey.shade800, height: 1.5),
                                   ),
                                   if (tour.meetingPoint!.description != null) ...[
@@ -501,11 +494,11 @@ class TourDetailsView extends StatelessWidget {
                               child: GestureDetector(
                                 onTap: () => controller.onTourTap(related),
                                 child: _buildRelatedTourCard(
-                                  related.title ?? '',
-                                  related.location ?? '',
-                                  (related.price ?? 0.0).toStringAsFixed(0),
-                                  related.rating ?? 0.0,
-                                  related.imageUrl ?? '',
+                                  related.title,
+                                  related.location,
+                                  (related.price).toStringAsFixed(0),
+                                  related.rating,
+                                  related.imageUrl,
                                 ),
                               ),
                             );

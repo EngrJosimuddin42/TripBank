@@ -19,7 +19,7 @@ void main() async {
   runApp(const MyApp());
 }
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
           title: "TripBank",
-          initialRoute: Routes.HOME,
+          initialRoute: Routes.home,
           getPages: AppPages.routes,
 
           // Smooth transition

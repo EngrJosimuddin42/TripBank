@@ -17,8 +17,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../models/tour_model.dart';
 
 class HomeView extends GetView<HomeController> {
-  const HomeView({Key? key}) : super(key: key);
-
+  const HomeView({super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -495,7 +494,7 @@ class HomeView extends GetView<HomeController> {
         Icons.tour,
         () => controller.onTourTapObject(tour),
         ),
-        ).toList(),
+        ),
             ],
           ],
         );
@@ -586,7 +585,7 @@ class HomeView extends GetView<HomeController> {
             itemBuilder: (context, index) {
               final action = controller.quickActions[index];
               final String imagePath = action['image'];
-              final String label = action['label'];
+              final label = action['label'] as String? ?? 'Action';
 
               return Container(
                 width: 94,
@@ -613,7 +612,7 @@ class HomeView extends GetView<HomeController> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          action['label'] as String,
+                          label,
                           style: GoogleFonts.workSans(
                             fontSize: 16,
                             color: const Color(0xFF6B5603),
@@ -621,6 +620,7 @@ class HomeView extends GetView<HomeController> {
                           ),
                           textAlign: TextAlign.center,
                           overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
                         ),
                       ],
                     ),

@@ -5,7 +5,7 @@ import '../../../routes/app_pages.dart';
 import '../controllers/profile_controller.dart';
 
 class ProfileView extends GetView<ProfileController> {
-  const ProfileView({Key? key}) : super(key: key);
+  const ProfileView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -217,7 +217,7 @@ class ProfileView extends GetView<ProfileController> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: InkWell(
         onTap: () {
-          Get.toNamed(Routes.LOYALTY_PROGRAM);
+          Get.toNamed(Routes.loyaltyProgram);
         },
         borderRadius: BorderRadius.circular(8),
         child: Container(
@@ -260,7 +260,7 @@ class ProfileView extends GetView<ProfileController> {
                     const SizedBox(height: 6),
                     GestureDetector(
                       onTap: () {
-                        Get.toNamed(Routes.LOYALTY_PROGRAM);
+                        Get.toNamed(Routes.loyaltyProgram);
                       },
                       child:Text(
                         'Details',

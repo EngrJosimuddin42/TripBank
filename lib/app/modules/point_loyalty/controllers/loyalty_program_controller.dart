@@ -258,11 +258,6 @@ class LoyaltyProgramController extends GetxController {
         title: 'Sharing'
     );
   }
-
-  @override
-  void onClose() {
-    super.onClose();
-  }
 }
 
 // Models remain unchanged

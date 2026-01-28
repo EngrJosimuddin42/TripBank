@@ -145,7 +145,7 @@ class AllHotelsView extends GetView<HotelsBookingController> {
     });
   }
 
-  Widget _buildHotelCard(hotel, int index) {
+  Widget _buildHotelCard(Hotel hotel, int index) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -212,7 +212,7 @@ class AllHotelsView extends GetView<HotelsBookingController> {
     );
   }
 
-  Widget _buildHotelHeader(hotel) {
+  Widget _buildHotelHeader(Hotel hotel) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -247,7 +247,7 @@ class AllHotelsView extends GetView<HotelsBookingController> {
     );
   }
 
-  Widget _buildRating(hotel) {
+  Widget _buildRating(Hotel hotel) {
     return Row(
       children: [
         ...List.generate(5, (index) {
@@ -269,7 +269,7 @@ class AllHotelsView extends GetView<HotelsBookingController> {
     );
   }
 
-  Widget _buildDescription(hotel) {
+  Widget _buildDescription(Hotel hotel) {
     return Text(
       hotel.description,
       style: GoogleFonts.inter(
@@ -322,7 +322,7 @@ class AllHotelsView extends GetView<HotelsBookingController> {
     );
   }
 
-  Widget _buildPriceSection(hotel) {
+  Widget _buildPriceSection(Hotel hotel) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

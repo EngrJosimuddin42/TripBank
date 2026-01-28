@@ -2,124 +2,124 @@ part of 'app_pages.dart';
 
 abstract class Routes {
   Routes._();
-  static const HOME = _Paths.HOME;
-  static const LOGIN = _Paths.LOGIN;
-  static const SPLASH = _Paths.SPLASH;
-  static const REGISTER = _Paths.REGISTER;
-  static const ONBOARDING = _Paths.ONBOARDING;
-  static const FORGOT_PASSWORD_EMAIL = _Paths.FORGOT_PASSWORD_EMAIL;
-  static const FORGOT_PASSWORD_OTP = _Paths.FORGOT_PASSWORD_OTP;
-  static const CREATE_NEW_PASSWORD = _Paths.CREATE_NEW_PASSWORD;
-  static const PROFILE = _Paths.PROFILE;
-  static const EXPLORE = _Paths.EXPLORE;
-  static const HOTELS = _Paths.HOTELS;
-  static const TOURS = _Paths.TOURS;
-  static const LOYALTY_PROGRAM = _Paths.LOYALTY_PROGRAM;
-  static const DRAWER = _Paths.DRAWER;
-  static const SAVED = _Paths.SAVED;
-  static const DESTINATIONS = _Paths.DESTINATIONS;
-  static const DESTINATION_HOTELS = _Paths.DESTINATION_HOTELS;
-  static const CHATBOT = _Paths.CHATBOT;
-  static const ALL_SERVICE = _Paths.ALL_SERVICE;
-  static const FLIGHT_BOOKING = _Paths.FLIGHT_BOOKING;
-  static const HOTELS_BOOKING = _Paths.HOTELS_BOOKING;
-  static const CARS_BOOKING = _Paths.CARS_BOOKING;
-  static const TOURS_BOOKING = _Paths.TOURS_BOOKING;
+  static const home = _Paths.home;
+  static const login = _Paths.login;
+  static const splash = _Paths.splash;
+  static const register = _Paths.register;
+  static const onboarding = _Paths.onboarding;
+  static const forgotPasswordEmail = _Paths.forgotPasswordEmail;
+  static const forgotPasswordOtp = _Paths.forgotPasswordOtp;
+  static const createNewPassword = _Paths.createNewPassword;
+  static const profile = _Paths.profile;
+  static const explore = _Paths.explore;
+  static const hotels = _Paths.hotels;
+  static const tours = _Paths.tours;
+  static const loyaltyProgram = _Paths.loyaltyProgram;
+  static const drawer = _Paths.drawer;
+  static const saved = _Paths.saved;
+  static const destinations = _Paths.destinations;
+  static const destinationHotels = _Paths.destinationHotels;
+  static const chatbot = _Paths.chatbot;
+  static const allService = _Paths.allService;
+  static const flightBooking = _Paths.flightBooking;
+  static const hotelsBooking = _Paths.hotelsBooking;
+  static const carsBooking = _Paths.carsBooking;
+  static const toursBooking = _Paths.toursBooking;
 
-  //  Flight Booking Pages
-  static const SEARCH_ALL_FLIGHT = _Paths.SEARCH_ALL_FLIGHT;
-  static const FLIGHT_DETAILS = _Paths.FLIGHT_DETAILS;
-  static const PASSENGER_DETAILS = _Paths.PASSENGER_DETAILS;
-  static const PAYMENT = _Paths.PAYMENT;
-  static const PAYMENT_CONFIRM = _Paths.PAYMENT_CONFIRM;
-  static const TICKET = _Paths.TICKET;
+  // Flight Booking Pages
+  static const searchAllFlight = _Paths.searchAllFlight;
+  static const flightDetails = _Paths.flightDetails;
+  static const passengerDetails = _Paths.passengerDetails;
+  static const payment = _Paths.payment;
+  static const paymentConfirm = _Paths.paymentConfirm;
+  static const ticket = _Paths.ticket;
 
-  //  Hotel Booking Pages
-  static const ALL_HOTELS = _Paths.ALL_HOTELS;
-  static const HOTEL_DETAILS = _Paths.HOTEL_DETAILS;
-  static const PAYMENT_HOTEL = _Paths.PAYMENT_HOTEL;
-  static const HOTEL_TICKET = _Paths.HOTEL_TICKET;
+  // Hotel Booking Pages
+  static const allHotels = _Paths.allHotels;
+  static const hotelDetails = _Paths.hotelDetails;
+  static const paymentHotel = _Paths.paymentHotel;
+  static const hotelTicket = _Paths.hotelTicket;
 
-  //  Car Booking Pages
-  static const SEARCH_ALL_CARS = _Paths.SEARCH_ALL_CARS;
-  static const CAR_DETAILS = _Paths.CAR_DETAILS;
-  static const MAKE_PAYMENT = _Paths.MAKE_PAYMENT;
-  static const CAR_TICKET = _Paths.CAR_TICKET;
+  // Car Booking Pages
+  static const searchAllCars = _Paths.searchAllCars;
+  static const carDetails = _Paths.carDetails;
+  static const makePayment = _Paths.makePayment;
+  static const carTicket = _Paths.carTicket;
 
-// Tour Booking Pages
-  static const TOUR_DETAILS = _Paths.TOUR_DETAILS;
-  static const PAYMENT_TOUR = _Paths.PAYMENT_TOUR;
-  static const TOUR_TICKET = _Paths.TOUR_TICKET;
-  static const ALL_RELATED_TOURS = _Paths.ALL_RELATED_TOURS;
+  // Tour Booking Pages
+  static const tourDetails = _Paths.tourDetails;
+  static const paymentTour = _Paths.paymentTour;
+  static const tourTicket = _Paths.tourTicket;
+  static const allRelatedTours = _Paths.allRelatedTours;
 
   // Point & Loyalty Pages
-  static const BUY_GIFT_CARD = _Paths.BUY_GIFT_CARD;
-  static const SEND_GIFT_CARD = _Paths.SEND_GIFT_CARD;
-  static const REDEEM_GIFT_CARD = _Paths.REDEEM_GIFT_CARD;
-  static const MY_GIFT_CARDS = _Paths.MY_GIFT_CARDS;
-  static const REFER_FRIENDS = _Paths.REFER_FRIENDS;
-  static const MY_BOOKINGS = _Paths.MY_BOOKINGS;
-
+  static const buyGiftCard = _Paths.buyGiftCard;
+  static const sendGiftCard = _Paths.sendGiftCard;
+  static const redeemGiftCard = _Paths.redeemGiftCard;
+  static const myGiftCards = _Paths.myGiftCards;
+  static const referFriends = _Paths.referFriends;
+  static const myBookings = _Paths.myBookings;
 }
 
 abstract class _Paths {
   _Paths._();
-  static const HOME = '/home';
-  static const LOGIN = '/login';
-  static const SPLASH = '/splash';
-  static const REGISTER = '/register';
-  static const ONBOARDING = '/onboarding';
-  static const FORGOT_PASSWORD_EMAIL = '/forgot-password-email';
-  static const FORGOT_PASSWORD_OTP = '/forgot-password-otp';
-  static const CREATE_NEW_PASSWORD = '/create-new-password';
-  static const PROFILE = '/profile';
-  static const EXPLORE = '/explore';
-  static const HOTELS = '/hotels';
-  static const TOURS = '/tours';
-  static const LOYALTY_PROGRAM = '/loyalty-program';
-  static const DRAWER = '/drawer';
-  static const SAVED = '/saved';
-  static const DESTINATIONS = '/destinations';
-  static const DESTINATION_HOTELS = '/destination-hotels';
-  static const CHATBOT = '/chatbot';
-  static const ALL_SERVICE = '/all-service';
-  static const FLIGHT_BOOKING = '/flight-booking';
-  static const HOTELS_BOOKING = '/hotels-booking';
-  static const CARS_BOOKING = '/cars-booking';
-  static const TOURS_BOOKING = '/tours-booking';
 
-  //  Flight Booking Pages
-  static const SEARCH_ALL_FLIGHT = '/search-all-flight';
-  static const FLIGHT_DETAILS = '/flight-details';
-  static const PASSENGER_DETAILS = '/passenger-details';
-  static const PAYMENT = '/payment';
-  static const PAYMENT_CONFIRM = '/payment-confirm';
-  static const TICKET = '/ticket';
+  static const home = '/home';
+  static const login = '/login';
+  static const splash = '/splash';
+  static const register = '/register';
+  static const onboarding = '/onboarding';
+  static const forgotPasswordEmail = '/forgot-password-email';
+  static const forgotPasswordOtp = '/forgot-password-otp';
+  static const createNewPassword = '/create-new-password';
+  static const profile = '/profile';
+  static const explore = '/explore';
+  static const hotels = '/hotels';
+  static const tours = '/tours';
+  static const loyaltyProgram = '/loyalty-program';
+  static const drawer = '/drawer';
+  static const saved = '/saved';
+  static const destinations = '/destinations';
+  static const destinationHotels = '/destination-hotels';
+  static const chatbot = '/chatbot';
+  static const allService = '/all-service';
+  static const flightBooking = '/flight-booking';
+  static const hotelsBooking = '/hotels-booking';
+  static const carsBooking = '/cars-booking';
+  static const toursBooking = '/tours-booking';
+
+  // Flight Booking Pages
+  static const searchAllFlight = '/search-all-flight';
+  static const flightDetails = '/flight-details';
+  static const passengerDetails = '/passenger-details';
+  static const payment = '/payment';
+  static const paymentConfirm = '/payment-confirm';
+  static const ticket = '/ticket';
 
   // Hotel Booking Pages
-  static const ALL_HOTELS = '/all-hotels';
-  static const HOTEL_DETAILS = '/hotel-details';
-  static const PAYMENT_HOTEL = '/payment-hotel';
-  static const HOTEL_TICKET = '/hotel-ticket';
+  static const allHotels = '/all-hotels';
+  static const hotelDetails = '/hotel-details';
+  static const paymentHotel = '/payment-hotel';
+  static const hotelTicket = '/hotel-ticket';
 
   // Car Booking Pages
-  static const SEARCH_ALL_CARS = '/search-all-cars';
-  static const CAR_DETAILS = '/car-details';
-  static const MAKE_PAYMENT = '/make-payment';
-  static const CAR_TICKET = '/car-ticket';
+  static const searchAllCars = '/search-all-cars';
+  static const carDetails = '/car-details';
+  static const makePayment = '/make-payment';
+  static const carTicket = '/car-ticket';
 
   // Tour Booking Pages
-  static const TOUR_DETAILS = '/tour-details';
-  static const PAYMENT_TOUR = '/payment-tour';
-  static const TOUR_TICKET = '/tour-ticket';
-  static const ALL_RELATED_TOURS = '/all-related-tours';
+  static const tourDetails = '/tour-details';
+  static const paymentTour = '/payment-tour';
+  static const tourTicket = '/tour-ticket';
+  static const allRelatedTours = '/all-related-tours';
 
-  //  Gift Card & Loyalty Pages
-  static const BUY_GIFT_CARD = '/buy-gift-card';
-  static const SEND_GIFT_CARD = '/send-gift-card';
-  static const REDEEM_GIFT_CARD = '/redeem-gift-card';
-  static const MY_GIFT_CARDS = '/my-gift-cards';
-  static const REFER_FRIENDS = '/refer-friends';
-  static const MY_BOOKINGS = '/my-bookings';
-  static const MY_BOOKINGS_DETAILS = '/my-bookings-details';
+  // Gift Card & Loyalty Pages
+  static const buyGiftCard = '/buy-gift-card';
+  static const sendGiftCard = '/send-gift-card';
+  static const redeemGiftCard = '/redeem-gift-card';
+  static const myGiftCards = '/my-gift-cards';
+  static const referFriends = '/refer-friends';
+  static const myBookings = '/my-bookings';
+  static const myBookingsDetails = '/my-bookings-details';
 }

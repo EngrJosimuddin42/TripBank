@@ -202,8 +202,8 @@ class MakePaymentView extends GetView<CarsBookingController> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        controller.ArrivingFromLocation.value.isNotEmpty
-                            ? controller.ArrivingFromLocation.value
+                        controller.arrivingFromLocation.value.isNotEmpty
+                            ? controller.arrivingFromLocation.value
                             : 'Not selected',
                         style: GoogleFonts.inter(
                           fontSize: 13,
@@ -211,9 +211,9 @@ class MakePaymentView extends GetView<CarsBookingController> {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      if (controller.ArrivingDate.value != null)
+                      if (controller.arrivingDate.value != null)
                         Text(
-                          _formatDate(controller.ArrivingDate.value!),
+                          _formatDate(controller.arrivingDate.value!),
                           style: GoogleFonts.inter(
                             fontSize: 11,
                             color: Colors.grey[600],
@@ -262,8 +262,8 @@ class MakePaymentView extends GetView<CarsBookingController> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        controller.ArrivingToLocation.value.isNotEmpty
-                            ? controller.ArrivingToLocation.value
+                        controller.arrivingToLocation.value.isNotEmpty
+                            ? controller.arrivingToLocation.value
                             : 'Not selected',
                         style: GoogleFonts.inter(
                           fontSize: 13,
@@ -312,8 +312,8 @@ class MakePaymentView extends GetView<CarsBookingController> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          controller.ArrivingToLocation.value.isNotEmpty
-                              ? controller.ArrivingToLocation.value
+                          controller.arrivingToLocation.value.isNotEmpty
+                              ? controller.arrivingToLocation.value
                               : 'Same as drop-off',
                           style: GoogleFonts.inter(
                             fontSize: 13,
@@ -362,8 +362,8 @@ class MakePaymentView extends GetView<CarsBookingController> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          controller.ArrivingFromLocation.value.isNotEmpty
-                              ? controller.ArrivingFromLocation.value
+                          controller.arrivingFromLocation.value.isNotEmpty
+                              ? controller.arrivingFromLocation.value
                               : 'Same as pickup',
                           style: GoogleFonts.inter(
                             fontSize: 13,
@@ -418,7 +418,7 @@ class MakePaymentView extends GetView<CarsBookingController> {
               method['name'] as String,
               method['icon'] as String,
             );
-          }).toList(),
+          }),
         ],
       ),
     );

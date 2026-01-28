@@ -192,7 +192,6 @@ class ChatbotView extends GetView<ChatbotController> {
                   controller.startNewChat();
                   Get.back();
                 },
-                child: Container(
                   child: Row(
                     children: [
                       Image.asset('assets/images/edit.png', color: Colors.black),
@@ -207,7 +206,6 @@ class ChatbotView extends GetView<ChatbotController> {
                       ),
                     ],
                   ),
-                ),
               ),
             ),
             Divider(color: Colors.grey[300]),

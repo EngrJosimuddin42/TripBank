@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide DrawerController;
 import 'package:get/get.dart';
 import 'dart:async';
@@ -170,7 +171,11 @@ class HomeController extends GetxController {
     try {
       final user = await _userRepository.getProfile();
       await _authService.updateUser(user);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('Profile load error: $e');
+        print('Stack: $stackTrace');
+        }
     } finally {
       isLoadingProfile.value = false;
     }
@@ -211,7 +216,11 @@ class HomeController extends GetxController {
           'buttonText': bannerData['buttonText'] ?? 'Book Now',
         });
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('Failed to load promotional banner: $e');
+        print('Stack: $stackTrace');
+      }
     }
   }
 
@@ -371,7 +380,7 @@ List<Hotel> get displayedHotels {
   }
 
   void onTourTapObject(Tour tour) {
-    Get.toNamed(Routes.TOUR_DETAILS, arguments: tour);
+    Get.toNamed(Routes.tourDetails, arguments: tour);
 
   }
 

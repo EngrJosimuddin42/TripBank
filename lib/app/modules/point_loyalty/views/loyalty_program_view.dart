@@ -114,7 +114,12 @@ class LoyaltyProgramView extends GetView<LoyaltyProgramController> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            '${controller.totalPoints.value.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}', // Dynamic with formatting
+                            controller.totalPoints.value
+                                .toStringAsFixed(0)
+                                .replaceAllMapped(
+                              RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+                                  (Match m) => '${m[1]},',
+                            ),
                             style: GoogleFonts.inter(
                               color: Colors.white,
                               fontSize: 36,

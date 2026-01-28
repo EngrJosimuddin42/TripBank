@@ -116,7 +116,9 @@ class ChatbotController extends GetxController {
           chatHistory.clear();
         }
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('Chat History Error: $e');
+      debugPrint('Stacktrace: $stackTrace');
     } finally {
       isLoadingHistory.value = false;
     }
@@ -182,8 +184,7 @@ class ChatbotController extends GetxController {
       // Call API to get chat messages
 
       final response =
-      await _apiService.get('${ApiConstants.chatById}/$chatId');
-
+      await _apiService.get(ApiConstants.getChatById(chatId));
       if (response['success'] == true && response['data'] != null) {
         final List<dynamic> chatMessages = response['data']['messages'] ?? [];
 
@@ -281,10 +282,10 @@ class ChatbotController extends GetxController {
     final user = _authService.currentUser.value;
 
     if (user != null) {
-      if (user.name != null && user.name!.isNotEmpty) {
-        return user.name!;
-      } else if (user.email != null && user.email!.isNotEmpty) {
-        return user.email!.split('@')[0];
+      if (user.name.isNotEmpty) {
+        return user.name;
+      } else if (user.email.isNotEmpty) {
+        return user.email.split('@')[0];
       }
     }
 

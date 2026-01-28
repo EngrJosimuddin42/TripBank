@@ -5,7 +5,7 @@ import '../controllers/drawer_controller.dart';
 import 'package:flutter/services.dart';
 
 class DrawerView extends GetView<DrawerController> {
-  const DrawerView({Key? key}) : super(key: key);
+  const DrawerView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -97,57 +97,6 @@ class DrawerView extends GetView<DrawerController> {
             ],
           ),
         ),
-      ),
-    );
-  }
-  Widget _buildProfileHeader() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Obx(() => Text(
-            controller.userName.value,
-            style: GoogleFonts.inter(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: Colors.black
-            ),
-          ),
-          ),
-          const SizedBox(height: 4),
-          Obx(
-                () =>Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Image.asset(
-                  'assets/images/premium quality.png',
-                  width: 24,
-                  height: 24,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  controller.userType.value,
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF9D9D9D),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Obx(() => Text(
-            controller.userAddress.value,
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF2A2A2A),
-            ),
-          ),
-          ),
-        ],
       ),
     );
   }

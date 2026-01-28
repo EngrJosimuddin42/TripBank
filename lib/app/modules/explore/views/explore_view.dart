@@ -7,7 +7,7 @@ import 'all_destinations_view.dart';
 import 'featured_destinations_view.dart';
 
 class ExploreView extends StatelessWidget {
-  const ExploreView({Key? key}) : super(key: key);
+  const ExploreView({super.key});
 
   @override
   Widget build(BuildContext context) {

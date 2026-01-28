@@ -9,23 +9,14 @@ class ToursBookingBinding extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut<ToursBookingController>(() => ToursBookingController(),
-      fenix: true,
-    );
+      fenix: true);
+    Get.lazyPut<FavoritesService>(() => FavoritesService(),
+      fenix: true);
 
-    Get.lazyPut<FavoritesService>(
-          () => FavoritesService(),
-      fenix: true,
-    );
+    Get.lazyPut<MyBookingsController>(() => MyBookingsController(),
+      fenix: true);
 
-    Get.lazyPut<MyBookingsController>(
-          () => MyBookingsController(),
-      fenix: true,
-    );
-
-    Get.lazyPut<ProfileController>(
-          () => ProfileController(),
-      fenix: true,
-    );
-
+    Get.lazyPut<ProfileController>(() => ProfileController(),
+      fenix: true);
   }
 }

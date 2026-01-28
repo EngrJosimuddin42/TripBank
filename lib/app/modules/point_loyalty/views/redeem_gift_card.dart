@@ -95,13 +95,13 @@ class RedeemGiftCardView extends GetView<LoyaltyProgramController> {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    _buildCardTab('Buy Card', 0, () => Get.toNamed(Routes.BUY_GIFT_CARD)),
+                    _buildCardTab('Buy Card', 0, () => Get.toNamed(Routes.buyGiftCard)),
                     const SizedBox(width: 12),
-                    _buildCardTab('Send Card', 1, () => Get.toNamed(Routes.SEND_GIFT_CARD)),
+                    _buildCardTab('Send Card', 1, () => Get.toNamed(Routes.sendGiftCard)),
                     const SizedBox(width: 12),
-                    _buildCardTab('Redeem', 2, () => Get.toNamed(Routes.REDEEM_GIFT_CARD)),
+                    _buildCardTab('Redeem', 2, () => Get.toNamed(Routes.redeemGiftCard)),
                     const SizedBox(width: 12),
-                    _buildCardTab('My Cards', 3, () => Get.toNamed(Routes.MY_GIFT_CARDS)),
+                    _buildCardTab('My Cards', 3, () => Get.toNamed(Routes.myGiftCards)),
                   ],
                 ),
               ),

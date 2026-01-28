@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../../routes/app_pages.dart';
 import '../../../services/storage_service.dart';
@@ -20,12 +21,16 @@ class SplashController extends GetxController {
       final bool isLoggedIn = await _storage.isLoggedIn();
 
       if (isLoggedIn) {
-        Get.offAllNamed(Routes.HOME);
+        Get.offAllNamed(Routes.home);
       } else {
-        Get.offAllNamed(Routes.ONBOARDING);
+        Get.offAllNamed(Routes.onboarding);
       }
-    } catch (e, stack) {
-      Get.offAllNamed(Routes.ONBOARDING);
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        debugPrint('Navigation error: $e');
+        debugPrint('Stack: $stackTrace');
+      }
+      Get.offAllNamed(Routes.onboarding);
       SnackbarHelper.showError(
           'Something went wrong. Starting from onboarding.',
           title: 'Something Went Wrong'
@@ -34,10 +39,5 @@ class SplashController extends GetxController {
     } finally {
       isLoading.value = false;
     }
-  }
-
-  @override
-  void onClose() {
-    super.onClose();
   }
 }

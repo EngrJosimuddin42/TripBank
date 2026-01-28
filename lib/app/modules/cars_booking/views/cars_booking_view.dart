@@ -155,29 +155,29 @@ class CarsBookingView extends GetView<CarsBookingController> {
   Widget _buildLocationSection({required bool isDeparture}) {
     return Obx(() {
       final fromLocation = isDeparture
-          ? controller.ArrivingFromLocation.value
+          ? controller.arrivingFromLocation.value
           : controller.returnFromLocation.value;
       final fromCode = isDeparture
-          ? controller.ArrivingFromCode.value
+          ? controller.arrivingFromCode.value
           : controller.returnFromCode.value;
       final fromTerminal = isDeparture
-          ? controller.ArrivingFromTerminal.value
+          ? controller.arrivingFromTerminal.value
           : controller.returnFromTerminal.value;
       final fromCountry = isDeparture
-          ? controller.ArrivingFromCountry.value
+          ? controller.arrivingFromCountry.value
           : controller.returnFromCountry.value;
 
       final toLocation = isDeparture
-          ? controller.ArrivingToLocation.value
+          ? controller.arrivingToLocation.value
           : controller.returnToLocation.value;
       final toCode = isDeparture
-          ? controller.ArrivingToCode.value
+          ? controller.arrivingToCode.value
           : controller.returnToCode.value;
       final toTerminal = isDeparture
-          ? controller.ArrivingToTerminal.value
+          ? controller.arrivingToTerminal.value
           : controller.returnToTerminal.value;
       final toCountry = isDeparture
-          ? controller.ArrivingToCountry.value
+          ? controller.arrivingToCountry.value
           : controller.returnToCountry.value;
 
       final fromLabel = isDeparture ? 'From' : 'Pickup';
@@ -374,15 +374,15 @@ class CarsBookingView extends GetView<CarsBookingController> {
     if (result != null && result is LocationData) {
       if (isDeparture) {
         if (isFrom) {
-          controller.ArrivingFromLocation.value = result.city;
-          controller.ArrivingFromCode.value = result.code;
-          controller.ArrivingFromTerminal.value = result.terminal;
-          controller.ArrivingFromCountry.value = result.country;
+          controller.arrivingFromLocation.value = result.city;
+          controller.arrivingFromCode.value = result.code;
+          controller.arrivingFromTerminal.value = result.terminal;
+          controller.arrivingFromCountry.value = result.country;
         } else {
-          controller.ArrivingToLocation.value = result.city;
-          controller.ArrivingToCode.value = result.code;
-          controller.ArrivingToTerminal.value = result.terminal;
-          controller.ArrivingToCountry.value = result.country;
+          controller.arrivingToLocation.value = result.city;
+          controller.arrivingToCode.value = result.code;
+          controller.arrivingToTerminal.value = result.terminal;
+          controller.arrivingToCountry.value = result.country;
         }
       } else {
         if (isFrom) {
@@ -433,14 +433,14 @@ class CarsBookingView extends GetView<CarsBookingController> {
   Widget _buildTimeOption(String time, bool isDeparture) {
     return Obx(() {
       final isSelected = isDeparture
-          ? controller.ArrivingPreferredTimes.contains(time)
+          ? controller.arrivingPreferredTimes.contains(time)
           : controller.returnPreferredTimes.contains(time);
 
       return GestureDetector(
         onTap: () {
           if (isDeparture) {
-            controller.ArrivingPreferredTimes.clear();
-            controller.ArrivingPreferredTimes.add(time);
+            controller.arrivingPreferredTimes.clear();
+            controller.arrivingPreferredTimes.add(time);
           } else {
             controller.returnPreferredTimes.clear();
             controller.returnPreferredTimes.add(time);
@@ -546,7 +546,7 @@ class CarsBookingView extends GetView<CarsBookingController> {
                   final time = timeSlots[index];
                   return Obx(() {
                     final isSelected = isDeparture
-                        ? controller.ArrivingSelectedTimeSlots.contains(time)
+                        ? controller.arrivingSelectedTimeSlots.contains(time)
                         : controller.returnSelectedTimeSlots.contains(time);
 
                     return GestureDetector(
@@ -592,7 +592,7 @@ class CarsBookingView extends GetView<CarsBookingController> {
               child: ElevatedButton(
                 onPressed: () {
                   final selectedSlots = isDeparture
-                      ? controller.ArrivingSelectedTimeSlots
+                      ? controller.arrivingSelectedTimeSlots
                       : controller.returnSelectedTimeSlots;
                   if (selectedSlots.isEmpty) {
                     SnackbarHelper.showWarning(
@@ -645,11 +645,11 @@ class CarsBookingView extends GetView<CarsBookingController> {
   Widget _buildDateSection() {
     return Builder(
       builder: (context) => Obx(() {
-        bool isLocationFilled = controller.ArrivingFromLocation.value.isNotEmpty &&
-            controller.ArrivingToLocation.value.isNotEmpty;
+        bool isLocationFilled = controller.arrivingFromLocation.value.isNotEmpty &&
+            controller.arrivingToLocation.value.isNotEmpty;
 
-        bool isTimeSelected = controller.ArrivingPreferredTimes.isNotEmpty ||
-            controller.ArrivingSelectedTimeSlots.isNotEmpty;
+        bool isTimeSelected = controller.arrivingPreferredTimes.isNotEmpty ||
+            controller.arrivingSelectedTimeSlots.isNotEmpty;
 
         bool canShowAddReturnButton = isLocationFilled && isTimeSelected;
 
@@ -658,7 +658,7 @@ class CarsBookingView extends GetView<CarsBookingController> {
                 onTap: () => _selectDate(true, context),
                 child: _buildSingleDateCard(
                   'Pickup Date',
-                  controller.ArrivingDate.value,
+                  controller.arrivingDate.value,
                 ),
               );
             }
@@ -679,7 +679,7 @@ class CarsBookingView extends GetView<CarsBookingController> {
                       Expanded(
                         child: GestureDetector(
                           onTap: () => _selectDate(true, context),
-                          child: _buildDateColumn('Pickup', controller.ArrivingDate.value),
+                          child: _buildDateColumn('Pickup', controller.arrivingDate.value),
                         ),
                       ),
                       Container(width: 1.5, height: 40, color: const Color(0xFFFECD08)),
@@ -865,9 +865,9 @@ class CarsBookingView extends GetView<CarsBookingController> {
 
   Future<void> _selectDate(bool isPickup, BuildContext context) async {
     final DateTime initial = isPickup
-        ? (controller.ArrivingDate.value ?? DateTime.now().add(const Duration(days: 1)))
+        ? (controller.arrivingDate.value ?? DateTime.now().add(const Duration(days: 1)))
         : (controller.returnDate.value ??
-        controller.ArrivingDate.value?.add(const Duration(days: 7)) ??
+        controller.arrivingDate.value?.add(const Duration(days: 7)) ??
         DateTime.now().add(const Duration(days: 8)));
 
     final DateTime? picked = await showDialog<DateTime>(
@@ -883,7 +883,7 @@ class CarsBookingView extends GetView<CarsBookingController> {
     if (picked == null) return;
 
     if (isPickup) {
-      controller.ArrivingDate.value = picked;
+      controller.arrivingDate.value = picked;
 
       if (controller.selectedTripType.value == 'Round Way' &&
           controller.returnDate.value != null &&
@@ -893,8 +893,8 @@ class CarsBookingView extends GetView<CarsBookingController> {
     } else {
       final wasReturnDateNull = controller.returnDate.value == null;
 
-      if (controller.ArrivingDate.value != null &&
-          picked.isBefore(controller.ArrivingDate.value!)) {
+      if (controller.arrivingDate.value != null &&
+          picked.isBefore(controller.arrivingDate.value!)) {
         SnackbarHelper.showWarning(
             'Return date cannot be before pickup date.',
             title: 'Invalid Selection'
@@ -907,19 +907,19 @@ class CarsBookingView extends GetView<CarsBookingController> {
 
         // Return Pickup = Arriving To
 
-        controller.returnFromLocation.value = controller.ArrivingToLocation.value;
-        controller.returnFromCode.value      = controller.ArrivingToCode.value;
-        controller.returnFromTerminal.value  = controller.ArrivingToTerminal.value;
-        controller.returnFromCountry.value   = controller.ArrivingToCountry.value;
+        controller.returnFromLocation.value = controller.arrivingToLocation.value;
+        controller.returnFromCode.value      = controller.arrivingToCode.value;
+        controller.returnFromTerminal.value  = controller.arrivingToTerminal.value;
+        controller.returnFromCountry.value   = controller.arrivingToCountry.value;
 
         // Return Drop-off = Arriving From
 
-        controller.returnToLocation.value    = controller.ArrivingFromLocation.value;
-        controller.returnToCode.value        = controller.ArrivingFromCode.value;
-        controller.returnToTerminal.value    = controller.ArrivingFromTerminal.value;
-        controller.returnToCountry.value     = controller.ArrivingFromCountry.value;
+        controller.returnToLocation.value    = controller.arrivingFromLocation.value;
+        controller.returnToCode.value        = controller.arrivingFromCode.value;
+        controller.returnToTerminal.value    = controller.arrivingFromTerminal.value;
+        controller.returnToCountry.value     = controller.arrivingFromCountry.value;
         SnackbarHelper.showSuccess(
-            'Return trip: ${controller.ArrivingToLocation.value} → ${controller.ArrivingFromLocation.value}',
+            'Return trip: ${controller.arrivingToLocation.value} → ${controller.arrivingFromLocation.value}',
             title: 'Return Locations Filled'
         );
       }

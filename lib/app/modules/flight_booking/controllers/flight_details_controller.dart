@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../models/flight_model.dart';
 import '../../../widgets/snackbar_helper.dart';
@@ -12,8 +11,10 @@ class FlightDetailsController extends GetxController {
   final isRoundTrip = false.obs;
   final totalPassengers = 1.obs;
   final showFareDetails = false.obs;
+  final selectedClass = 'Economy'.obs;
+  String get passengerSummary => "$_adults Adults, $_children Children, $_infants Infants";
 
-  // Passenger breakdown
+  // Private passenger breakdown
   int _adults = 1;
   int _children = 0;
   int _infants = 0;
@@ -21,162 +22,119 @@ class FlightDetailsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _initializeData();
+  }
 
+  void _initializeData() {
     final args = Get.arguments;
 
-    if (args is Map) {
-      selectedFlight.value = args['flight'] as Flight?;
-      isRoundTrip.value = args['isRoundTrip'] ?? false;
-      totalPassengers.value = args['totalPassengers'] ?? 1;
+    if (Get.isRegistered<FlightBookingController>()) {
+      final booking = Get.find<FlightBookingController>();
+      selectedClass.value = booking.selectedClass.value;
+      totalPassengers.value = booking.totalPassengers;
+      isRoundTrip.value = booking.selectedTripType.value.contains('Round');
+      _adults = booking.adults.value;
+      _children = booking.children.value;
+      _infants = booking.infants.value;
+    }
 
-      //  Passenger breakdown
-      _adults = args['adults'] ?? 1;
-      _children = args['children'] ?? 0;
-      _infants = args['infants'] ?? 0;
-    } else if (args is Flight) {
-      selectedFlight.value = args;
-      isRoundTrip.value = false;
-
-      try {
-        final bookingController = Get.find<FlightBookingController>();
-        totalPassengers.value = bookingController.totalPassengers;
-        isRoundTrip.value = bookingController.selectedTripType.value == 'Round Way';
-
-        // Breakdown
-        _adults = bookingController.adults.value;
-        _children = bookingController.children.value;
-        _infants = bookingController.infants.value;
-
-      } catch (e) {
-        totalPassengers.value = 1;
-        _adults = 1;
-        _children = 0;
-        _infants = 0;
+    if (args != null) {
+      if (args is Map) {
+        selectedFlight.value = args['flight'];
+        isRoundTrip.value = args['isRoundTrip'] ?? isRoundTrip.value;
+        totalPassengers.value = args['totalPassengers'] ?? totalPassengers.value;
+        if (args['cabinClass'] != null) selectedClass.value = args['cabinClass'];
+      } else if (args is Flight) {
+        selectedFlight.value = args;
+        if (args.cabinClass.isNotEmpty) selectedClass.value = args.cabinClass;
       }
     }
 
     if (selectedFlight.value == null) {
-      Future.delayed(Duration.zero, () {
-        SnackbarHelper.showError(
-            'No flight data found. Redirecting back...',
-            title: 'Data Missing'
-        );
+      _handleMissingData();
+    }
+  }
+
+  void _handleMissingData() {
+    Future.delayed(Duration.zero, () {
+      SnackbarHelper.showError('No flight details available.');
+      if (Get.key.currentState?.canPop() ?? false) {
         Get.back();
-      });
-    }
-  }
-
-  //  Book Flight Method
-  void bookFlight() {
-    if (selectedFlight.value == null) {
-      SnackbarHelper.showError(
-          'Please select a flight to proceed with the booking.',
-          title: 'No Flight Selected'
-      );
-      return;
-    }
-
-    try {
-      FlightBookingController bookingController;
-      if (Get.isRegistered<FlightBookingController>()) {
-        bookingController = Get.find<FlightBookingController>();
       } else {
-        bookingController = Get.put(
-          FlightBookingController(),
-          permanent: true,
-        );
+        Get.offAllNamed('/home');
       }
-
-      // Flight data set
-      bookingController.selectedFlight.value = selectedFlight.value;
-
-      // breakdown set
-      bookingController.adults.value = _adults;
-      bookingController.children.value = _children;
-      bookingController.infants.value = _infants;
-
-
-      // Navigate with arguments
-      Get.toNamed('/passenger-details', arguments: {
-        'flight': selectedFlight.value,
-        'isRoundTrip': isRoundTrip.value,
-        'totalPassengers': totalPassengers.value,
-      });
-
-    } catch (e) {
-      SnackbarHelper.showError(
-          'Failed to proceed with booking. Please try again.',
-          title: 'Booking Error'
-      );
-    }
+    });
   }
 
-  // Calculate total (Round trip support )
-  double calculateTotal() {
-    final flight = selectedFlight.value;
-    if (flight == null) return 0.0;
-    final passengers = totalPassengers.value;
-
-    // Departure flight
-    double total = (flight.price + flight.taxAmount + flight.vatAmount + flight.otherCharges) * passengers;
-
-    //  Return flight add  (if round trip)
-    if (isRoundTrip.value && flight.returnDepartureTime != null) {
-      total += (flight.price + flight.taxAmount + flight.vatAmount + flight.otherCharges) * passengers;
-    }
-
-    return total;
+  double get classMultiplier {
+    final String c = selectedClass.value.toLowerCase();
+    if (c.contains('business')) return 2.5;
+    if (c.contains('first')) return 4.0;
+    if (c.contains('premium')) return 1.5;
+    return 1.0;
   }
 
-  // Get breakdown details with Round Trip support
   Map<String, double> getPriceBreakdown() {
-    final passengers = totalPassengers.value;
     final flight = selectedFlight.value;
+    if (flight == null) return {'total': 0.0};
+    final int tripFactor = (isRoundTrip.value && flight.returnDepartureTime != null) ? 2 : 1;
+    final int pCount = totalPassengers.value;
 
-    if (flight == null) {
-      return {'baseFare': 0.0, 'taxes': 0.0, 'vat': 0.0, 'otherCharges': 0.0, 'total': 0.0};
-    }
 
-    double baseFare = flight.price * passengers;
-    double taxes = flight.taxAmount * passengers;
-    double vat = flight.vatAmount * passengers;
-    double otherCharges = flight.otherCharges * passengers;
-
-    // Round trip
-    if (isRoundTrip.value && flight.returnDepartureTime != null) {
-      baseFare *= 2;
-      taxes *= 2;
-      vat *= 2;
-      otherCharges *= 2;
-    }
+    double baseFare = (flight.price * classMultiplier) * pCount * tripFactor;
+    double taxes = flight.taxAmount * pCount * tripFactor;
+    double vat = flight.vatAmount * pCount * tripFactor;
+    double other = flight.otherCharges * pCount * tripFactor;
 
     return {
       'baseFare': baseFare,
       'taxes': taxes,
       'vat': vat,
-      'otherCharges': otherCharges,
-      'total': baseFare + taxes + vat + otherCharges,
+      'otherCharges': other,
+      'total': baseFare + taxes + vat + other,
     };
+  }
+
+  void bookFlight() {
+    final flight = selectedFlight.value;
+    if (flight == null) return;
+
+    final bookingController = Get.isRegistered<FlightBookingController>()
+        ? Get.find<FlightBookingController>()
+        : Get.put(FlightBookingController(), permanent: true);
+    bookingController.selectedFlight.value = flight;
+    bookingController.selectedClass.value = selectedClass.value;
+
+    bookingController.adults.value = _adults;
+    bookingController.children.value = _children;
+    bookingController.infants.value = _infants;
+
+    Get.toNamed('/passenger-details', arguments: {
+      'flight': flight,
+      'isRoundTrip': isRoundTrip.value,
+      'totalPassengers': totalPassengers.value,
+      'cabinClass': selectedClass.value,
+      'adults': _adults,
+      'children': _children,
+      'infants': _infants,
+    });
   }
 
   void toggleFareDetails() => showFareDetails.toggle();
 
-  String formatDate(DateTime date) {
-    final day = date.day.toString().padLeft(2, '0');
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return '$day ${months[date.month - 1]}, ${date.year}';
+  String formatDate(DateTime date) =>
+      "${date.day.toString().padLeft(2, '0')} ${_getMonth(date.month)}, ${date.year}";
+
+  String _getMonth(int m) {
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    if (m < 1 || m > 12) return 'Jan';
+    return months[m - 1];
   }
 
   String formatTime(DateTime time) {
-    final hour = time.hour > 12 ? time.hour - 12 : (time.hour == 0 ? 12 : time.hour);
-    final minute = time.minute.toString().padLeft(2, '0');
-    final period = time.hour >= 12 ? 'PM' : 'AM';
-    return '$hour:$minute $period';
-  }
-
-  void reset() {
-    selectedFlight.value = null;
-    showFareDetails.value = false;
-    isRoundTrip.value = false;
+    final String hour = (time.hour > 12 ? time.hour - 12 : (time.hour == 0 ? 12 : time.hour)).toString();
+    final String min = time.minute.toString().padLeft(2, '0');
+    final String period = time.hour >= 12 ? 'PM' : 'AM';
+    return '$hour:$min $period';
   }
 }

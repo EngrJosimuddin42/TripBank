@@ -4,7 +4,7 @@ import '../modules/chatbot/bindings/chatbot_binding.dart';
 import '../modules/chatbot/views/chatbot_view.dart';
 
 class DraggableChatBubble extends StatefulWidget {
-  const DraggableChatBubble({Key? key}) : super(key: key);
+  const DraggableChatBubble({super.key});
 
   @override
   State<DraggableChatBubble> createState() => _DraggableChatBubbleState();

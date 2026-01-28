@@ -209,7 +209,7 @@ class LoginView extends GetView<LoginController> {
                       alignment: Alignment.centerRight,
                       child: TextButton(
                         onPressed: () =>
-                            Get.toNamed(Routes.FORGOT_PASSWORD_EMAIL),
+                            Get.toNamed(Routes.forgotPasswordEmail),
                         child: Text(
                           'Forgot Password?',
                           style: GoogleFonts.inter(
@@ -320,7 +320,7 @@ class LoginView extends GetView<LoginController> {
                           ),
                         ),
                         GestureDetector(
-                          onTap: () => Get.toNamed(Routes.REGISTER),
+                          onTap: () => Get.toNamed(Routes.register),
                           child: Text(
                             'Register',
                             style: GoogleFonts.inter(
@@ -338,32 +338,6 @@ class LoginView extends GetView<LoginController> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildTab(String title, bool isActive, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        children: [
-          Text(
-            title,
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: isActive
-                  ? const Color(0xFFE7BB07)
-                  : const Color(0xFF818898),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            height: 3,
-            width: 130,
-            color: isActive ? const Color(0xFFE7BB07) : Colors.transparent,
-          ),
-        ],
       ),
     );
   }

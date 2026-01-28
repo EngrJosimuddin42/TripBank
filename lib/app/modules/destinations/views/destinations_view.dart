@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../home/controllers/home_controller.dart';
 
 class DestinationsView extends GetView<HomeController> {
-  const DestinationsView({Key? key}) : super(key: key);
+  const DestinationsView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +109,7 @@ class DestinationsView extends GetView<HomeController> {
                             child: CachedNetworkImage(
                               imageUrl: dest['image'] ?? '',
                               fit: BoxFit.cover,
-                              placeholder: (_, __) => Container(
+                              placeholder: (context, url) => Container(
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     begin: Alignment.topCenter,
@@ -127,7 +127,7 @@ class DestinationsView extends GetView<HomeController> {
                                   ),
                                 ),
                               ),
-                              errorWidget: (_, __, ___) => Container(
+                              errorWidget: (context, url, error) => Container(
                                 color: Colors.grey[300],
                                 child: const Icon(
                                   Icons.image_not_supported,

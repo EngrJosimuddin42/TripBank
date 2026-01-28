@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'dart:async';
 import '../constants/api_constants.dart';
@@ -47,7 +48,11 @@ class FavoritesService extends GetxService {
 
       final cars = _storageService.getFavoriteCars();
       favoriteCars.assignAll(cars);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        debugPrint('Error loading local favorites: $e');
+        debugPrint('Stack trace: $stackTrace');
+      }
     }
   }
 
@@ -59,7 +64,11 @@ class FavoritesService extends GetxService {
       await _storageService.saveFavoriteTours(favoriteTours.toList());
       await _storageService.saveFavoriteCars(favoriteCars.toList());
 
-    } catch (e) {
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        debugPrint('Error saving local favorites: $e');
+        debugPrint('Stack trace: $stackTrace');
+      }
     }
   }
 
@@ -89,8 +98,16 @@ class FavoritesService extends GetxService {
         }
 
         await _saveLocalFavorites();
+      } else {
+        if (kDebugMode) {
+          debugPrint('Server returned unsuccessful sync: ${response['message'] ?? 'No message'}');
+        }
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        debugPrint('Favorites sync failed: $e');
+        debugPrint('Stack trace: $stackTrace');
+      }
     } finally {
       isSyncing.value = false;
     }

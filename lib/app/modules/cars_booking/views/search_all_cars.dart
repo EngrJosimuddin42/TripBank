@@ -333,7 +333,7 @@ class SearchAllCarsView extends GetView<CarsBookingController> {
                 ],
               ),
               const SizedBox(height: 8),
-              Text("${car.types}",style: GoogleFonts.inter(
+              Text(car.types,style: GoogleFonts.inter(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                   color: Colors.black87)),

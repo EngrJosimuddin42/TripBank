@@ -30,6 +30,53 @@ class _LocationSearchDialogState extends State<LocationSearchDialog> {
   final _isLoading = false.obs;
   final _searchQuery = ''.obs;
 
+  //  SINGLE SOURCE OF TRUTH
+  static final List<LocationData> _allLocations = [
+    // Nigeria
+    LocationData(city: 'Abuja', code: 'ABV', terminal: 'Abuja Bus Terminal', country: 'Nigeria'),
+    LocationData(city: 'Lagos', code: 'LOS', terminal: 'Ikeja Bus Park', country: 'Nigeria'),
+    LocationData(city: 'Ibadan', code: 'IBA', terminal: 'Ibadan Bus Terminal', country: 'Nigeria'),
+    LocationData(city: 'Port Harcourt', code: 'PHC', terminal: 'Port Harcourt Central Station', country: 'Nigeria'),
+    LocationData(city: 'Kano', code: 'KAN', terminal: 'Kano Interstate Terminal', country: 'Nigeria'),
+
+    // Europe
+    LocationData(city: 'Paris', code: 'CDG', terminal: 'Paris Central Station', country: 'France'),
+    LocationData(city: 'Berlin', code: 'BER', terminal: 'Berlin Central Bus Station', country: 'Germany'),
+    LocationData(city: 'Rome', code: 'ROM', terminal: 'Roma Tiburtina', country: 'Italy'),
+    LocationData(city: 'Madrid', code: 'MAD', terminal: 'Estación Sur de Autobuses', country: 'Spain'),
+    LocationData(city: 'Amsterdam', code: 'AMS', terminal: 'Amsterdam Sloterdijk', country: 'Netherlands'),
+    LocationData(city: 'Istanbul', code: 'IST', terminal: 'City Square Terminal', country: 'Turkey'),
+
+    // Asia
+    LocationData(city: 'Dubai', code: 'DXB', terminal: 'Al Ghubaiba Bus Station', country: 'UAE'),
+    LocationData(city: 'Singapore', code: 'SIN', terminal: 'Queen Street Terminal', country: 'Singapore'),
+    LocationData(city: 'Tokyo', code: 'TYO', terminal: 'Shinjuku Bus Terminal', country: 'Japan'),
+    LocationData(city: 'Bangkok', code: 'BKK', terminal: 'Mo Chit Bus Terminal', country: 'Thailand'),
+    LocationData(city: 'Kuala Lumpur', code: 'KUL', terminal: 'TBS Bus Terminal', country: 'Malaysia'),
+    LocationData(city: 'Mumbai', code: 'BOM', terminal: 'Mumbai Central Bus Stand', country: 'India'),
+    LocationData(city: 'Delhi', code: 'DEL', terminal: 'ISBT Kashmere Gate', country: 'India'),
+    LocationData(city: 'Dhaka', code: 'DAC', terminal: 'Mohakhali Bus Terminal', country: 'Bangladesh'),
+    LocationData(city: 'Chittagong', code: 'CGP', terminal: 'Chittagong Bus Stand', country: 'Bangladesh'),
+    LocationData(city: 'Sylhet', code: 'ZYL', terminal: 'Sylhet Central Bus Station', country: 'Bangladesh'),
+
+    // North America
+    LocationData(city: 'New York', code: 'NYC', terminal: 'Port Authority Bus Terminal', country: 'USA'),
+    LocationData(city: 'Los Angeles', code: 'LAX', terminal: 'Union Station', country: 'USA'),
+    LocationData(city: 'Chicago', code: 'CHI', terminal: 'Chicago Union Station', country: 'USA'),
+    LocationData(city: 'Toronto', code: 'YYZ', terminal: 'Toronto Coach Terminal', country: 'Canada'),
+    LocationData(city: 'Vancouver', code: 'YVR', terminal: 'Pacific Central Station', country: 'Canada'),
+
+    // Middle East
+    LocationData(city: 'Riyadh', code: 'RUH', terminal: 'Riyadh Bus Station', country: 'Saudi Arabia'),
+    LocationData(city: 'Doha', code: 'DOH', terminal: 'Doha Bus Terminal', country: 'Qatar'),
+    LocationData(city: 'Cairo', code: 'CAI', terminal: 'Cairo Gateway Terminal', country: 'Egypt'),
+
+    // Africa
+    LocationData(city: 'Johannesburg', code: 'JNB', terminal: 'Park Station', country: 'South Africa'),
+    LocationData(city: 'Nairobi', code: 'NBO', terminal: 'Nairobi Railway Station', country: 'Kenya'),
+    LocationData(city: 'Accra', code: 'ACC', terminal: 'Accra Central Station', country: 'Ghana'),
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -37,221 +84,12 @@ class _LocationSearchDialogState extends State<LocationSearchDialog> {
   }
 
   void _loadPopularLocations() {
-    _locations.value = [
-
-      // Nigeria
-
-      LocationData(
-        city: 'Abuja',
-        code: 'ABV',
-        terminal: 'Abuja Bus Terminal',
-        country: 'Nigeria',
-      ),
-      LocationData(
-        city: 'Lagos',
-        code: 'LOS',
-        terminal: 'Ikeja Bus Park',
-        country: 'Nigeria',
-      ),
-      LocationData(
-        city: 'Ibadan',
-        code: 'IBA',
-        terminal: 'Ibadan Bus Terminal',
-        country: 'Nigeria',
-      ),
-      LocationData(
-        city: 'Port Harcourt',
-        code: 'PHC',
-        terminal: 'Port Harcourt Central Station',
-        country: 'Nigeria',
-      ),
-      LocationData(
-        city: 'Kano',
-        code: 'KAN',
-        terminal: 'Kano Interstate Terminal',
-        country: 'Nigeria',
-      ),
-
-      LocationData(
-        city: 'Paris',
-        code: 'CDG',
-        terminal: 'Paris Central Station',
-        country: 'France',
-      ),
-      LocationData(
-        city: 'Berlin',
-        code: 'BER',
-        terminal: 'Berlin Central Bus Station',
-        country: 'Germany',
-      ),
-      LocationData(
-        city: 'Rome',
-        code: 'ROM',
-        terminal: 'Roma Tiburtina',
-        country: 'Italy',
-      ),
-      LocationData(
-        city: 'Madrid',
-        code: 'MAD',
-        terminal: 'Estación Sur de Autobuses',
-        country: 'Spain',
-      ),
-      LocationData(
-        city: 'Amsterdam',
-        code: 'AMS',
-        terminal: 'Amsterdam Sloterdijk',
-        country: 'Netherlands',
-      ),
-      LocationData(
-        city: 'Istanbul',
-        code: 'IST',
-        terminal: 'City Square Terminal',
-        country: 'Turkey',
-      ),
-
-      // Asia
-
-      LocationData(
-        city: 'Dubai',
-        code: 'DXB',
-        terminal: 'Al Ghubaiba Bus Station',
-        country: 'UAE',
-      ),
-      LocationData(
-        city: 'Singapore',
-        code: 'SIN',
-        terminal: 'Queen Street Terminal',
-        country: 'Singapore',
-      ),
-      LocationData(
-        city: 'Tokyo',
-        code: 'TYO',
-        terminal: 'Shinjuku Bus Terminal',
-        country: 'Japan',
-      ),
-      LocationData(
-        city: 'Bangkok',
-        code: 'BKK',
-        terminal: 'Mo Chit Bus Terminal',
-        country: 'Thailand',
-      ),
-      LocationData(
-        city: 'Kuala Lumpur',
-        code: 'KUL',
-        terminal: 'TBS Bus Terminal',
-        country: 'Malaysia',
-      ),
-      LocationData(
-        city: 'Mumbai',
-        code: 'BOM',
-        terminal: 'Mumbai Central Bus Stand',
-        country: 'India',
-      ),
-      LocationData(
-        city: 'Delhi',
-        code: 'DEL',
-        terminal: 'ISBT Kashmere Gate',
-        country: 'India',
-      ),
-      LocationData(
-        city: 'Dhaka',
-        code: 'DAC',
-        terminal: 'Mohakhali Bus Terminal',
-        country: 'Bangladesh',
-      ),
-      LocationData(
-        city: 'Chittagong',
-        code: 'CGP',
-        terminal: 'Chittagong Bus Stand',
-        country: 'Bangladesh',
-      ),
-      LocationData(
-        city: 'Sylhet',
-        code: 'ZYL',
-        terminal: 'Sylhet Central Bus Station',
-        country: 'Bangladesh',
-      ),
-
-      // North America
-
-      LocationData(
-        city: 'New York',
-        code: 'NYC',
-        terminal: 'Port Authority Bus Terminal',
-        country: 'USA',
-      ),
-      LocationData(
-        city: 'Los Angeles',
-        code: 'LAX',
-        terminal: 'Union Station',
-        country: 'USA',
-      ),
-      LocationData(
-        city: 'Chicago',
-        code: 'CHI',
-        terminal: 'Chicago Union Station',
-        country: 'USA',
-      ),
-      LocationData(
-        city: 'Toronto',
-        code: 'YYZ',
-        terminal: 'Toronto Coach Terminal',
-        country: 'Canada',
-      ),
-      LocationData(
-        city: 'Vancouver',
-        code: 'YVR',
-        terminal: 'Pacific Central Station',
-        country: 'Canada',
-      ),
-
-      // Middle East
-
-      LocationData(
-        city: 'Riyadh',
-        code: 'RUH',
-        terminal: 'Riyadh Bus Station',
-        country: 'Saudi Arabia',
-      ),
-      LocationData(
-        city: 'Doha',
-        code: 'DOH',
-        terminal: 'Doha Bus Terminal',
-        country: 'Qatar',
-      ),
-      LocationData(
-        city: 'Cairo',
-        code: 'CAI',
-        terminal: 'Cairo Gateway Terminal',
-        country: 'Egypt',
-      ),
-
-      // Africa
-
-      LocationData(
-        city: 'Johannesburg',
-        code: 'JNB',
-        terminal: 'Park Station',
-        country: 'South Africa',
-      ),
-      LocationData(
-        city: 'Nairobi',
-        code: 'NBO',
-        terminal: 'Nairobi Railway Station',
-        country: 'Kenya',
-      ),
-      LocationData(
-        city: 'Accra',
-        code: 'ACC',
-        terminal: 'Accra Central Station',
-        country: 'Ghana',
-      ),
-    ];
+    _locations.value = _allLocations;
   }
-
 
   void _searchLocations(String query) async {
     _searchQuery.value = query;
+
     if (query.trim().isEmpty) {
       _loadPopularLocations();
       return;
@@ -260,65 +98,17 @@ class _LocationSearchDialogState extends State<LocationSearchDialog> {
     _isLoading.value = true;
     await Future.delayed(const Duration(milliseconds: 300));
 
-    // All locations
-
-    final allLocations = [
-      // Nigeria
-      LocationData(city: 'Abuja', code: 'ABV', terminal: 'Abuja Bus Terminal', country: 'Nigeria'),
-      LocationData(city: 'Lagos', code: 'LOS', terminal: 'Ikeja Bus Park', country: 'Nigeria'),
-      LocationData(city: 'Ibadan', code: 'IBA', terminal: 'Ibadan Bus Terminal', country: 'Nigeria'),
-      LocationData(city: 'Port Harcourt', code: 'PHC', terminal: 'Port Harcourt Central Station', country: 'Nigeria'),
-      LocationData(city: 'Kano', code: 'KAN', terminal: 'Kano Interstate Terminal', country: 'Nigeria'),
-
-      // Europe
-      LocationData(city: 'Paris', code: 'CDG', terminal: 'Paris Central Station', country: 'France'),
-      LocationData(city: 'Berlin', code: 'BER', terminal: 'Berlin Central Bus Station', country: 'Germany'),
-      LocationData(city: 'Rome', code: 'ROM', terminal: 'Roma Tiburtina', country: 'Italy'),
-      LocationData(city: 'Madrid', code: 'MAD', terminal: 'Estación Sur de Autobuses', country: 'Spain'),
-      LocationData(city: 'Amsterdam', code: 'AMS', terminal: 'Amsterdam Sloterdijk', country: 'Netherlands'),
-      LocationData(city: 'Istanbul', code: 'IST', terminal: 'City Square Terminal', country: 'Turkey'),
-
-      // Asia
-      LocationData(city: 'Dubai', code: 'DXB', terminal: 'Al Ghubaiba Bus Station', country: 'UAE'),
-      LocationData(city: 'Singapore', code: 'SIN', terminal: 'Queen Street Terminal', country: 'Singapore'),
-      LocationData(city: 'Tokyo', code: 'TYO', terminal: 'Shinjuku Bus Terminal', country: 'Japan'),
-      LocationData(city: 'Bangkok', code: 'BKK', terminal: 'Mo Chit Bus Terminal', country: 'Thailand'),
-      LocationData(city: 'Kuala Lumpur', code: 'KUL', terminal: 'TBS Bus Terminal', country: 'Malaysia'),
-      LocationData(city: 'Mumbai', code: 'BOM', terminal: 'Mumbai Central Bus Stand', country: 'India'),
-      LocationData(city: 'Delhi', code: 'DEL', terminal: 'ISBT Kashmere Gate', country: 'India'),
-      LocationData(city: 'Dhaka', code: 'DAC', terminal: 'Mohakhali Bus Terminal', country: 'Bangladesh'),
-      LocationData(city: 'Chittagong', code: 'CGP', terminal: 'Chittagong Bus Stand', country: 'Bangladesh'),
-      LocationData(city: 'Sylhet', code: 'ZYL', terminal: 'Sylhet Central Bus Station', country: 'Bangladesh'),
-
-      // North America
-      LocationData(city: 'New York', code: 'NYC', terminal: 'Port Authority Bus Terminal', country: 'USA'),
-      LocationData(city: 'Los Angeles', code: 'LAX', terminal: 'Union Station', country: 'USA'),
-      LocationData(city: 'Chicago', code: 'CHI', terminal: 'Chicago Union Station', country: 'USA'),
-      LocationData(city: 'Toronto', code: 'YYZ', terminal: 'Toronto Coach Terminal', country: 'Canada'),
-      LocationData(city: 'Vancouver', code: 'YVR', terminal: 'Pacific Central Station', country: 'Canada'),
-
-      // Middle East
-      LocationData(city: 'Riyadh', code: 'RUH', terminal: 'Riyadh Bus Station', country: 'Saudi Arabia'),
-      LocationData(city: 'Doha', code: 'DOH', terminal: 'Doha Bus Terminal', country: 'Qatar'),
-      LocationData(city: 'Cairo', code: 'CAI', terminal: 'Cairo Gateway Terminal', country: 'Egypt'),
-
-      // Africa
-      LocationData(city: 'Johannesburg', code: 'JNB', terminal: 'Park Station', country: 'South Africa'),
-      LocationData(city: 'Nairobi', code: 'NBO', terminal: 'Nairobi Railway Station', country: 'Kenya'),
-      LocationData(city: 'Accra', code: 'ACC', terminal: 'Accra Central Station', country: 'Ghana'),
-    ];
-
-    final filtered = allLocations.where((loc) =>
-    loc.city.toLowerCase().contains(query.toLowerCase()) ||
-        loc.code.toLowerCase().contains(query.toLowerCase()) ||
-        loc.country.toLowerCase().contains(query.toLowerCase()) ||
-        loc.terminal.toLowerCase().contains(query.toLowerCase())
+    final queryLower = query.toLowerCase();
+    final filtered = _allLocations.where((loc) =>
+    loc.city.toLowerCase().contains(queryLower) ||
+        loc.code.toLowerCase().contains(queryLower) ||
+        loc.country.toLowerCase().contains(queryLower) ||
+        loc.terminal.toLowerCase().contains(queryLower)
     ).toList();
 
     _locations.value = filtered;
     _isLoading.value = false;
   }
-
 
   Widget _buildLocationTile(LocationData location) {
     return InkWell(
@@ -410,11 +200,14 @@ class _LocationSearchDialogState extends State<LocationSearchDialog> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(widget.title,
-                    style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(
+                    widget.title,
+                    style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold)
+                ),
                 IconButton(
                     onPressed: () => Get.back(),
-                    icon: const Icon(Icons.close)),
+                    icon: const Icon(Icons.close)
+                ),
               ],
             ),
             const SizedBox(height: 10),
@@ -429,7 +222,8 @@ class _LocationSearchDialogState extends State<LocationSearchDialog> {
                 fillColor: const Color(0xFFFFFAE6),
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none),
+                    borderSide: BorderSide.none
+                ),
               ),
             ),
             const SizedBox(height: 15),
@@ -437,12 +231,17 @@ class _LocationSearchDialogState extends State<LocationSearchDialog> {
               child: Obx(() {
                 if (_isLoading.value) {
                   return const Center(
-                      child: CircularProgressIndicator(color: Color(0xFFFECD08)));
+                      child: CircularProgressIndicator(color: Color(0xFFFECD08))
+                  );
                 }
 
                 if (_locations.isEmpty) {
                   return Center(
-                      child: Text("No locations found", style: GoogleFonts.inter()));
+                      child: Text(
+                          "No locations found",
+                          style: GoogleFonts.inter()
+                      )
+                  );
                 }
 
                 return ListView.separated(

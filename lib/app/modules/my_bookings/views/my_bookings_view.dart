@@ -14,13 +14,29 @@ class MyBookingsView extends GetView<MyBookingsController> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+
+
         automaticallyImplyLeading: false,
-        leading: Navigator.canPop(context)
-            ? IconButton(
-          onPressed: () => Get.back(),
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
-        )
-            : null,
+        leading: (() {
+          final dynamic args = Get.arguments;
+          final bool fromTicket = (args is Map && args['fromTicket'] == true);
+          final bool canPop = Navigator.canPop(context);
+          if (fromTicket) {
+            return IconButton(
+              onPressed: () => Get.offAllNamed('/home'),
+              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+            );
+          }
+
+          if (canPop) {
+            return IconButton(
+              onPressed: () => Get.back(),
+              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+            );
+          }
+          return null;
+        })(),
+
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -32,6 +48,7 @@ class MyBookingsView extends GetView<MyBookingsController> {
                 fontWeight: FontWeight.bold,
               ),
             ),
+            const SizedBox(height: 6),
             Text(
               'Manage and  see all your tour and ticket',
               style: GoogleFonts.inter(
@@ -267,7 +284,7 @@ class MyBookingsView extends GetView<MyBookingsController> {
                               ],
                             ),
                           );
-                        }).toList(),
+                        }),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
@@ -303,7 +320,7 @@ class MyBookingsView extends GetView<MyBookingsController> {
                   width: 110,
                   height: 160,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorBuilder: (context, error, stackTrace) => Container(
                     width: 110,
                     height: 160,
                     color: Colors.grey[200],
@@ -404,7 +421,7 @@ class MyBookingsView extends GetView<MyBookingsController> {
                       width: 90,
                       height: 110,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
+                      errorBuilder: (context, error, stackTrace) => Container(
                         width: 90,
                         height: 110,
                         color: Colors.grey[200],
@@ -516,7 +533,7 @@ class MyBookingsView extends GetView<MyBookingsController> {
                     child: Icon(_getServiceIcon(service), size: 16, color: _getServiceColor(service)),
                   ),
                 );
-              }).toList(),
+              }),
 
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),

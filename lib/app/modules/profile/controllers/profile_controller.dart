@@ -120,32 +120,6 @@ class ProfileController extends GetxController {
     }
   }
 
-  // Helper methods for color & icon
-  Color _getColorForLabel(String label) {
-    switch (label) {
-      case 'Gold':
-        return const Color(0xFFFFD700);
-      case 'Platinum':
-        return const Color(0xFF00BCD4);
-      case 'Diamond':
-        return const Color(0xFF2196F3);
-      default:
-        return Colors.grey;
-    }
-  }
-
-  IconData _getIconForLabel(String label) {
-    switch (label) {
-      case 'Gold':
-        return Icons.monetization_on;
-      case 'Platinum':
-        return Icons.center_focus_strong;
-      case 'Diamond':
-        return Icons.diamond;
-      default:
-        return Icons.auto_awesome;
-    }
-  }
 
   // Methods
   void editProfile() {
@@ -269,19 +243,19 @@ class ProfileController extends GetxController {
 
 
   void openBookings() {
-    Get.toNamed(Routes.MY_BOOKINGS);
+    Get.toNamed(Routes.myBookings);
   }
 
   void openSaved() {
-    Get.toNamed(Routes.SAVED);
+    Get.toNamed(Routes.saved);
   }
 
   void openAIChatbot() {
-    Get.toNamed(Routes.CHATBOT);
+    Get.toNamed(Routes.chatbot);
   }
 
   void openHistory() {
-    Get.toNamed(Routes.MY_BOOKINGS);
+    Get.toNamed(Routes.myBookings);
   }
 
   void openLegalInfo() =>
@@ -320,7 +294,7 @@ class ProfileController extends GetxController {
       confirm: ElevatedButton(
         onPressed: () {
           Get.back();
-          Get.offAllNamed(Routes.LOGIN);
+          Get.offAllNamed(Routes.login);
           SnackbarHelper.showSuccess('You have been logged out successfully');
         },
         style: ElevatedButton.styleFrom(

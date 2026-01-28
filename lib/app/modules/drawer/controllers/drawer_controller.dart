@@ -127,10 +127,9 @@ class DrawerController extends GetxController {
     MenuItem(icon: Image.asset('assets/images/info.png'), label: 'Legal Info', color: Color(0xFFFECD08), onTap: openLegalInfo),
   ];
 
-  void openBookings() {Get.toNamed(Routes.MY_BOOKINGS);}
-  void openSaved() {Get.toNamed(Routes.SAVED);}
-  void openAIChatbot() { Get.toNamed(Routes.CHATBOT);}
-  void openHistory() { Get.toNamed(Routes.MY_BOOKINGS);}
+  void openSaved() {Get.toNamed(Routes.saved);}
+  void openAIChatbot() { Get.toNamed(Routes.chatbot);}
+  void openHistory() { Get.toNamed(Routes.myBookings);}
   void openLegalInfo() => Get.snackbar('Legal', 'Opening legal information');
 
   void logout() {
@@ -163,7 +162,7 @@ class DrawerController extends GetxController {
       confirm: ElevatedButton(
         onPressed: () {
           Get.back();
-          Get.offAllNamed(Routes.LOGIN);
+          Get.offAllNamed(Routes.login);
           SnackbarHelper.showSuccess('You have been logged out successfully');
         },
         style: ElevatedButton.styleFrom(

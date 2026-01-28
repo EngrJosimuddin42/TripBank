@@ -99,16 +99,16 @@ class SendGiftCardView extends GetView<LoyaltyProgramController> {
                 child: Row(
                   children: [
                     _buildCardTab(
-                        'Buy Card', 0, () => Get.toNamed(Routes.BUY_GIFT_CARD)),
+                        'Buy Card', 0, () => Get.toNamed(Routes.buyGiftCard)),
                     const SizedBox(width: 12),
                     _buildCardTab('Send Card', 1, () =>
-                        Get.toNamed(Routes.SEND_GIFT_CARD)),
+                        Get.toNamed(Routes.sendGiftCard)),
                     const SizedBox(width: 12),
                     _buildCardTab('Redeem', 2, () =>
-                        Get.toNamed(Routes.REDEEM_GIFT_CARD)),
+                        Get.toNamed(Routes.redeemGiftCard)),
                     const SizedBox(width: 12),
                     _buildCardTab(
-                        'My Cards', 3, () => Get.toNamed(Routes.MY_GIFT_CARDS)),
+                        'My Cards', 3, () => Get.toNamed(Routes.myGiftCards)),
                   ],
                 ),
               ),

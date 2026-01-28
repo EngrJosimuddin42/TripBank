@@ -2,7 +2,6 @@ import 'package:get/get.dart';
 import 'dart:math';
 import 'package:intl/intl.dart';
 import '../../../constants/app_strings.dart';
-import '../../../models/booking_model.dart';
 import '../../../models/flight_model.dart';
 import '../../../utils/booking_helper.dart';
 import '../../../widgets/airport_search_dialog.dart';
@@ -73,7 +72,6 @@ class FlightBookingController extends GetxController {
   // Multi-way flights
   final multiWayFlights = <MultiWayFlight>[].obs;
 
-
   // Selected flight (from details page)
   final selectedFlight = Rxn<Flight>();
   var isFromSaved = false.obs;
@@ -87,14 +85,12 @@ class FlightBookingController extends GetxController {
     {'name': 'Coinbase Commerce', 'icon': 'assets/images/coinbase.png'},
   ];
 
-
   void proceedFromExplore() {
     if (isFromSaved.value && selectedFlight.value != null) {
       Get.toNamed('/flight-details', arguments: selectedFlight.value);
       isFromSaved.value = false;
     }
   }
-
 
   @override
   void onClose() {
@@ -110,7 +106,6 @@ class FlightBookingController extends GetxController {
     super.onInit();
     departureDate.value = DateTime.now().add(const Duration(days: 1));
 
-
     // Multi-way initial flight
     multiWayFlights.add(MultiWayFlight(
       fromLocation: '',
@@ -122,7 +117,7 @@ class FlightBookingController extends GetxController {
     ));
   }
 
-  // Multi-way flight management - UPDATED METHOD
+  // Multi-way flight management
   void updateMultiWayFlight(int index, {
     String? fromLocation,
     String? fromCode,
@@ -148,8 +143,7 @@ class FlightBookingController extends GetxController {
   }
 
   void updateMultiWayFlightTime(int index, String time) {
-    if (index < multiWayFlights.length) {
-      final flight = multiWayFlights[index];
+    if (index >= 0 && index < multiWayFlights.length) {
       updateMultiWayFlight(index, preferredTime: time);
     }
   }
@@ -257,9 +251,7 @@ class FlightBookingController extends GetxController {
     return DateFormat('HH:mm').format(date);
   }
 
-
-  //  Swap Departure Locations
-
+  // Swap Departure Locations
   void swapDepartureLocations() {
     final temp = departureFromLocation.value;
     departureFromLocation.value = departureToLocation.value;
@@ -294,7 +286,7 @@ class FlightBookingController extends GetxController {
     if (type == AppStrings.oneWay || type == AppStrings.multiWay) {
       returnDate.value = null;
     } else if (type == AppStrings.roundWay) {
-      // Round Way select  automatically return locations fill
+      // Round Way select automatically return locations fill
       if (departureFromLocation.value.isNotEmpty && departureToLocation.value.isNotEmpty) {
         returnFromLocation.value = departureToLocation.value;
         returnFromCode.value = departureToCode.value;
@@ -333,8 +325,6 @@ class FlightBookingController extends GetxController {
     });
   }
 
-
-
   Future<void> makePayment() async {
     if (selectedPaymentMethod.value.isEmpty) {
       if (Get.isDialogOpen ?? false) Get.back();
@@ -353,6 +343,12 @@ class FlightBookingController extends GetxController {
         }
         if (args['passengers'] != null && passengers.isEmpty) {
           passengers.value = List<Passenger>.from(args['passengers']);
+        }
+        if (args['contactEmail'] != null) {
+          contactEmail.value = args['contactEmail'];
+        }
+        if (args['contactPhone'] != null) {
+          contactPhone.value = args['contactPhone'];
         }
       }
     }
@@ -390,9 +386,23 @@ class FlightBookingController extends GetxController {
       );
 
       // Dynamic imageUrl
-      String dynamicImageUrl = (flight.imageUrl != null && flight.imageUrl!.isNotEmpty)
-          ? flight.imageUrl!
-          : 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400';
+      String dynamicImageUrl = "";
+      if (flight.imageUrl.isNotEmpty) {
+        dynamicImageUrl = flight.imageUrl;
+      } else {
+        dynamicImageUrl = BookingHelper.getFlightImage(flight.to);
+      }
+
+      // Extract contact info from passengers if not set
+      String finalEmail = contactEmail.value;
+      String finalPhone = contactPhone.value;
+
+      if (finalEmail.isEmpty && passengers.isNotEmpty) {
+        finalEmail = passengers.first.email ?? 'guest@tripbank.com';
+      }
+      if (finalPhone.isEmpty && passengers.isNotEmpty) {
+        finalPhone = passengers.first.phone ?? '+880 1700-000000';
+      }
 
       // MyBookingsController check
       MyBookingsController myBookingsController;
@@ -405,7 +415,7 @@ class FlightBookingController extends GetxController {
         );
       }
 
-      // Use BookingHelper
+      // Use BookingHelper with complete data structure
       final bookingToSave = BookingHelper.createFlightBooking(
         destination: flight.to,
         country: _extractCountry(flight.to),
@@ -414,34 +424,47 @@ class FlightBookingController extends GetxController {
         totalPrice: totalPrice,
         travelers: totalPassengers,
         airline: flight.airline,
-        flightClass: flight.cabinClass,
+        flightClass: selectedClass.value,
         imageUrl: dynamicImageUrl,
         flightDetails: {
+          'imageUrl': dynamicImageUrl,
+          'airlineLogo': dynamicImageUrl,
+          'bookingReference': currentBooking.value!.bookingId,
+          'bookingId': currentBooking.value!.bookingId,
+          'pnr': pnr,
           'flightNumber': flight.flightNumber,
+          'airline': flight.airline,
           'from': flight.from,
           'fromCode': flight.fromCode,
           'to': flight.to,
           'toCode': flight.toCode,
-          'departureTime': formatTime(flight.departureTime),
-          'arrivalTime': formatTime(flight.arrivalTime),
+          'departureTime': flight.departureTime.toIso8601String(),
+          'arrivalTime': flight.arrivalTime.toIso8601String(),
           'duration': flight.duration,
           'stops': flight.stops,
           'stopDetails': flight.stopDetails,
+          'class': selectedClass.value,
+          'cabinClass': selectedClass.value,
           'baggageAllowance': flight.baggageAllowance,
           'isRefundable': flight.isRefundable,
           'availableSeats': flight.availableSeats,
           'facilities': flight.facilities,
-          'pnr': pnr,
+          'baseFare': (flight.price * totalPassengers),
+          'taxes': flight.taxAmount * totalPassengers,
+          'otherCharges': flight.otherCharges * totalPassengers,
+          'totalPrice': totalPrice,
+          'currencySymbol': flight.currencySymbol,
           'paymentMethod': selectedPaymentMethod.value,
           'passengers': passengers.map((p) => p.toJson()).toList(),
-          'bookingId': currentBooking.value!.bookingId,
-          'currencySymbol': flight.currencySymbol,
+          'travelers': totalPassengers,
+          'contactEmail': finalEmail,
+          'contactPhone': finalPhone,
 
-          // Round trip data
+          // Round trip data (if applicable)
           if (flight.returnDepartureTime != null)
-            'returnDepartureTime': formatTime(flight.returnDepartureTime!),
+            'returnDepartureTime': flight.returnDepartureTime!.toIso8601String(),
           if (flight.returnArrivalTime != null)
-            'returnArrivalTime': formatTime(flight.returnArrivalTime!),
+            'returnArrivalTime': flight.returnArrivalTime!.toIso8601String(),
           if (flight.returnDuration != null)
             'returnDuration': flight.returnDuration,
           if (flight.returnStops != null)
@@ -471,22 +494,12 @@ class FlightBookingController extends GetxController {
   double calculateTotalPrice() {
     final flight = selectedFlight.value;
     if (flight == null) return 0.0;
-
-    // Base fare for all passengers
     final baseFare = flight.price * totalPassengers;
-
-    // Taxes for all passengers
     final taxes = flight.taxAmount * totalPassengers;
-
-    // VAT for all passengers
     final vat = flight.vatAmount * totalPassengers;
-
-    // Other charges for all passengers
     final otherCharges = flight.otherCharges * totalPassengers;
-
     return baseFare + taxes + vat + otherCharges;
   }
-
 
   String getPassengerBreakdown() {
     List<String> parts = [];
@@ -505,7 +518,6 @@ class FlightBookingController extends GetxController {
 
     return parts.join(', ');
   }
-
 
   String _generatePNR() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -566,7 +578,7 @@ class FlightBookingController extends GetxController {
           departureFromLocation.value = selectedAirport.city;
           departureFromCode.value = selectedAirport.code;
 
-          //  Round Trip automatically Return
+          // Round Trip automatically Return
           if (selectedTripType.value == 'Round Way') {
             returnToLocation.value = selectedAirport.city;
             returnToCode.value = selectedAirport.code;
@@ -575,7 +587,7 @@ class FlightBookingController extends GetxController {
           departureToLocation.value = selectedAirport.city;
           departureToCode.value = selectedAirport.code;
 
-          //  Round Trip  automatically Return FROM
+          // Round Trip automatically Return FROM
           if (selectedTripType.value == 'Round Way') {
             returnFromLocation.value = selectedAirport.city;
             returnFromCode.value = selectedAirport.code;
@@ -615,6 +627,4 @@ class FlightBookingController extends GetxController {
 
     return cityCountryMap[location] ?? 'International';
   }
-
 }
-

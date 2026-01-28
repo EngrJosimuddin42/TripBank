@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import '../../../constants/app_strings.dart';
-import '../../../models/booking_model.dart';
 import '../../../models/tour_model.dart';
 import '../../../services/favorites_service.dart';
 import '../../../utils/booking_helper.dart';
@@ -59,7 +58,7 @@ class ToursBookingController extends GetxController {
       'included': tour.included,
       'notIncluded': tour.notIncluded,
       'whatToBring': tour.whatToBring,
-      'itinerary': tour.itinerary?.map((day) => {
+      'itinerary': tour.itinerary.map((day) => {
         'day': day.day,
         'title': day.title,
         'activities': day.activities,
@@ -690,7 +689,7 @@ class ToursBookingController extends GetxController {
         : 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400';
 
 
-    // ========== USE BookingHelper ==========
+    // USE BookingHelper
     final bookingToSave = BookingHelper.createTourBooking(
       tourName: tour.title,
       destination: tour.location,
@@ -729,12 +728,11 @@ class ToursBookingController extends GetxController {
         'notIncluded': tour.notIncluded,
         'whatToBring': tour.whatToBring,
 
-        if (tour.itinerary != null)
-          'itinerary': tour.itinerary!.map((day) => {
-            'day': day.day,
-            'title': day.title,
-            'activities': day.activities,
-          }).toList(),
+        'itinerary': tour.itinerary.map((day) => {
+          'day': day.day,
+          'title': day.title,
+          'activities': day.activities,
+        }).toList(),
 
         if (tour.meetingPoint != null)
           'meetingPoint': {

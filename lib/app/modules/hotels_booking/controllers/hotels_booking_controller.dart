@@ -1,9 +1,9 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../../models/booking_model.dart';
 import '../../../models/hotel_model.dart';
 import '../../../services/favorites_service.dart';
+import '../../../utils/booking_helper.dart';
 import '../../../widgets/snackbar_helper.dart';
 import '../../my_bookings/controllers/my_bookings_controller.dart';
 
@@ -45,11 +45,11 @@ class HotelsBookingController extends GetxController {
       'address': hotel.address,
       'description': hotel.description,
       'highlights': hotel.highlights,
-      'Services': hotel.services?.map((s) => {
+      'Services': hotel.services.map((s) => {
         'name': s.name,
         'icon': Service.iconToString(s.icon),
       }).toList(),
-      'roomDetails': hotel.roomDetails?.map((r) => {
+      'roomDetails': hotel.roomDetails.map((r) => {
         'label': r.label,
         'value': r.value,
         'isPrice': r.isPrice,
@@ -990,21 +990,49 @@ class HotelsBookingController extends GetxController {
     final hotel = selectedHotel.value;
     if (hotel == null) return;
 
-    final summary = BookingSummary(
-      type: 'Hotel',
-      title: hotel.name,
-      subtitle: '$roomAndGuestSummary • ${nights.value} night${nights.value > 1 ? "s" : ""}',
-      dates: getFormattedDateRange(),
-      imageUrl: hotel.image,
-      bookingId: 'HB-${DateTime.now().millisecondsSinceEpoch}',
-      status: 'Confirmed',
-      totalAmount: formatPrice(finalAmount),
-      ticketData: {
-        'hotel': hotel.toJson(),
-        'nights': nights.value,
-        'checkIn': checkInDate.value.toIso8601String(),
-        'checkOut': checkOutDate.value.toIso8601String(),
-        'room': currentRoom?.toJson(),
+    final checkIn = checkInDate.value;
+    final checkOut = checkOutDate.value;
+    final nightsCount = nights.value;
+
+    final dynamicImageUrl = hotel.image.isNotEmpty
+        ? hotel.image
+        : 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400';
+
+    // Generate booking reference
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final bookingRef = 'HB-$timestamp';
+
+    // Prepare amenities list
+    final amenitiesList = [
+      'Free Wi-Fi',
+      'Room Service',
+      'Cafe',
+      'Parking Service',
+    ];
+
+    // USE BookingHelper
+    final bookingToSave = BookingHelper.createHotelBooking(
+      hotelName: hotel.name,
+      location: _extractCity(hotel.location),
+      country: _extractCountry(hotel.location),
+      checkIn: checkIn,
+      checkOut: checkOut,
+      totalPrice: finalAmount,
+      guests: guestCount.value,
+      imageUrl: dynamicImageUrl,
+      hotelDetails: {
+        'bookingReference': bookingRef,
+        'bookingId': bookingRef,
+        'hotelId': hotel.id,
+        'hotelName': hotel.name,
+        'address': hotel.address,
+        'rating': hotel.rating,
+        'reviews': hotel.reviews,
+        'checkIn': checkIn.toIso8601String(),
+        'checkOut': checkOut.toIso8601String(),
+        'nights': nightsCount,
+        'rooms': roomCount.value,
+        'guests': guestCount.value,
         'roomClass': preferredClass.value,
         'basePrice': totalBasePrice,
         'discount': totalDiscountAmount,
@@ -1012,13 +1040,58 @@ class HotelsBookingController extends GetxController {
         'serviceFee': totalServiceFee,
         'totalPrice': finalAmount,
         'paymentMethod': selectedPaymentMethod.value,
-        'couponCode': couponCode.value,
+        'amenities': amenitiesList,
+        if (couponCode.value.isNotEmpty) 'couponCode': couponCode.value,
+        if (currentRoom != null) 'room': currentRoom!.toJson(),
       },
     );
 
-    Get.find<MyBookingsController>().addBooking(summary);
+    Get.find<MyBookingsController>().addBooking(bookingToSave);
+
+    SnackbarHelper.showSuccess(
+      'Your hotel booking has been confirmed successfully!',
+      title: 'Booking Confirmed',
+    );
   }
 
+  // Extract city from location string
+  String _extractCity(String location) {
+    final parts = location.split(',');
+    if (parts.isNotEmpty) {
+      return parts.first.trim();
+    }
+    return location;
+  }
+
+// Extract country from location string
+  String _extractCountry(String location) {
+    final parts = location.split(',');
+    if (parts.length > 1) {
+      final lastPart = parts.last.trim();
+
+      final countryMap = {
+        'France': 'France',
+        'UAE': 'UAE',
+        'Indonesia': 'Indonesia',
+        'Singapore': 'Singapore',
+        'Maldives': 'Maldives',
+        'Marina Bay': 'Singapore',
+        'Sentosa Island': 'Singapore',
+        'Orchard Road': 'Singapore',
+        'City Hall': 'Singapore',
+      };
+
+      return countryMap[lastPart] ?? lastPart;
+    }
+
+    if (location.contains('Singapore')) return 'Singapore';
+    if (location.contains('Paris')) return 'France';
+    if (location.contains('Dubai')) return 'UAE';
+    if (location.contains('Bali')) return 'Indonesia';
+    if (location.contains('Maldives')) return 'Maldives';
+
+    return 'International';
+  }
 
   List<Map<String, dynamic>> get featuredDestinations {
     return allHotels

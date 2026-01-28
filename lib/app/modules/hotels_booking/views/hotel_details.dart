@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../../models/hotel_model.dart';
 import '../../../widgets/snackbar_helper.dart';
 import '../controllers/hotels_booking_controller.dart';
 
@@ -179,7 +180,7 @@ class HotelDetailsView extends GetView<HotelsBookingController> {
     );
   }
 
-  Widget _buildHotelHeader(hotel) {
+  Widget _buildHotelHeader(Hotel hotel) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -232,7 +233,7 @@ class HotelDetailsView extends GetView<HotelsBookingController> {
     );
   }
 
-  Widget _buildOverviewSection(hotel) {
+  Widget _buildOverviewSection(Hotel hotel) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -295,7 +296,7 @@ class HotelDetailsView extends GetView<HotelsBookingController> {
     );
   }
 
-  Widget _buildHighlightsSection(hotel) {
+  Widget _buildHighlightsSection (Hotel hotel) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -346,7 +347,7 @@ class HotelDetailsView extends GetView<HotelsBookingController> {
     );
   }
 
-  Widget _buildServicesSection(hotel) {
+  Widget _buildServicesSection(Hotel hotel) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -536,7 +537,7 @@ class HotelDetailsView extends GetView<HotelsBookingController> {
     );
   }
 
-  Widget _buildRoomDetails(room) {
+  Widget _buildRoomDetails(Room room) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -599,7 +600,7 @@ class HotelDetailsView extends GetView<HotelsBookingController> {
     );
   }
 
-  Widget _buildRoomRating(room) {
+  Widget _buildRoomRating(Room room) {
     return Row(
       children: [
         Container(
@@ -631,7 +632,7 @@ class HotelDetailsView extends GetView<HotelsBookingController> {
     );
   }
 
-  Widget _buildPolicySection(room) {
+  Widget _buildPolicySection(Room room) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -667,7 +668,7 @@ class HotelDetailsView extends GetView<HotelsBookingController> {
     );
   }
 
-  Widget _buildExtrasSection(room) {
+  Widget _buildExtrasSection(Room room) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -679,7 +680,7 @@ class HotelDetailsView extends GetView<HotelsBookingController> {
     );
   }
 
-  Widget _buildPriceAndReserveButton(room) {
+  Widget _buildPriceAndReserveButton(Room room) {
     return Center(
       child: Column(
         children: [

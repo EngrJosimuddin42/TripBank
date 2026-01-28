@@ -428,6 +428,7 @@ class PaymentView extends GetView<FlightBookingController> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: TextField(
+                        controller: couponController,
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
@@ -543,7 +544,7 @@ class PaymentView extends GetView<FlightBookingController> {
                 ],
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );

@@ -29,15 +29,15 @@ class CarsBookingController extends GetxController {
 
   // DEPARTURE/ARRIVING LOCATIONS
 
-  final ArrivingFromLocation = ''.obs;
-  final ArrivingFromCode = ''.obs;
-  final ArrivingFromTerminal = ''.obs;
-  final ArrivingFromCountry = ''.obs;
+  final arrivingFromLocation = ''.obs;
+  final arrivingFromCode = ''.obs;
+  final arrivingFromTerminal = ''.obs;
+  final arrivingFromCountry = ''.obs;
 
-  final ArrivingToLocation = ''.obs;
-  final ArrivingToCode = ''.obs;
-  final ArrivingToTerminal = ''.obs;
-  final ArrivingToCountry = ''.obs;
+  final arrivingToLocation = ''.obs;
+  final arrivingToCode = ''.obs;
+  final arrivingToTerminal = ''.obs;
+  final arrivingToCountry = ''.obs;
 
   // RETURN LOCATIONS
 
@@ -53,7 +53,7 @@ class CarsBookingController extends GetxController {
 
   // DATES
 
-  final ArrivingDate = Rx<DateTime?>(null);
+  final arrivingDate = Rx<DateTime?>(null);
   final returnDate = Rx<DateTime?>(null);
 
   // PASSENGERS
@@ -65,9 +65,9 @@ class CarsBookingController extends GetxController {
   // TIME PREFERENCES
 
   final timeOptions = ['Early morning', 'Morning', 'Afternoon', 'Evening'];
-  final ArrivingPreferredTimes = <String>[].obs;
+  final arrivingPreferredTimes = <String>[].obs;
   final returnPreferredTimes = <String>[].obs;
-  final ArrivingSelectedTimeSlots = <String>[].obs;
+  final arrivingSelectedTimeSlots = <String>[].obs;
   final returnSelectedTimeSlots = <String>[].obs;
 
   // SEARCH RESULTS
@@ -132,7 +132,7 @@ class CarsBookingController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    ArrivingDate.value ??= DateTime.now().add(const Duration(days: 1));
+    arrivingDate.value ??= DateTime.now().add(const Duration(days: 1));
   }
 
   // FAVORITES
@@ -252,7 +252,7 @@ class CarsBookingController extends GetxController {
 
   void selectCar(Car car) {
     selectedCar.value = car;
-    if (ArrivingDate.value == null) {
+    if (arrivingDate.value == null) {
       SnackbarHelper.showWarning(
         "Please select a pickup date before proceeding.",
         title: "Date Required",
@@ -263,7 +263,7 @@ class CarsBookingController extends GetxController {
       '/car-details',
       arguments: {
         'car': car,
-        'pickupDate': ArrivingDate.value,
+        'pickupDate': arrivingDate.value,
         'returnDate': returnDate.value,
         'tripType': selectedTripType.value,
         'totalDays': calculateBookingDays(),
@@ -300,21 +300,21 @@ class CarsBookingController extends GetxController {
   // LOCATION MANAGEMENT
 
   void swapArrivingLocations() {
-    final tempLocation = ArrivingFromLocation.value;
-    ArrivingFromLocation.value = ArrivingToLocation.value;
-    ArrivingToLocation.value = tempLocation;
+    final tempLocation = arrivingFromLocation.value;
+    arrivingFromLocation.value = arrivingToLocation.value;
+    arrivingToLocation.value = tempLocation;
 
-    final tempCode = ArrivingFromCode.value;
-    ArrivingFromCode.value = ArrivingToCode.value;
-    ArrivingToCode.value = tempCode;
+    final tempCode = arrivingFromCode.value;
+    arrivingFromCode.value = arrivingToCode.value;
+    arrivingToCode.value = tempCode;
 
-    final tempTerminal = ArrivingFromTerminal.value;
-    ArrivingFromTerminal.value = ArrivingToTerminal.value;
-    ArrivingToTerminal.value = tempTerminal;
+    final tempTerminal = arrivingFromTerminal.value;
+    arrivingFromTerminal.value = arrivingToTerminal.value;
+    arrivingToTerminal.value = tempTerminal;
 
-    final tempCountry = ArrivingFromCountry.value;
-    ArrivingFromCountry.value = ArrivingToCountry.value;
-    ArrivingToCountry.value = tempCountry;
+    final tempCountry = arrivingFromCountry.value;
+    arrivingFromCountry.value = arrivingToCountry.value;
+    arrivingToCountry.value = tempCountry;
   }
 
   void swapReturnLocations() {
@@ -377,10 +377,10 @@ class CarsBookingController extends GetxController {
   }
 
   void toggleDepartureTimeSlot(String slot) {
-    ArrivingSelectedTimeSlots
+    arrivingSelectedTimeSlots
       ..clear()
       ..add(slot);
-    ArrivingPreferredTimes
+    arrivingPreferredTimes
       ..clear()
       ..add(_getTimeCategory(slot));
   }
@@ -473,20 +473,20 @@ class CarsBookingController extends GetxController {
 
     // Validation
 
-    if (ArrivingFromCode.value == ArrivingToCode.value) {
+    if (arrivingFromCode.value == arrivingToCode.value) {
       SnackbarHelper.showError(
           'Pickup and Drop-off locations cannot be the same. Please change one.',
           title: 'Invalid Location'
       );      return;
     }
-    if (ArrivingDate.value == null) {
+    if (arrivingDate.value == null) {
       SnackbarHelper.showWarning(
           'Please select a pickup date to proceed.',
           title: 'Date Required'
       );      return;
     }
     if (selectedTripType.value == 'Round Way' &&
-        (returnDate.value == null || returnDate.value!.isBefore(ArrivingDate.value!))) {
+        (returnDate.value == null || returnDate.value!.isBefore(arrivingDate.value!))) {
       SnackbarHelper.showWarning(
           'Return date must be after pickup',
           title: 'Invalid Return Date'
@@ -547,9 +547,9 @@ class CarsBookingController extends GetxController {
   // PRICE CALCULATE
 
   int calculateBookingDays() {
-    if (ArrivingDate.value == null) return 1;
+    if (arrivingDate.value == null) return 1;
     if (selectedTripType.value == 'Round Way' && returnDate.value != null) {
-      return returnDate.value!.difference(ArrivingDate.value!).inDays + 1;
+      return returnDate.value!.difference(arrivingDate.value!).inDays + 1;
     }
     return 1;
   }
@@ -608,28 +608,36 @@ class CarsBookingController extends GetxController {
     if (car == null) return;
 
     final days = calculateBookingDays();
-    final total = calculateTotalAmount();
+    final breakdown = getPriceBreakdown();
+    final total = breakdown['total'] ?? 0.0;
 
     final dynamicImageUrl = car.imageUrl.isNotEmpty
         ? car.imageUrl
         : 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=400';
 
+    // Generate booking reference
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final bookingRef = 'TB-$timestamp';
 
     // USE BookingHelper
     final bookingToSave = BookingHelper.createCarBooking(
       carModel: '${car.brand} ${car.model}',
-      pickupLocation: ArrivingFromLocation.value.isNotEmpty
-          ? ArrivingFromLocation.value
+      pickupLocation: arrivingFromLocation.value.isNotEmpty
+          ? arrivingFromLocation.value
           : 'Airport',
-      country: ArrivingFromCountry.value.isNotEmpty
-          ? ArrivingFromCountry.value
+      country: arrivingFromCountry.value.isNotEmpty
+          ? arrivingFromCountry.value
           : 'UAE',
-      pickupDate: ArrivingDate.value ?? DateTime.now(),
-      returnDate: returnDate.value ?? ArrivingDate.value?.add(Duration(days: days)) ?? DateTime.now(),
+      pickupDate: arrivingDate.value ?? DateTime.now(),
+      returnDate: returnDate.value ?? arrivingDate.value?.add(Duration(days: days)) ?? DateTime.now(),
       totalPrice: total,
       passengers: totalPassengers,
       imageUrl: dynamicImageUrl,
       carDetails: {
+        'bookingReference': bookingRef,
+        'carBrand': car.brand,
+        'carModel': car.model,
+        'carType': car.types,
         'carId': car.id,
         'brand': car.brand,
         'model': car.model,
@@ -644,21 +652,33 @@ class CarsBookingController extends GetxController {
         'pricePerDay': car.pricePerDay,
         'extras': car.extras,
         'days': days,
+        'baseFare': breakdown['baseFare'],
+        'tax': breakdown['tax'],
+        'aitVat': breakdown['aitVat'],
+        'otherCharges': breakdown['otherCharges'],
+        'total': total,
+        'pickupLocation': arrivingFromLocation.value,
+        'returnLocation': arrivingToLocation.value,
+        'pickupDate': arrivingDate.value?.toIso8601String(),
+        'returnDate': returnDate.value?.toIso8601String(),
+        'pickupTime': _getPickupTime(),
+        'returnTime': _getReturnTime(),
+        'isRoundTrip': selectedTripType.value == 'Round Way',
+        'paymentMethod': selectedPaymentMethod.value,
         'pickup': {
-          'location': ArrivingFromLocation.value,
-          'code': ArrivingFromCode.value,
-          'terminal': ArrivingFromTerminal.value,
-          'country': ArrivingFromCountry.value,
-          'date': ArrivingDate.value?.toIso8601String(),
+          'location': arrivingFromLocation.value,
+          'code': arrivingFromCode.value,
+          'terminal': arrivingFromTerminal.value,
+          'country': arrivingFromCountry.value,
+          'date': arrivingDate.value?.toIso8601String(),
         },
         'dropoff': {
-          'location': ArrivingToLocation.value,
-          'code': ArrivingToCode.value,
-          'terminal': ArrivingToTerminal.value,
-          'country': ArrivingToCountry.value,
+          'location': arrivingToLocation.value,
+          'code': arrivingToCode.value,
+          'terminal': arrivingToTerminal.value,
+          'country': arrivingToCountry.value,
           'date': returnDate.value?.toIso8601String(),
         },
-        'paymentMethod': selectedPaymentMethod.value,
       },
     );
 
@@ -670,9 +690,24 @@ class CarsBookingController extends GetxController {
     );
   }
 
-  String _formatDate(DateTime date) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return '${date.day.toString().padLeft(2, '0')} ${months[date.month - 1]}, ${date.year}';
+  String _getPickupTime() {
+    if (arrivingSelectedTimeSlots.isNotEmpty) {
+      return arrivingSelectedTimeSlots.first;
+    } else if (arrivingPreferredTimes.isNotEmpty) {
+      return getDefaultTimeFromPreference(arrivingPreferredTimes.first);
+    }
+    return '10:00 am';
+  }
+
+  String? _getReturnTime() {
+    if (selectedTripType.value != 'Round Way') return null;
+
+    if (returnSelectedTimeSlots.isNotEmpty) {
+      return returnSelectedTimeSlots.first;
+    } else if (returnPreferredTimes.isNotEmpty) {
+      return getDefaultTimeFromPreference(returnPreferredTimes.first);
+    }
+    return '10:00 am';
   }
 
   void resetBooking() {

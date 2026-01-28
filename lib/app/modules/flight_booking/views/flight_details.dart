@@ -319,7 +319,7 @@ class FlightDetailsView extends GetView<FlightDetailsController> {
                   _buildBulletList([
                     flight.airline,
                     flight.flightNumber,
-                    '${flight.cabinClass} ($totalPassengers)',
+                    '${controller.selectedClass.value} ($totalPassengers)',
                     flight.baggageAllowance,
                     if (flight.fareRules != null) flight.fareRules!,
                   ]),
@@ -391,7 +391,7 @@ class FlightDetailsView extends GetView<FlightDetailsController> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),
